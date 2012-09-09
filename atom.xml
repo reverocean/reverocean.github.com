@@ -4,7 +4,7 @@
   <title><![CDATA[海洋的Blog]]></title>
   <link href="http://reverocean.github.com/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-09T01:46:28+08:00</updated>
+  <updated>2012-09-09T15:44:53+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,5 +12,103 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Validating Model Attributes in Spring@MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/"/>
+    <updated>2012-09-09T14:18:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<figure class='code'><figcaption><span>Discover if a number is prime </span><a href='http://www.noulakaz.net/weblog/2007/03/18/a-regular-expression-to-check-for-prime-numbers/'>Source Article</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Fixnum</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">prime?</span>
+</span><span class='line'>    <span class="p">(</span><span class="s1">&#39;1&#39;</span> <span class="o">*</span> <span class="nb">self</span><span class="p">)</span> <span class="o">!~</span> <span class="sr">/^1?$|^(11+?)\1+$/</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<div><script src='https://gist.github.com/3683064.js?file='></script>
+<noscript><pre><code>&lt;web-app version=&quot;3.0&quot;
+        xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;               
+        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;               
+        xsi:schemaLocation=http://java.sun.com/xml/ns/javaee                           
+                           http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd
+        metadata-complete=&quot;true&quot;&gt;    
+        &lt;servlet&gt;
+                &lt;servlet-name&gt;bookstore&lt;/servlet-name&gt;        
+&lt;servlet-class&gt;            org.springframework.web.servlet.DispatcherServlet
+        &lt;/servlet-class&gt;        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+    &lt;/servlet&gt;    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;bookstore&lt;/servlet-name&gt;        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;    &lt;/servlet-mapping&gt; 
+&lt;/web-app&gt;</code></pre></noscript></div>
+
+
+
+
+<figure class='code'><figcaption><span> (test.js)</span> <a href='http://reverocean.github.com/downloads/code/test.js'>download</a></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="kc">undefined</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">xui</span><span class="p">,</span>
+</span><span class='line'>    <span class="nb">window</span> <span class="o">=</span> <span class="k">this</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">string</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">String</span><span class="p">(</span><span class="s1">&#39;string&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nb">document</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nb">document</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">simpleExpr</span> <span class="o">=</span> <span class="sr">/^#?([\w-]+)$/</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">idExpr</span> <span class="o">=</span> <span class="sr">/^#/</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">tagExpr</span> <span class="o">=</span> <span class="sr">/&lt;([\w:]+)/</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">slice</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'><span class="k">try</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="nx">slice</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">)[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nodeType</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">slice</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">ret</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">e</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>            <span class="nx">ret</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">e</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nx">x$</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">xui</span> <span class="o">=</span> <span class="nx">xui</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">q</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">new</span> <span class="nx">xui</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="nx">q</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://reverocean.github.com/images/icon.png" title="" ></p>
+]]></content>
+  </entry>
   
 </feed>
