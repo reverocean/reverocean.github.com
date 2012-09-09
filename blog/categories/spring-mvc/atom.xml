@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Spring MVC | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/spring-mvc/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-09T15:44:53+08:00</updated>
+  <updated>2012-09-09T17:43:27+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -14,38 +14,43 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Validating Model Attributes in Spring@MVC]]></title>
+    <title type="html"><![CDATA[Validating Model Attributes in Spring @MVC]]></title>
     <link href="http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/"/>
     <updated>2012-09-09T14:18:00+08:00</updated>
     <id>http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc</id>
-    <content type="html"><![CDATA[<p>```ruby Discover if a number is prime http://www.noulakaz.net/weblog/2007/03/18/a-regular-expression-to-check-for-prime-numbers/ Source Article
-class Fixnum
-  def prime?</p>
+    <content type="html"><![CDATA[<h2>Spring的Validator接口</h2>
 
-<pre><code>('1' * self) !~ /^1?$|^(11+?)\1+$/
+<p>Spring的Validation主要接口是：<em>org.springframework.validation.Validator</em>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Validator接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">validation</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Validator</span> <span class="o">{</span>    <span class="kt">boolean</span> <span class="n">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;?&gt;</span> <span class="n">clazz</span><span class="o">);</span>    <span class="kt">void</span> <span class="n">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">);}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div><br/>
+* supports方法： 用来判断该validator是否可以验证对象。如果supports返回<strong>true</strong>，框架会调用validate方法去验证。<br/>
+* validate方法： 实现验证
+在Spring @MVC里有两种方式触发验证：</p>
+
+<pre><code>1.  把Validator注入到Controller，我们自己手工调validate方法。  
+2.  在方法上添加*javax.validation.Valid*或者*org.springframework.validation.annotation.Validated*annotation。Spring的annotation要比javax的强大些，可以指定hints和validation groups（如果和JSR-303validator联合使用）
 </code></pre>
 
-<p>  end
-end
-```</p>
+<p><strong>需要注意的是，validation结果要是有错误的话，validator会返回message code，需要配置MessageSource来让错误消息显示的更有意义些。</strong></p>
 
-<p><div><script src='https://gist.github.com/3683064.js?file='></script>
-<noscript><pre><code>&lt;web-app version=&quot;3.0&quot;
-        xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;               
-        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;               
-        xsi:schemaLocation=http://java.sun.com/xml/ns/javaee                           
-                           http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd
-        metadata-complete=&quot;true&quot;&gt;    
-        &lt;servlet&gt;
-                &lt;servlet-name&gt;bookstore&lt;/servlet-name&gt;        
-&lt;servlet-class&gt;            org.springframework.web.servlet.DispatcherServlet
-        &lt;/servlet-class&gt;        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
-    &lt;/servlet&gt;    &lt;servlet-mapping&gt;
-        &lt;servlet-name&gt;bookstore&lt;/servlet-name&gt;        &lt;url-pattern&gt;/*&lt;/url-pattern&gt;    &lt;/servlet-mapping&gt; 
-&lt;/web-app&gt;</code></pre></noscript></div>
-</p>
+<hr />
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span> (test.js)</span> <a href='/downloads/code/test.js'>download</a></figcaption>
+<h2>实现一个Validator</h2>
+
+<p><strong>需求</strong>
+<code>
+实现一个验证Account的Validator
+username, password和email必填
+email是正确的email地址
+地址，城市和国家是必填的
+</code>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AccountValidator </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -56,50 +61,64 @@ end
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="kc">undefined</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">xui</span><span class="p">,</span>
-</span><span class='line'>    <span class="nb">window</span> <span class="o">=</span> <span class="k">this</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">string</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">String</span><span class="p">(</span><span class="s1">&#39;string&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nb">document</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nb">document</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">simpleExpr</span> <span class="o">=</span> <span class="sr">/^#?([\w-]+)$/</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">idExpr</span> <span class="o">=</span> <span class="sr">/^#/</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">tagExpr</span> <span class="o">=</span> <span class="sr">/&lt;([\w:]+)/</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">slice</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="p">[].</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">};</span>
-</span><span class='line'><span class="k">try</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="nx">slice</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">)[</span><span class="mi">0</span><span class="p">].</span><span class="nx">nodeType</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">slice</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kd">var</span> <span class="nx">ret</span> <span class="o">=</span> <span class="p">[];</span>
-</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">e</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
-</span><span class='line'>            <span class="nx">ret</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">e</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">ret</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">};</span>
-</span><span class='line'><span class="p">}</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
 </span><span class='line'>
-</span><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nx">x$</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">xui</span> <span class="o">=</span> <span class="nx">xui</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">q</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">new</span> <span class="nx">xui</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="nx">q</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
-</span><span class='line'><span class="p">};</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">validation</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">java.util.regex.Pattern</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">org.springframework.validation.Errors</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">org.springframework.validation.ValidationUtils</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">org.springframework.validation.Validator</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.Account</span><span class="o">;</span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccountValidator</span> <span class="kd">implements</span> <span class="n">Validator</span> <span class="o">{</span>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EMAIL_PATTERN</span> <span class="o">=</span> <span class="s">&quot;&lt;sup&gt;[&lt;em&gt;A-Za-z0-9-]+(\.[&lt;/em&gt;A-Za-z0-9-]+)*@&quot;</span><span class="o">&lt;/</span><span class="n">sup</span><span class="o">&gt;</span>                                                <span class="o">+</span><span class="s">&quot;[A-Za-z0-9]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$&quot;</span><span class="o">;</span>    <span class="nd">@Override</span>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="n">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;?&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>        <span class="k">return</span> <span class="o">(</span><span class="n">Account</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="n">clazz</span><span class="o">);</span>    <span class="o">}</span>    <span class="nd">@Override</span>    <span class="kd">public</span> <span class="kt">void</span> <span class="n">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;username&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Username&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">,&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>          <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Password&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;emailAddress&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Email Address&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.street&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Street&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.city&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;City&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.country&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Country&quot;</span><span class="o">});</span>        <span class="k">if</span> <span class="o">(!</span><span class="n">errors</span><span class="o">.</span><span class="na">hasFieldErrors</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">))</span> <span class="o">{</span>            <span class="n">Account</span> <span class="n">account</span> <span class="o">=</span> <span class="o">(</span><span class="n">Account</span><span class="o">)</span> <span class="n">target</span><span class="o">;</span>            <span class="n">String</span> <span class="n">email</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getEmailAddress</span><span class="o">();</span>            <span class="k">if</span> <span class="o">(!</span><span class="n">emai</span><span class="o">.</span><span class="na">matches</span><span class="o">(</span><span class="n">EMAIL_PATTERN</span><span class="o">))</span> <span class="o">{</span>                <span class="n">errors</span><span class="o">.</span><span class="na">rejectValue</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">,</span> <span class="s">&quot;invalid&quot;</span><span class="o">);</span>            <span class="o">}</span>     <span class="o">}</span>   <span class="o">}}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
-<img src="/images/icon.png" title="" ></p>
+* 第14行的isAssignableFrom方法用于判断类Class1和另一个类Class2是否相同或是另一个类的超类或接口<br/>
+* <em>ValidationUtils.rejectIfEmpty</em>方法用来判断对象的属性是否为空，还有<em>ValidationUtils.rejectIfEmptyOrWhiteSpace</em>方法。但是判断属性是否为空还可以在<em>org.springframework.web.bind.WebDataBinder</em>里加以验证<br/>
+* <em>errors.hasFieldErrors("emailAddress")</em> 方法用来判断emailAddress是否有错误<br/>
+* <em>errors.rejectValue</em>用于手动往errors里添加一个错误<br/>
+* 这里的<em>required</em>都是Error Message的Key，需要Spring的框架处理<br/>
+* <em>address.street</em>是嵌套属性</p>
+
+<hr />
+
+<h2>配置并使用自定义Validator</h2>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">controller</span><span class="o">;</span><span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.AccountValidator</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span><span class="c1">// Other imports omitted@Controller@RequestMapping(&quot;/customer/register&quot;)public class RegistrationController {    @InitBinder    public void initBinder(WebDataBinder binder) {        binder.setDisallowedFields(&quot;id&quot;);        binder.setValidator(new AccountValidator());}@RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT })public String handleRegistration(@Valid @ModelAttribute Account account, BindingResult result) {        if (result.hasErrors()) {            return &quot;customer/register&quot;;        }        this.accountService.save(account);        return &quot;redirect:/customer/account/&quot; + account.getId();    }    // Other methods omitted}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<ul>
+<li><em>binder.setValidator(new AccountValidator())</em>在Controller中将我们自定义的Validator注册一下</li>
+<li><em>@Valid @ModelAttribute Account account</em>绑定到Account上，这样当页面提交之后就会触发验证</li>
+<li><em>BindingResult result</em>在binding和validation中的错误信息都会放到BindingResult里去</li>
+<li>使用<em>result.hasErrors()</em>判断是否有错误（包括binding和validation）</li>
+</ul>
+
+
+<hr />
+
+<h2>使用JSR-303 Validation</h2>
+
+<p>JSR-303提供了一种方便的方式来进行validation，不需要我们自己去实现接口，也不需要在init-binder方法中注册，只需要在要验证的类上加上响应的annotation就可以了。
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">domain</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.Email</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.NotEmpty</span><span class="o">;</span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Account</span> <span class="o">{</span>    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">;</span>    <span class="kd">private</span> <span class="n">Date</span> <span class="n">dateOfBirth</span><span class="o">;</span>    <span class="nd">@Embedded</span>    <span class="nd">@Valid</span>    <span class="kd">private</span> <span class="n">Address</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Address</span><span class="o">();</span>    <span class="nd">@NotEmpty</span>    <span class="nd">@Email</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">emailAddress</span><span class="o">;</span>    <span class="nd">@NotEmpty</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>    <span class="nd">@NotEmpty</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">password</span><span class="o">;</span>    <span class="c1">// getters and setters omitted}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<ul>
+<li><em>@Embedded</em>表示嵌套对象</li>
+<li><em>@NotEmpty</em>验证不能为空</li>
+<li><em>@Email</em>验证Email地址的合法性<br/>
+<strong>这样看起来JSR-303简单很多</strong></li>
+</ul>
+
+
+<hr />
+
+<blockquote><p>本文是基于Pro Spring MVC - With Web Flow的笔记，非原创</p></blockquote>
 ]]></content>
   </entry>
   
