@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-10T17:49:01+08:00</updated>
+  <updated>2012-09-13T13:13:13+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,68 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Using Scoped Beans]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/11/using-scoped-beans/"/>
+    <updated>2012-09-11T09:22:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/11/using-scoped-beans</id>
+    <content type="html"><![CDATA[<h1>Bean的Scope</h1>
+
+<p>Spring支持的Scope有：
+*  singleton: 默认scope<br/>
+*  prototype<br/>
+*  thread<br/>
+*  request<br/>
+*  session<br/>
+*  globalSession<br/>
+*  application</p>
+
+<p>在定义Bean的地方添加<em>org.springframework.context.annotation.Scope</em>annotation，为定义的Bean指定不同的Scope。该annotation可以用在type-level和method-level上。<br/>
+*  type-level: 该类型的所有的Bean都是指定的Scope<br/>
+*  method-level： 当前方法所定义的Bean是指定的Scope</p>
+
+<p>Scope Annotation的属性：<br/>
+*  value： 指定Bean的scope类型<br/>
+*  proxyModel： 指定是否需要proxy以及proxy的机制。<strong>ScopedProxyModel.TARGET_CLASS</strong>用于指定该Bean所对应的类型没有接口，需要默认值是NO</p>
+
+<h1>Example of session scope</h1>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>配置session scope的Bean  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="c1">//Other imports omitted import org.springframework.context.annotation.Scope;    import org.springframework.context.annotation.ScopedProxyMode;  import com.apress.prospringmvc.bookstore.domain.Cart;   @Configuration  @EnableWebMvc   @ComponentScan(basePackages =       { &quot;com.apress.prospringmvc.bookstore.web&quot; })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {//Other methods omitted@Bean@Scope(value = &quot;session&quot;, proxyMode = ScopedProxyMode.TARGET_CLASS)    public Cart cart() {        return new Cart();    }}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h1>使用SessionStatus管理session scope bean的状态</h1>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>SessionStatus实例 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">method</span> <span class="o">=</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">,</span> <span class="n">params</span> <span class="o">=</span> <span class="s">&quot;order&quot;</span><span class="o">)</span>       <span class="kd">public</span> <span class="n">String</span> <span class="n">checkout</span><span class="o">(</span><span class="n">SessionStatus</span> <span class="n">status</span><span class="o">,</span><span class="nd">@Validated</span> <span class="nd">@ModelAttribute</span> <span class="n">Order</span> <span class="n">order</span><span class="o">,</span>                           <span class="n">BindingResult</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>          <span class="k">if</span> <span class="o">(</span><span class="n">errors</span><span class="o">.</span><span class="na">hasErrors</span><span class="o">())</span> <span class="o">{</span>            <span class="k">return</span> <span class="s">&quot;cart/checkout&quot;</span><span class="o">;</span>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>            <span class="k">this</span><span class="o">.</span><span class="na">bookstoreService</span><span class="o">.</span><span class="na">store</span><span class="o">(</span><span class="n">order</span><span class="o">);</span>            <span class="n">status</span><span class="o">.</span><span class="na">setComplete</span><span class="o">();</span> <span class="c1">//remove order from session            this.cart.clear(); // clear the cart            return &quot;redirect:/index.htm&quot;;       } }</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Internationalization in Spring @MVC]]></title>
