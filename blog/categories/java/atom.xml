@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-13T13:13:13+08:00</updated>
+  <updated>2012-09-24T16:26:06+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,60 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Inteceptor in Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/24/inteceptor-in-spring-at-mvc/"/>
+    <updated>2012-09-24T14:48:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/24/inteceptor-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Interceptors</h1>
+
+<p>Interceptor和Filter的功能一样，都是用于拦截incoming HTTP requests。但是Filter要比interceptor更强大些，因为Filter能够修改incoming request/response。</p>
+
+<h2>Interceptor的回调接口</h2>
+
+<ul>
+<li>preHandler： Called before the handler is invoked</li>
+<li>postHandler: 在Handler调用之后，View渲染之前调用。可以用于替换model里的共享对象</li>
+<li>afterCompletion：在request处理完成之后。该方法无论preHandler方法调用成功与否都会被调用。可以用于清除一些资源。</li>
+</ul>
+
+
+<h2>Interceptor接口</h2>
+
+<ul>
+<li>org.springframework.web.servlet.HandlerInterceptor</li>
+<li>org.springframework.web.context.request.WebRequestInterceptor
+这两个Interceptor的最大区别在与WebRequestInterceptor跟底层技术独立，可以用于JSF或者Servlet，而HandlerIntercepotr只能用于Servlet。HandlerInterceptor的preHandler方法返回false可以用于阻止handler的调用。</li>
+</ul>
+
+
+<h1>Configuring</h1>
+
+<p>配置Interceptor分为两步：<br/>
+*  配置Interceptor<br/>
+*  关联Interceptor和Handler：有两个方法来完成关联：</p>
+
+<pre><code>1. 显示的把interceptors添加到handler mapping的配置里去  
+2. 使用org.springframework.web.servlet .config.annotation.InterceptorRegistry添加（推荐这种方式）
+</code></pre>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>显示关联HandlerMapping和Interceptor  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.context.annotation.ComponentScan</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.EnableWebMvc</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping</span><span class="o">;</span><span class="nd">@Configuration@EnableWebMvc@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurationSupport</span> <span class="o">{</span>    <span class="nd">@Override</span>    <span class="kd">public</span> <span class="n">RequestMappingHandlerMapping</span> <span class="n">requestMappingHandlerMapping</span><span class="o">()</span> <span class="o">{</span>        <span class="n">RequestMappingHandlerMapping</span> <span class="n">handlerMapping</span><span class="o">;</span>        <span class="n">handlerMapping</span> <span class="o">=</span> <span class="kd">super</span><span class="o">.</span><span class="na">requestMappingHandlerMapping</span><span class="o">();</span>        <span class="n">handlerMapping</span><span class="o">.</span><span class="na">setInterceptors</span><span class="o">(</span><span class="n">getAllInterceptors</span><span class="o">());</span>        <span class="k">return</span> <span class="n">handlerMapping</span> <span class="o">}</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>使用InterceptorRegistry关联HandlerMapping和Interceptor  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="c1">//Other imports omittedimport org.springframework.web.servlet.HandlerInterceptor;import org.springframework.web.servlet.config.annotation.InterceptorRegistry;@Configuration@EnableWebMvc@ComponentScan(basePackages = { &quot;com.apress.prospringmvc.bookstore.web&quot; })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Override    public void addInterceptors(InterceptorRegistry registry) {        registry.addInterceptor(localeChangeInterceptor());    }    @Bean    public HandlerInterceptor localeChangeInterceptor() {        LocaleChangeInterceptor localeChangeInterceptor;        localeChangeInterceptor = new LocaleChangeInterceptor();        localeChangeInterceptor.setParamName(&quot;lang&quot;);        return localeChangeInterceptor;    }    //... Other methods omitted}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Limiting an Interceptor to Certain URLs  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="c1">//Imports omitted@Configuration@EnableWebMvc@ComponentScan(basePackages = { &quot;com.apress.prospringmvc.bookstore.web&quot; })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Override    public void addInterceptors(InterceptorRegistry registry) {        InterceptorRegistration registration;       registration = registry.addInterceptor(localeChangeInterceptor());      registation.addPathPatterns(&quot;/customers/**&quot;);}    //Other methods omitted}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using Scoped Beans]]></title>
