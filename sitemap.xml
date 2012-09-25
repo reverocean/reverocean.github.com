@@ -28,7 +28,15 @@
     </url>
     <url>
         <loc>http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc/</loc>
-        <lastmod>2012-09-25T10:22:21+08:00</lastmod>
+        <lastmod>2012-09-25T11:53:51+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/25/android-sdk-setup/</loc>
+        <lastmod>2012-09-25T11:52:01+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/25/what-should-be-test-in-android/</loc>
+        <lastmod>2012-09-25T15:31:05+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/about/</loc>
@@ -36,10 +44,10 @@
     </url>
     <url>
         <loc>http://reverocean.github.com/blog/archives/</loc>
-        <lastmod>2012-09-25T10:22:21+08:00</lastmod>
+        <lastmod>2012-09-25T15:31:05+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/</loc>
-        <lastmod>2012-09-25T10:22:21+08:00</lastmod>
+        <lastmod>2012-09-25T15:31:05+08:00</lastmod>
     </url>
 </urlset>
