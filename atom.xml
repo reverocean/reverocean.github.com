@@ -4,7 +4,7 @@
   <title><![CDATA[海洋的Blog]]></title>
   <link href="http://reverocean.github.com/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-24T16:32:34+08:00</updated>
+  <updated>2012-09-25T11:46:20+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,115 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Extend Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc/"/>
+    <updated>2012-09-25T09:21:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Extending RequestMappingHandlerMapping</h1>
+
+<p>Spring @MVC通过在方法上使用RequestMapping来确认应该使用哪个方法来响应相应的请求，而RequestMapping又通过各种RequestCondition的实现来完成各种过滤（比如：consumes，headers，methods，params，produces以及value等）。在Spring @MVC框架中使用RequestConditionHolder和RequestMappingInfo这两个实现。</p>
+
+<h2>自定义RequestCondition</h2>
+
+<ul>
+<li>实现RequestCondition接口</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>RequestCondition接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">mvc</span><span class="o">.</span><span class="na">condition</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RequestCondition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">combine</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">getMatchingCondition</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>继承RequestMappingHandlerMapping
+
+<ul>
+<li> getCustomTypeCondition方法根据对应的Handler<strong>类</strong>返回类级别的condition</li>
+<li> getCustomMethodCondition方法根据对应的Handler<strong>方法</strong>返回方法级别的condition</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>扩展RequestMappingHandlerAdapter</h1>
+
+<p>在Reques™appingHandlerAdapterli里，Spring @MVC通过各种HandlerMethodArgumentResolver的实现来决定传什么参数给Handler的方法。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Exception Handling in Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc/"/>
+    <updated>2012-09-24T16:34:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Exception Handler</h1>
+
+<figure class='code'><figcaption><span>Exception Handler接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframeowork</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">HandlerExceptionResolver</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">ModelAndView</span> <span class="nf">resolveException</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">Object</span> <span class="n">handler</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">Exception</span> <span class="n">ex</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Dispatcher servlet会查找application context里的所有实现了HandlerExceptionResolver接口的Bean。</li>
+<li>如果有多个ExceptionResolver实现，在有异常出现时，Dispatcher Servlet会一次调用，直到viewname被返回或者response被写入。</li>
+<li>如果异常没有被处理，那么异常会重新抛出。</li>
+</ul>
+
+
+<h2>Spring提供的HandlerExceptionResolver实现</h2>
+
+<ul>
+<li>AnnotationMethodHandlerExceptionResolver</li>
+<li>ExceptionHandlerExceptionResolver</li>
+<li>DefaultHandlerExceptionResolver</li>
+<li>ResponseStatusExceptionResolver</li>
+<li>SimpleMappingExceptionResolver</li>
+<li>HandlerExceptionResolverComposite</li>
+</ul>
+
+
+<p>￼￼</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Inteceptor in Spring @MVC]]></title>

@@ -3,22 +3,11 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>About Me - 海洋的Blog</title>
+	<title>Extend Spring @MVC - 海洋的Blog</title>
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="老程序员初入ThoughtWorks 1
-2
-3
-4
-5
-6
-最熟悉Java，Spring
-最喜欢Ruby，ROR
-也喜欢JavaScript
-C#，Flex，Python, Django还不错
-喜欢电影，乒乓球，篮球，星际争霸和宅
-给儿子的话：凡事预则立，不预则废 联系方式 邮箱：&#x72 &hellip;">
+	<meta name="description" content="Extending RequestMappingHandlerMapping Spring @MVC通过在方法上使用RequestMapping来确认应该使用哪个方法来响应相应的请求，而RequestMapping又通过各种RequestCondition的实现来完成各种过滤（比如： &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -80,39 +69,85 @@ C#，Flex，Python, Django还不错
 	
 		
 	
-	<div id="content" class="inner"><article class="page">
-    
-    <h1 class="title">About Me</h1>
-    
-    <div class="entry-content"><blockquote><h1>老程序员初入ThoughtWorks</h1></blockquote>
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Extend Spring @MVC</h1>
+	<div class="entry-content"><h1>Extending RequestMappingHandlerMapping</h1>
 
-<p><img src="/images/my.JPG" title="" ></p>
+<p>Spring @MVC通过在方法上使用RequestMapping来确认应该使用哪个方法来响应相应的请求，而RequestMapping又通过各种RequestCondition的实现来完成各种过滤（比如：consumes，headers，methods，params，produces以及value等）。在Spring @MVC框架中使用RequestConditionHolder和RequestMappingInfo这两个实现。</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<h2>自定义RequestCondition</h2>
+
+<ul>
+<li>实现RequestCondition接口</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>RequestCondition接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>最熟悉Java，Spring
-</span><span class='line'>最喜欢Ruby，ROR
-</span><span class='line'>也喜欢JavaScript
-</span><span class='line'>C#，Flex，Python, Django还不错
-</span><span class='line'>喜欢电影，乒乓球，篮球，星际争霸和宅
-</span><span class='line'>给儿子的话：凡事预则立，不预则废</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">mvc</span><span class="o">.</span><span class="na">condition</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RequestCondition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">combine</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">getMatchingCondition</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<hr />
+<ul>
+<li>继承RequestMappingHandlerMapping
 
-<blockquote><p><strong>联系方式</strong></p>
+<ul>
+<li> getCustomTypeCondition方法根据对应的Handler<strong>类</strong>返回类级别的condition</li>
+<li> getCustomMethodCondition方法根据对应的Handler<strong>方法</strong>返回方法级别的condition</li>
+</ul>
+</li>
+</ul>
 
-<hr />
 
-<p><strong>邮箱</strong>：<em><a href="&#109;&#97;&#105;&#x6c;&#116;&#x6f;&#x3a;&#114;&#x65;&#118;&#x65;&#114;&#111;&#99;&#x65;&#x61;&#110;&#x40;&#103;&#109;&#x61;&#105;&#x6c;&#46;&#x63;&#x6f;&#109;">&#x72;&#x65;&#x76;&#x65;&#x72;&#x6f;&#x63;&#101;&#x61;&#110;&#64;&#x67;&#109;&#97;&#105;&#108;&#46;&#99;&#x6f;&#x6d;</a></em><br/>
-<strong>Skype</strong>：<em>reverocean</em><br/>
-<strong>MSN</strong>：<em>reverocean@hotmail.com</em></p></blockquote>
+<h1>扩展RequestMappingHandlerAdapter</h1>
+
+<p>在Reques™appingHandlerAdapterli里，Spring @MVC通过各种HandlerMethodArgumentResolver的实现来决定传什么参数给Handler的方法。</p>
 </div>
-</article>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-25T09:21:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/25/extend-spring-at-mvc/#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 	<div class="share">
 	<div class="addthis_toolbox addthis_default_style ">
@@ -129,7 +164,6 @@ C#，Flex，Python, Django还不错
     <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
 </section>
-
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2012
 
@@ -150,8 +184,8 @@ C#，Flex，Python, Django还不错
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://reverocean.github.com/about/index.html';
-        var disqus_url = 'http://reverocean.github.com/about/index.html';
+        var disqus_identifier = 'http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc/';
+        var disqus_url = 'http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc/';
         var disqus_script = 'embed.js';
       
     (function () {

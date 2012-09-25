@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-24T16:32:34+08:00</updated>
+  <updated>2012-09-25T11:46:20+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,104 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Extend Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc/"/>
+    <updated>2012-09-25T09:21:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Extending RequestMappingHandlerMapping</h1>
+
+<p>Spring @MVC通过在方法上使用RequestMapping来确认应该使用哪个方法来响应相应的请求，而RequestMapping又通过各种RequestCondition的实现来完成各种过滤（比如：consumes，headers，methods，params，produces以及value等）。在Spring @MVC框架中使用RequestConditionHolder和RequestMappingInfo这两个实现。</p>
+
+<h2>自定义RequestCondition</h2>
+
+<ul>
+<li>实现RequestCondition接口
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>RequestCondition接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">mvc</span><span class="o">.</span><span class="na">condition</span><span class="o">;&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">ul</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RequestCondition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">T</span> <span class="n">combine</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">);</span>
+</span><span class='line'><span class="n">T</span> <span class="nf">getMatchingCondition</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'><span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<ul>
+<li>继承RequestMappingHandlerMapping
+
+<ul>
+<li> getCustomTypeCondition方法根据对应的Handler<strong>类</strong>返回类级别的condition</li>
+<li> getCustomMethodCondition方法根据对应的Handler<strong>方法</strong>返回方法级别的condition</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>扩展RequestMappingHandlerAdapter</h1>
+
+<p>在Reques™appingHandlerAdapterli里，Spring @MVC通过各种HandlerMethodArgumentResolver的实现来决定传什么参数给Handler的方法。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Exception Handling in Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc/"/>
+    <updated>2012-09-24T16:34:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Exception Handler</h1>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Exception Handler接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframeowork</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">HandlerExceptionResolver</span> <span class="o">{</span>  <span class="n">ModelAndView</span> <span class="n">resolveException</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>                                <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>                                <span class="n">Object</span> <span class="n">handler</span><span class="o">,</span>                                <span class="n">Exception</span> <span class="n">ex</span><span class="o">);}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<ul>
+<li>Dispatcher servlet会查找application context里的所有实现了HandlerExceptionResolver接口的Bean。</li>
+<li>如果有多个ExceptionResolver实现，在有异常出现时，Dispatcher Servlet会一次调用，直到viewname被返回或者response被写入。</li>
+<li>如果异常没有被处理，那么异常会重新抛出。</li>
+</ul>
+
+
+<h2>Spring提供的HandlerExceptionResolver实现</h2>
+
+<ul>
+<li>AnnotationMethodHandlerExceptionResolver</li>
+<li>ExceptionHandlerExceptionResolver</li>
+<li>DefaultHandlerExceptionResolver</li>
+<li>ResponseStatusExceptionResolver</li>
+<li>SimpleMappingExceptionResolver</li>
+<li>HandlerExceptionResolverComposite</li>
+</ul>
+
+
+<p>￼￼</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Inteceptor in Spring @MVC]]></title>
@@ -186,115 +284,6 @@
 <p>注意：<br/>
 *  23行的代码<strong>localeChangeInterceptor.setParamName("lang")</strong>用来设置request中的参数名<br/>
 *  一般把LocaleChangeInterceptor配置为第一个interceptor，这样即使出现什么错误，任然能够改变用户的language</p>
-
-<hr />
-
-<blockquote><p>本文是基于Pro Spring MVC - With Web Flow的笔记，非原创</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Validating Model Attributes in Spring @MVC]]></title>
-    <link href="http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/"/>
-    <updated>2012-09-09T14:18:00+08:00</updated>
-    <id>http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc</id>
-    <content type="html"><![CDATA[<h2>Spring的Validator接口</h2>
-
-<p>Spring的Validation主要接口是：<em>org.springframework.validation.Validator</em>
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Validator接口  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">validation</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Validator</span> <span class="o">{</span>    <span class="kt">boolean</span> <span class="n">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;?&gt;</span> <span class="n">clazz</span><span class="o">);</span>    <span class="kt">void</span> <span class="n">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">);}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div><br/>
-* supports方法： 用来判断该validator是否可以验证对象。如果supports返回<strong>true</strong>，框架会调用validate方法去验证。<br/>
-* validate方法： 实现验证
-在Spring @MVC里有两种方式触发验证：</p>
-
-<pre><code>1.  把Validator注入到Controller，我们自己手工调validate方法。  
-2.  在方法上添加*javax.validation.Valid*或者*org.springframework.validation.annotation.Validated*annotation。Spring的annotation要比javax的强大些，可以指定hints和validation groups（如果和JSR-303validator联合使用）
-</code></pre>
-
-<p><strong>需要注意的是，validation结果要是有错误的话，validator会返回message code，需要配置MessageSource来让错误消息显示的更有意义些。</strong></p>
-
-<hr />
-
-<h2>实现一个Validator</h2>
-
-<p><strong>需求</strong>
-<code>
-实现一个验证Account的Validator
-username, password和email必填
-email是正确的email地址
-地址，城市和国家是必填的
-</code>
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AccountValidator </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">validation</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">java.util.regex.Pattern</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">org.springframework.validation.Errors</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">org.springframework.validation.ValidationUtils</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">org.springframework.validation.Validator</span><span class="o">;</span>  <span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.Account</span><span class="o">;</span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccountValidator</span> <span class="kd">implements</span> <span class="n">Validator</span> <span class="o">{</span>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EMAIL_PATTERN</span> <span class="o">=</span> <span class="s">&quot;&lt;sup&gt;[&lt;em&gt;A-Za-z0-9-]+(\.[&lt;/em&gt;A-Za-z0-9-]+)*@&quot;</span><span class="o">&lt;/</span><span class="n">sup</span><span class="o">&gt;</span>                                                <span class="o">+</span><span class="s">&quot;[A-Za-z0-9]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$&quot;</span><span class="o">;</span>    <span class="nd">@Override</span>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="n">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;?&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>        <span class="k">return</span> <span class="o">(</span><span class="n">Account</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="n">clazz</span><span class="o">);</span>    <span class="o">}</span>    <span class="nd">@Override</span>    <span class="kd">public</span> <span class="kt">void</span> <span class="n">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;username&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Username&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">,&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>          <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Password&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;emailAddress&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Email Address&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.street&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Street&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.city&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;City&quot;</span><span class="o">});</span>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.country&quot;</span><span class="o">,</span>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Country&quot;</span><span class="o">});</span>        <span class="k">if</span> <span class="o">(!</span><span class="n">errors</span><span class="o">.</span><span class="na">hasFieldErrors</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">))</span> <span class="o">{</span>            <span class="n">Account</span> <span class="n">account</span> <span class="o">=</span> <span class="o">(</span><span class="n">Account</span><span class="o">)</span> <span class="n">target</span><span class="o">;</span>            <span class="n">String</span> <span class="n">email</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getEmailAddress</span><span class="o">();</span>            <span class="k">if</span> <span class="o">(!</span><span class="n">emai</span><span class="o">.</span><span class="na">matches</span><span class="o">(</span><span class="n">EMAIL_PATTERN</span><span class="o">))</span> <span class="o">{</span>                <span class="n">errors</span><span class="o">.</span><span class="na">rejectValue</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">,</span> <span class="s">&quot;invalid&quot;</span><span class="o">);</span>            <span class="o">}</span>     <span class="o">}</span>   <span class="o">}}</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-* 第14行的isAssignableFrom方法用于判断类Class1和另一个类Class2是否相同或是另一个类的超类或接口<br/>
-* <em>ValidationUtils.rejectIfEmpty</em>方法用来判断对象的属性是否为空，还有<em>ValidationUtils.rejectIfEmptyOrWhiteSpace</em>方法。但是判断属性是否为空还可以在<em>org.springframework.web.bind.WebDataBinder</em>里加以验证<br/>
-* <em>errors.hasFieldErrors("emailAddress")</em> 方法用来判断emailAddress是否有错误<br/>
-* <em>errors.rejectValue</em>用于手动往errors里添加一个错误<br/>
-* 这里的<em>required</em>都是Error Message的Key，需要Spring的框架处理<br/>
-* <em>address.street</em>是嵌套属性</p>
-
-<hr />
-
-<h2>配置并使用自定义Validator</h2>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AccountValidator </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">controller</span><span class="o">;</span><span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.AccountValidator</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span><span class="c1">// Other imports omitted@Controller@RequestMapping(&quot;/customer/register&quot;)public class RegistrationController {    @InitBinder    public void initBinder(WebDataBinder binder) {        binder.setDisallowedFields(&quot;id&quot;);        binder.setValidator(new AccountValidator());}@RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT })public String handleRegistration(@Valid @ModelAttribute Account account, BindingResult result) {        if (result.hasErrors()) {            return &quot;customer/register&quot;;        }        this.accountService.save(account);        return &quot;redirect:/customer/account/&quot; + account.getId();    }    // Other methods omitted}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<ul>
-<li><em>binder.setValidator(new AccountValidator())</em>在Controller中将我们自定义的Validator注册一下</li>
-<li><em>@Valid @ModelAttribute Account account</em>绑定到Account上，这样当页面提交之后就会触发验证</li>
-<li><em>BindingResult result</em>在binding和validation中的错误信息都会放到BindingResult里去</li>
-<li>使用<em>result.hasErrors()</em>判断是否有错误（包括binding和validation）</li>
-</ul>
-
-
-<hr />
-
-<h2>使用JSR-303 Validation</h2>
-
-<p>JSR-303提供了一种方便的方式来进行validation，不需要我们自己去实现接口，也不需要在init-binder方法中注册，只需要在要验证的类上加上响应的annotation就可以了。
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>AccountValidator </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">domain</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.Email</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.NotEmpty</span><span class="o">;</span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Account</span> <span class="o">{</span>    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">;</span>    <span class="kd">private</span> <span class="n">Date</span> <span class="n">dateOfBirth</span><span class="o">;</span>    <span class="nd">@Embedded</span>    <span class="nd">@Valid</span>    <span class="kd">private</span> <span class="n">Address</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Address</span><span class="o">();</span>    <span class="nd">@NotEmpty</span>    <span class="nd">@Email</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">emailAddress</span><span class="o">;</span>    <span class="nd">@NotEmpty</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>    <span class="nd">@NotEmpty</span>    <span class="kd">private</span> <span class="n">String</span> <span class="n">password</span><span class="o">;</span>    <span class="c1">// getters and setters omitted}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<ul>
-<li><em>@Embedded</em>表示嵌套对象</li>
-<li><em>@NotEmpty</em>验证不能为空</li>
-<li><em>@Email</em>验证Email地址的合法性<br/>
-<strong>这样看起来JSR-303简单很多</strong></li>
-</ul>
-
 
 <hr />
 

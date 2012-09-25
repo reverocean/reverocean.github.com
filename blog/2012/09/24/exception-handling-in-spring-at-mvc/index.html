@@ -3,11 +3,21 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Category: Java - 海洋的Blog</title>
+	<title>Exception Handling in Spring @MVC - 海洋的Blog</title>
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="Category: Java">
+	<meta name="description" content="Exception Handler Exception Handler接口 1
+2
+3
+4
+5
+6
+7
+8
+9
+package org.springframeowork.web.servlet;
+import javax.servlet.http.HttpServletRequest; &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -69,131 +79,96 @@
 	
 		
 	
-	<div id="content" class="inner">
-	
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Exception Handling in Spring @MVC</h1>
+	<div class="entry-content"><h1>Exception Handler</h1>
+
+<figure class='code'><figcaption><span>Exception Handler接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframeowork</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">HandlerExceptionResolver</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">ModelAndView</span> <span class="nf">resolveException</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">Object</span> <span class="n">handler</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">Exception</span> <span class="n">ex</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-	
-	
-	<section class="archives"><h1 class="year">2012</h1>
-
-<article>
-	<h1 class="title"><a href="/blog/2012/09/25/extend-spring-at-mvc/">Extend Spring @MVC</a></h1>
-	<div class="meta">
-		<span class="date">Sep 25</span>
-		<span class="tags">
+<ul>
+<li>Dispatcher servlet会查找application context里的所有实现了HandlerExceptionResolver接口的Bean。</li>
+<li>如果有多个ExceptionResolver实现，在有异常出现时，Dispatcher Servlet会一次调用，直到viewname被返回或者response被写入。</li>
+<li>如果异常没有被处理，那么异常会重新抛出。</li>
+</ul>
 
 
-	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
+<h2>Spring提供的HandlerExceptionResolver实现</h2>
+
+<ul>
+<li>AnnotationMethodHandlerExceptionResolver</li>
+<li>ExceptionHandlerExceptionResolver</li>
+<li>DefaultHandlerExceptionResolver</li>
+<li>ResponseStatusExceptionResolver</li>
+<li>SimpleMappingExceptionResolver</li>
+<li>HandlerExceptionResolverComposite</li>
+</ul>
 
 
-</span>
-	    
-	    <span class="comments"><a href="/blog/2012/09/25/extend-spring-at-mvc/#disqus_thread">Comments</a></span>
-	    
-	</div>
-</article>
-
-	
+<p>￼￼</p>
+</div>
 
 
-<article>
-	<h1 class="title"><a href="/blog/2012/09/24/exception-handling-in-spring-at-mvc/">Exception Handling in Spring @MVC</a></h1>
-	<div class="meta">
-		<span class="date">Sep 24</span>
-		<span class="tags">
+<div class="meta">
+	<div class="date">
 
 
-	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
 
 
-</span>
-	    
-	    <span class="comments"><a href="/blog/2012/09/24/exception-handling-in-spring-at-mvc/#disqus_thread">Comments</a></span>
-	    
-	</div>
-</article>
-
-	
 
 
-<article>
-	<h1 class="title"><a href="/blog/2012/09/24/inteceptor-in-spring-at-mvc/">Inteceptor in Spring @MVC</a></h1>
-	<div class="meta">
-		<span class="date">Sep 24</span>
-		<span class="tags">
 
 
-	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
+  
 
 
-</span>
-	    
-	    <span class="comments"><a href="/blog/2012/09/24/inteceptor-in-spring-at-mvc/#disqus_thread">Comments</a></span>
-	    
-	</div>
-</article>
-
-	
-
-
-<article>
-	<h1 class="title"><a href="/blog/2012/09/11/using-scoped-beans/">Using Scoped Beans</a></h1>
-	<div class="meta">
-		<span class="date">Sep 11</span>
-		<span class="tags">
+<time datetime="2012-09-24T16:34:00+08:00" pubdate data-updated="true">2012-09-24 Mon</time></div>
+	<div class="tags">
 
 
 	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
 
 
-</span>
-	    
-	    <span class="comments"><a href="/blog/2012/09/11/using-scoped-beans/#disqus_thread">Comments</a></span>
-	    
-	</div>
-</article>
-
+</div>
 	
-
-
-<article>
-	<h1 class="title"><a href="/blog/2012/09/09/internationalization-in-spring-at-mvc/">Internationalization in Spring @MVC</a></h1>
-	<div class="meta">
-		<span class="date">Sep  9</span>
-		<span class="tags">
-
-
-	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
-
-
-</span>
-	    
-	    <span class="comments"><a href="/blog/2012/09/09/internationalization-in-spring-at-mvc/#disqus_thread">Comments</a></span>
-	    
-	</div>
-</article>
-
+		<span class="comments"><a href="/blog/2012/09/24/exception-handling-in-spring-at-mvc/#disqus_thread">Comments</a></span>
 	
+</div></article>
 
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
 
-<article>
-	<h1 class="title"><a href="/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/">Validating Model Attributes in Spring @MVC</a></h1>
-	<div class="meta">
-		<span class="date">Sep  9</span>
-		<span class="tags">
-
-
-	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring MVC</a>
-
-
-</span>
-	    
-	    <span class="comments"><a href="/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/#disqus_thread">Comments</a></span>
-	    
+	<a class="addthis_counter addthis_pill_style"></a>
 	</div>
-</article>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
 
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2012
 
@@ -213,7 +188,10 @@
       var disqus_shortname = 'reverocean';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc/';
+        var disqus_url = 'http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
