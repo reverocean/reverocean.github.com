@@ -4,7 +4,7 @@
   <title><![CDATA[海洋的Blog]]></title>
   <link href="http://reverocean.github.com/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-26T10:13:03+08:00</updated>
+  <updated>2012-09-26T17:17:18+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -131,7 +131,7 @@
 <h3>真正的测试</h3>
 
 <p>在JUnit3里，所有的以test开头的public void方法，都是Unit test。在JUnit4里使用@Test来标注哪些是Unit Tests。<br/>
-Android提供了@SmallTest，@MediumTest和@LargeTest来给测试分类，这样你可以使用test runner来跑单独的类别。<br/>
+Android提供了@SmallTest，@MediumTest，@LargeTest，@Smoke, @FlakyTest, @UIThreadTest和@Suppress来给测试分类，这样你可以使用test runner来跑单独的类别。<br/>
 使用assert*<br/>
 Android提供了MoreAsserts和ViewAsserts</p>
 
