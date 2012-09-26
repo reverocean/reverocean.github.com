@@ -83,7 +83,7 @@
 *  方便访问Android的系统对象<br/>
 *  Instrumentation框架方便用于测试控制和检测应用<br/>
 *  Mock Objects<br/>
-*  可以单独跑一个测试或者test suite
+*  可以单独跑一个测试或者test suite<br/>
 *  提供ADT插件支持管理测试和测试项目</p>
 
 <p>Instrumentation是Android测试框架的基础，在测试时注入application需要的的mock组件来隔离依赖。</p>
@@ -158,7 +158,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>注意：
+<p>注意：<br/>
 * Test项目的package是被测项目的package后面加上<em>.test</em><br/>
 * 指定<strong>android.test.InstrumentationTestRunner</strong>为Test runner<br/>
 * 被测项目和测试项目都是Android应用，他们自己对应的APK都会被安装到设备上。他们会共享同样的进程，因此他们具有同样的特征。<br/>
