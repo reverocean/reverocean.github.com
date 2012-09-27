@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-27T10:14:03+08:00</updated>
+  <updated>2012-09-27T13:44:53+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,228 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Gradle for Java]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/27/gradle-for-java/"/>
+    <updated>2012-09-27T10:15:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/27/gradle-for-java</id>
+    <content type="html"><![CDATA[<p>Gradle针对Java开发提供了‘java’插件，非常方便。如果安装约定的目录结构组织项目，几乎不用修改build.gradle。当然也很方便修改build.gradle去适应你的项目结构。</p>
+
+<h1>A basic Java project</h1>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>使用Java plugin </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'java'</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<ul>
+<li>gradle的Java插件约定的项目结构跟Maven的项目结构一样</li>
+<li>所有的output文件放在build文件夹下</li>
+</ul>
+
+
+<h1>Tasks</h1>
+
+<ul>
+<li>build：编译，测试并创建一个包含main下面的类和资源文件的JAR</li>
+<li>clean：删除build文件夹，做清理</li>
+<li>assemble：编译并打一个JAR包，不测试代码。加了War插件之后会打一个war包</li>
+<li>check：编译，测试。也可以添加其他的插件（Code-quality）来检查你的代码格式</li>
+</ul>
+
+
+<h1>管理依赖</h1>
+
+<p>依赖管理分为两个部分，第一是本项目依赖外部的其他jar，第二是本项目会产生一个jar包，别的项目会依赖当前项目的jar包，所以需要把jar包放置到一个公共的位置。</p>
+
+<h2>管理外部依赖</h2>
+
+<ul>
+<li>添加Maven的Repository
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
+</span><span class='line'>  mavenCentral()
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
+</span><span class='line'>  maven {
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>  url "http://repo.mycompany.com/maven2"
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p></li>
+</ul>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加lvy respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>ivy {
+</span><span class='line'>    url "http://repo.mycompany.com/repo"
+</span><span class='line'>}
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加lvy local respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>ivy {
+</span><span class='line'>    url "../local-repo"
+</span><span class='line'>}
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<pre><code>*  Gradle支持Maven和lvy的Respository
+*  Gradle可以通过local file system或者HTTP访问Respository
+*  Gradle默认不配置respository
+</code></pre>
+
+<ul>
+<li><p>添加dependencies
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加dependencies </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
+</span><span class='line'>  compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+</span><span class='line'>  testCompile group: 'junit', name: 'junit', version: '4.+'
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加dependencies </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
+</span><span class='line'>  compile 'org.hibernate:hibernate-core:3.6.7.Final'
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<ul>
+<li> 跟Maven一样，依赖分为几个声明周期：
+
+<ul>
+<li> compile</li>
+<li> runtime</li>
+<li> testCompile</li>
+<li> testRuntime</li>
+</ul>
+</li>
+<li> 同样跟Maven一样，需要指定依赖包的group，name以及version。也可以通过简单的方法“group:name:version”来指定</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Publishing artifacts</h2>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>设置publish到lvy </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>repositories {
+</span><span class='line'>    ivy {
+</span><span class='line'>        credentials {
+</span><span class='line'>            username "username"
+</span><span class='line'>            password "pw"
+</span><span class='line'>        }
+</span><span class='line'>        url "http://repo.mycompany.com"
+</span><span class='line'>    }
+</span><span class='line'>}
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>设置publish到Maven </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'maven'&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>uploadArchives {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>repositories {
+</span><span class='line'>    mavenDeployer {
+</span><span class='line'>        repository(url: "file://localhost/tmp/myRepo/")
+</span><span class='line'>    }
+</span><span class='line'>}
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>设置publish到文件夹 </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>repositories {
+</span><span class='line'>   flatDir {
+</span><span class='line'>       dirs 'repos'
+</span><span class='line'>   }
+</span><span class='line'>}
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Extend Spring @MVC]]></title>
@@ -226,70 +448,6 @@
 </span><span class='line'>
 </span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Internationalization in Spring @MVC]]></title>
-    <link href="http://reverocean.github.com/blog/2012/09/09/internationalization-in-spring-at-mvc/"/>
-    <updated>2012-09-09T20:05:00+08:00</updated>
-    <id>http://reverocean.github.com/blog/2012/09/09/internationalization-in-spring-at-mvc</id>
-    <content type="html"><![CDATA[<h2>Spring中i18n的组件</h2>
-
-<ol>
-<li><em>org.springframework.context.MessageSource</em>基于message code和Locale转换成相应的message</li>
-<li><em>org.springframework.web.servlet.LocaleResolver</em>从session或者cookie里取的locale</li>
-<li><em>org.springframework.web.servlet.i18n.LocaleChangeInterceptor</em>改变locale</li>
-</ol>
-
-
-<h1>MessageSource</h1>
-
-<h3>MessageSource的实现</h3>
-
-<p>Spring在<em>org.springframework.context.support</em>包下提供了两个MessageSource的实现：<br/>
-1. <em>ResourceBundleMessageSource</em>：使用JVM提供的ResourceBundle实现，只能在classpath里加载资源<br/>
-2. <em>ReloadableResourceBundleMessageSource</em>：和<em>ResourceBundleMessageSource</em>非常类似，但是提供了<strong>自动重新加载</strong>和<strong>缓存</strong>能力，以及可以从文件系统读取资源文件</p>
-
-<h3>配置MessageSource</h3>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>配置MessageSource  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.context.support.ReloadableResourceBundleMessageSource</span><span class="o">;</span> <span class="c1">// Other imports omitted@Configuration@EnableWebMvc@ComponentScan(basePackages = { &quot;com.apress.prospringmvc.bookstore.web&quot; })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Bean    public MessageSource messageSource() {        ReloadableResourceBundleMessageSource messageSource;        messageSource = new ReloadableResourceBundleMessageSource();        messageSource.setBasename(&quot;classpath:/messages&quot;);        messageSource.setUseCodeAsDefaultMessage(true);        return messageSource;} }</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<ul>
-<li>配置一个name是<strong>messageSource</strong>的Bean</li>
-<li>该配置会从classpath加载所有的messages.properties和messages_[locale].properties文件</li>
-</ul>
-
-
-<h1>LocaleResolver</h1>
-
-<p>LocaleResolver用来判断使用什么Locale，Spring在<em>org.springframework.web.servlet.i18n</em>包里具有如下实现：
-*  FixedLocaleResolver：固定Locale，不支持改变locale
-*  SessionLocaleResolver
-*  AcceptHeaderLocaleResolver：从Http头的accept里取的locale，一般和用户的操作系统一样，因此也不支持改变locale。是默认<strong>LocaleResolver</strong>
-*  CookieLocaleResolver</p>
-
-<h1>LocaleChangeInterceptor</h1>
-
-<p><strong>LocaleChangeInterceptor</strong>检查当前的request中是否有locale的参数，如果有，interceptor会使用配置的LocaleResolver去改变当前用户的locale。参数的名子（locale）是可配置的。</p>
-
-<h1>配置Spring的i18n</h1>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Spring的i18n配置  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.context.MessageSource</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.context.support.ReloadableResourceBundleMessageSource</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.HandlerInterceptor</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.LocaleResolver</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.InterceptorRegistry</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.i18n.CookieLocaleResolver</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.i18n.LocaleChangeInterceptor</span><span class="o">;</span><span class="c1">// Other imports omitted@Configuration@EnableWebMvc@ComponentScan(basePackages = { &quot;com.apress.prospringmvc.bookstore.web&quot; })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Override    public void addInterceptors(InterceptorRegistry registry) {        registry.addInterceptor(localeChangeInterceptor());    }    @Bean    public HandlerInterceptor localeChangeInterceptor() {        LocaleChangeInterceptor localeChangeInterceptor;        localeChangeInterceptor = new LocaleChangeInterceptor();        localeChangeInterceptor.setParamName(&quot;lang&quot;);        return localeChangeInterceptor;}    @Bean    public LocaleResolver localeResolver() {        return new CookieLocaleResolver();    }    @Bean    public MessageSource messageSource() {        ReloadableResourceBundleMessageSource messageSource;        messageSource = new ReloadableResourceBundleMessageSource();        messageSource.setBasename(&quot;classpath:/messages&quot;);        messageSource.setUseCodeAsDefaultMessage(true);        return messageSource;} }</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>注意：<br/>
-*  23行的代码<strong>localeChangeInterceptor.setParamName("lang")</strong>用来设置request中的参数名<br/>
-*  一般把LocaleChangeInterceptor配置为第一个interceptor，这样即使出现什么错误，任然能够改变用户的language</p>
-
-<hr />
-
-<blockquote><p>本文是基于Pro Spring MVC - With Web Flow的笔记，非原创</p></blockquote>
 ]]></content>
   </entry>
   
