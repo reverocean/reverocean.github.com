@@ -1,0 +1,429 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>海洋的Blog</title>
+	<meta name="author" content="海洋">
+
+	
+	<meta name="description" content="Spring的Validator接口 Spring的Validation主要接口是：org.springframework.validation.Validator Validator接口 1
+2
+3
+4
+5
+6
+package org.springframework.validation; &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="海洋的Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.ico" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">海洋的Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:reverocean.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+        <a class="sina-weibo" href="http://weibo.com/2249767451" target="_blank">
+            <svg width="40" height="40" class="sina-weibo" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path fill="" d="M9.641,17.231c-3.799,0.374-7.079-1.343-7.326-3.838c-0.246-2.494,2.634-4.82,6.434-5.196  c3.798-0.377,7.079,1.34,7.326,3.835C16.32,14.529,13.44,16.855,9.641,17.231 M17.24,8.952c-0.322-0.098-0.544-0.163-0.375-0.587  c0.365-0.921,0.403-1.718,0.007-2.286c-0.745-1.063-2.783-1.005-5.12-0.027c0-0.002-0.734,0.321-0.546-0.261  c0.359-1.156,0.305-2.123-0.254-2.682c-1.267-1.271-4.639,0.047-7.53,2.936C1.257,8.209,0,10.504,0,12.488  c0,3.796,4.866,6.104,9.628,6.104c6.241,0,10.393-3.627,10.393-6.506C20.021,10.347,18.557,9.358,17.24,8.952" />
+                <path fill="" d="M21.384,2.005c-1.507-1.671-3.73-2.308-5.782-1.872l0,0c-0.475,0.102-0.778,0.569-0.676,1.043  c0.101,0.473,0.567,0.777,1.043,0.674c1.459-0.31,3.039,0.145,4.111,1.332c1.069,1.188,1.362,2.806,0.902,4.225v0.001  c-0.149,0.462,0.104,0.957,0.566,1.106c0.461,0.149,0.956-0.104,1.105-0.565c0,0,0-0.002,0-0.004  C23.299,5.95,22.894,3.674,21.384,2.005" />
+                <path fill="" d="M19.07,4.094c-0.734-0.814-1.817-1.123-2.817-0.912c-0.409,0.088-0.671,0.49-0.581,0.899  c0.088,0.407,0.489,0.67,0.896,0.58v0.001c0.488-0.104,1.019,0.047,1.379,0.445c0.359,0.398,0.455,0.941,0.301,1.416l0,0  c-0.127,0.398,0.09,0.825,0.488,0.954c0.396,0.127,0.824-0.091,0.952-0.488C20,6.017,19.805,4.908,19.07,4.094" />
+                <path fill="" d="M9.85,12.713c-0.132,0.229-0.426,0.338-0.656,0.242c-0.227-0.094-0.297-0.348-0.169-0.572  c0.132-0.221,0.416-0.328,0.64-0.239C9.895,12.227,9.978,12.483,9.85,12.713 M8.64,14.268c-0.367,0.586-1.154,0.843-1.747,0.57  c-0.584-0.265-0.756-0.945-0.389-1.518c0.362-0.568,1.124-0.824,1.712-0.574C8.811,12.998,9.001,13.675,8.64,14.268 M10.021,10.118  c-1.808-0.47-3.852,0.431-4.637,2.023c-0.8,1.624-0.026,3.428,1.801,4.017c1.892,0.612,4.122-0.324,4.898-2.078  C12.848,12.367,11.891,10.602,10.021,10.118" />
+            </svg>
+        </a>
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:reverocean.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/">Validating Model Attributes in Spring @MVC</a></h1>
+	<div class="entry-content">
+		<h2>Spring的Validator接口</h2>
+
+<p>Spring的Validation主要接口是：<em>org.springframework.validation.Validator</em></p>
+
+<figure class='code'><figcaption><span>Validator接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">validation</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Validator</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="nf">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">);</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>supports方法： 用来判断该validator是否可以验证对象。如果supports返回<strong>true</strong>，框架会调用validate方法去验证。</li>
+<li>validate方法： 实现验证
+在Spring @MVC里有两种方式触发验证：
+
+<ol>
+<li>把Validator注入到Controller，我们自己手工调validate方法。</li>
+<li>在方法上添加<em>javax.validation.Valid</em>或者<em>org.springframework.validation.annotation.Validated</em>annotation。Spring的annotation要比javax的强大些，可以指定hints和validation groups（如果和JSR-303validator联合使用）</li>
+</ol>
+</li>
+</ul>
+
+
+<p><strong>需要注意的是，validation结果要是有错误的话，validator会返回message code，需要配置MessageSource来让错误消息显示的更有意义些。</strong></p>
+
+<hr />
+
+<h2>实现一个Validator</h2>
+
+<p><strong>需求</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>实现一个验证Account的Validator
+</span><span class='line'>username, password和email必填
+</span><span class='line'>email是正确的email地址
+</span><span class='line'>地址，城市和国家是必填的</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">validation</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.regex.Pattern</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.validation.Errors</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.validation.ValidationUtils</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.validation.Validator</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.Account</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccountValidator</span> <span class="kd">implements</span> <span class="n">Validator</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EMAIL_PATTERN</span> <span class="o">=</span> <span class="s">&quot;^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@&quot;</span>
+</span><span class='line'>                                              <span class="o">+</span><span class="s">&quot;[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">(</span><span class="n">Account</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="n">clazz</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;username&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Username&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">,</span>
+</span><span class='line'>              <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Password&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;emailAddress&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Email Address&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.street&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Street&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.city&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;City&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.country&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Country&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">errors</span><span class="o">.</span><span class="na">hasFieldErrors</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Account</span> <span class="n">account</span> <span class="o">=</span> <span class="o">(</span><span class="n">Account</span><span class="o">)</span> <span class="n">target</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">String</span> <span class="n">email</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getEmailAddress</span><span class="o">();</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(!</span><span class="n">emai</span><span class="o">.</span><span class="na">matches</span><span class="o">(</span><span class="n">EMAIL_PATTERN</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">errors</span><span class="o">.</span><span class="na">rejectValue</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">,</span> <span class="s">&quot;invalid&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>第14行的isAssignableFrom方法用于判断类Class1和另一个类Class2是否相同或是另一个类的超类或接口</li>
+<li><em>ValidationUtils.rejectIfEmpty</em>方法用来判断对象的属性是否为空，还有<em>ValidationUtils.rejectIfEmptyOrWhiteSpace</em>方法。但是判断属性是否为空还可以在<em>org.springframework.web.bind.WebDataBinder</em>里加以验证</li>
+<li><em>errors.hasFieldErrors(&#8220;emailAddress&#8221;)</em> 方法用来判断emailAddress是否有错误</li>
+<li><em>errors.rejectValue</em>用于手动往errors里添加一个错误</li>
+<li>这里的<em>required</em>都是Error Message的Key，需要Spring的框架处理</li>
+<li><em>address.street</em>是嵌套属性</li>
+</ul>
+
+
+<hr />
+
+<h2>配置并使用自定义Validator</h2>
+
+<figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">controller</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.AccountValidator</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span>
+</span><span class='line'><span class="c1">// Other imports omitted</span>
+</span><span class='line'><span class="nd">@Controller</span>
+</span><span class='line'><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/customer/register&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RegistrationController</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@InitBinder</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initBinder</span><span class="o">(</span><span class="n">WebDataBinder</span> <span class="n">binder</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">binder</span><span class="o">.</span><span class="na">setDisallowedFields</span><span class="o">(</span><span class="s">&quot;id&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">binder</span><span class="o">.</span><span class="na">setValidator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccountValidator</span><span class="o">());</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">method</span> <span class="o">=</span> <span class="o">{</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">,</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">PUT</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="n">String</span> <span class="nf">handleRegistration</span><span class="o">(</span><span class="nd">@Valid</span> <span class="nd">@ModelAttribute</span> <span class="n">Account</span> <span class="n">account</span><span class="o">,</span> <span class="n">BindingResult</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">hasErrors</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;customer/register&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">accountService</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">account</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&quot;redirect:/customer/account/&quot;</span> <span class="o">+</span> <span class="n">account</span><span class="o">.</span><span class="na">getId</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">// Other methods omitted</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><em>binder.setValidator(new AccountValidator())</em>在Controller中将我们自定义的Validator注册一下</li>
+<li><em>@Valid @ModelAttribute Account account</em>绑定到Account上，这样当页面提交之后就会触发验证</li>
+<li><em>BindingResult result</em>在binding和validation中的错误信息都会放到BindingResult里去</li>
+<li>使用<em>result.hasErrors()</em>判断是否有错误（包括binding和validation）</li>
+</ul>
+
+
+<hr />
+
+<h2>使用JSR-303 Validation</h2>
+
+<p>JSR-303提供了一种方便的方式来进行validation，不需要我们自己去实现接口，也不需要在init-binder方法中注册，只需要在要验证的类上加上响应的annotation就可以了。</p>
+
+<figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">domain</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.Email</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.NotEmpty</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Account</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Date</span> <span class="n">dateOfBirth</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@Embedded</span>
+</span><span class='line'>    <span class="nd">@Valid</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Address</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Address</span><span class="o">();</span>
+</span><span class='line'>    <span class="nd">@NotEmpty</span>
+</span><span class='line'>    <span class="nd">@Email</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">emailAddress</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@NotEmpty</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@NotEmpty</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">password</span><span class="o">;</span>
+</span><span class='line'>    <span class="c1">// getters and setters omitted</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><em>@Embedded</em>表示嵌套对象</li>
+<li><em>@NotEmpty</em>验证不能为空</li>
+<li><em>@Email</em>验证Email地址的合法性<br/>
+<strong>这样看起来JSR-303简单很多</strong></li>
+</ul>
+
+
+<hr />
+
+<blockquote><p>本文是基于Pro Spring MVC - With Web Flow的笔记，非原创</p></blockquote>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-09T14:18:00+08:00" pubdate data-updated="true">2012-09-09 Sun</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring MVC</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc//blog/page/2/index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+<nav id="pagenavi">
+    
+        <a href="/" class="prev">Prev</a>
+    
+    
+    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
+</nav></div>
+	<footer id="footer" class="inner">Copyright &copy; 2012
+
+    海洋
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'reverocean';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>
