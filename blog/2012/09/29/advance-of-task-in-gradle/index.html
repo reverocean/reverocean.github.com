@@ -1,0 +1,516 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Advance of task in gradle - 海洋的Blog</title>
+	<meta name="author" content="海洋">
+
+	
+	<meta name="description" content="Gradle在执行的时候有三个生命周期： initialization
+configuration
+execution Configuration configuration一般用于设置Task在运行时所需的变量和数据结构，每次运行Gradle build文件的时候， &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="海洋的Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.ico" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">海洋的Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:reverocean.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+        <a class="sina-weibo" href="http://weibo.com/2249767451" target="_blank">
+            <svg width="40" height="40" class="sina-weibo" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path fill="" d="M9.641,17.231c-3.799,0.374-7.079-1.343-7.326-3.838c-0.246-2.494,2.634-4.82,6.434-5.196  c3.798-0.377,7.079,1.34,7.326,3.835C16.32,14.529,13.44,16.855,9.641,17.231 M17.24,8.952c-0.322-0.098-0.544-0.163-0.375-0.587  c0.365-0.921,0.403-1.718,0.007-2.286c-0.745-1.063-2.783-1.005-5.12-0.027c0-0.002-0.734,0.321-0.546-0.261  c0.359-1.156,0.305-2.123-0.254-2.682c-1.267-1.271-4.639,0.047-7.53,2.936C1.257,8.209,0,10.504,0,12.488  c0,3.796,4.866,6.104,9.628,6.104c6.241,0,10.393-3.627,10.393-6.506C20.021,10.347,18.557,9.358,17.24,8.952" />
+                <path fill="" d="M21.384,2.005c-1.507-1.671-3.73-2.308-5.782-1.872l0,0c-0.475,0.102-0.778,0.569-0.676,1.043  c0.101,0.473,0.567,0.777,1.043,0.674c1.459-0.31,3.039,0.145,4.111,1.332c1.069,1.188,1.362,2.806,0.902,4.225v0.001  c-0.149,0.462,0.104,0.957,0.566,1.106c0.461,0.149,0.956-0.104,1.105-0.565c0,0,0-0.002,0-0.004  C23.299,5.95,22.894,3.674,21.384,2.005" />
+                <path fill="" d="M19.07,4.094c-0.734-0.814-1.817-1.123-2.817-0.912c-0.409,0.088-0.671,0.49-0.581,0.899  c0.088,0.407,0.489,0.67,0.896,0.58v0.001c0.488-0.104,1.019,0.047,1.379,0.445c0.359,0.398,0.455,0.941,0.301,1.416l0,0  c-0.127,0.398,0.09,0.825,0.488,0.954c0.396,0.127,0.824-0.091,0.952-0.488C20,6.017,19.805,4.908,19.07,4.094" />
+                <path fill="" d="M9.85,12.713c-0.132,0.229-0.426,0.338-0.656,0.242c-0.227-0.094-0.297-0.348-0.169-0.572  c0.132-0.221,0.416-0.328,0.64-0.239C9.895,12.227,9.978,12.483,9.85,12.713 M8.64,14.268c-0.367,0.586-1.154,0.843-1.747,0.57  c-0.584-0.265-0.756-0.945-0.389-1.518c0.362-0.568,1.124-0.824,1.712-0.574C8.811,12.998,9.001,13.675,8.64,14.268 M10.021,10.118  c-1.808-0.47-3.852,0.431-4.637,2.023c-0.8,1.624-0.026,3.428,1.801,4.017c1.892,0.612,4.122-0.324,4.898-2.078  C12.848,12.367,11.891,10.602,10.021,10.118" />
+            </svg>
+        </a>
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:reverocean.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Advance of Task in Gradle</h1>
+	<div class="entry-content"><p>Gradle在执行的时候有三个生命周期：</p>
+
+<ol>
+<li>initialization</li>
+<li>configuration</li>
+<li>execution</li>
+</ol>
+
+
+<h1>Configuration</h1>
+
+<p>configuration一般用于设置Task在运行时所需的变量和数据结构，每次运行Gradle build文件的时候，都会运行一次configuration代码。</p>
+
+<figure class='code'><figcaption><span>Configuration of task </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task initializeDatabase
+</span><span class='line'>initializeDatabase { print 'configuring ' } 
+</span><span class='line'>initializeDatabase { println 'database connection' }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意这里的configuration块和定义task的块是一样的，不一样的地方就是在task后面没有&#8221;&lt;&lt;&#8221;活着doLast等。</p>
+
+<h1>Task是对象</h1>
+
+<p>Gradle为每一个Task都会创建一个具有属性，方法的对象。我们可以控制每个Task对象的访问顺序，类型以及其功能。一般的每个新的Task都是DefaultTask类型（就像Java里的java.lang.Object一样）。DefaultTask没有实际的功能，只提供一些Gradle需要的接口。</p>
+
+<h2>DefaultTask的方法</h2>
+
+<ul>
+<li>dependsOn</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>不同的方式调用dependsOn </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span> <span class="no">Declare</span> <span class="n">that</span> <span class="n">world</span> <span class="n">depends</span> <span class="n">on</span> <span class="n">hello</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">Preserves</span> <span class="n">any</span> <span class="n">previously</span> <span class="n">defined</span> <span class="n">dependencies</span> <span class="n">as</span> <span class="n">well</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>  
+</span><span class='line'>  <span class="n">dependsOn</span> <span class="n">createSchema</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">//</span> <span class="no">An</span> <span class="n">alternate</span> <span class="n">way</span> <span class="n">to</span> <span class="n">express</span> <span class="n">the</span> <span class="n">same</span> <span class="n">dependency</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>  
+</span><span class='line'>  <span class="n">dependsOn</span> <span class="o">&lt;&lt;</span> <span class="n">createSchema</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">Do</span> <span class="n">the</span> <span class="n">same</span> <span class="n">using</span> <span class="n">single</span> <span class="n">quotes</span> <span class="p">(</span><span class="n">which</span> <span class="n">are</span> <span class="n">usually</span> <span class="n">optional</span><span class="p">)</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>  
+</span><span class='line'>  <span class="n">dependsOn</span> <span class="err">&#39;</span><span class="n">createSchem</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">//</span> <span class="no">Explicitly</span> <span class="n">call</span> <span class="n">the</span> <span class="nb">method</span> <span class="n">on</span> <span class="n">the</span> <span class="n">task</span> <span class="n">object</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span>
+</span><span class='line'><span class="n">loadTestData</span><span class="o">.</span><span class="n">dependsOn</span> <span class="n">createSema</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">//</span> <span class="n">A</span> <span class="n">shortcut</span> <span class="k">for</span> <span class="n">declaring</span> <span class="n">dependencies</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">createSchema</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>doFirst<br/>
+可以添加一段在执行task的之前执行的代码，doFirst可以在已经存在的Task上添加代码。当多次定义doFirst的时候，每个代码块都会被累加到doFirst里去，运行的时候是安装先定义的后执行的顺序。</p></li>
+<li><p>doLast<br/>
+doLast除了在执行完Task之后执行和doFirst不一样之外，其他都一样。</p></li>
+<li><p>onlyIf<br/>
+onlyIf会判断你传入的闭包是否满足条件，如果满足条件就执行Task，否则就不执行。使用onlyIf方法，你可以使用System property来切换Task是否可以被调用。也可以读文件、调用web services、检查安全等来控制。</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>onlyIf的例子  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">createSchema</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;create database schema&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">createSchema</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;load test data&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">loadTestData</span><span class="o">.</span><span class="n">onlyIf</span> <span class="p">{</span>
+</span><span class='line'>  <span class="no">System</span><span class="o">.</span><span class="n">properties</span><span class="o">[</span><span class="s1">&#39;load.data&#39;</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>不传人property执行结果 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gradle</span> <span class="n">loadTestData</span>
+</span><span class='line'><span class="n">create</span> <span class="n">database</span> <span class="n">schema</span>
+</span><span class='line'><span class="ss">:loadTestData</span> <span class="no">SKIPPED</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>传人property执行结果  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gradle</span> <span class="o">-</span><span class="no">Dload</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="kp">true</span> <span class="n">loadTestData</span>
+</span><span class='line'><span class="ss">:createSchema</span>
+</span><span class='line'><span class="n">create</span> <span class="n">database</span> <span class="n">schema</span>
+</span><span class='line'><span class="ss">:loadTestData</span>
+</span><span class='line'><span class="nb">load</span> <span class="nb">test</span> <span class="n">data</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>DefaultTask的属性</h2>
+
+<ul>
+<li>didWork<br/>
+表示Task是否执行完毕的布尔值。不时所有的Task都有didWork这个属性，但是一些内置的Task都有，比如Compile，Copy以及Delete都有didWork这个Property，用于表示是否成功执行完成。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>利用compileJava的didWork </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apply</span> <span class="n">plugin</span><span class="p">:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'><span class="n">task</span> <span class="n">emailMe</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">compileJava</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">tasks</span><span class="o">.</span><span class="n">compileJava</span><span class="o">.</span><span class="n">didWork</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">println</span> <span class="s1">&#39;SEND EMAIL ANNOUNCING SUCCESS&#39;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>enabled<br/>
+用于表示Task是否会被执行的布尔值。当被设置为false的时候，task就不会被执行。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>设置task的enabled </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">templates</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;process email templates&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">task</span> <span class="n">sendEmails</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">templates</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;send emails&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">sendEmails</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kp">false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个build在执行gradle sendEmails的时候，因为sendEmails的enabled设置成了false，所以他不会被执行，但是他依赖的templates会被执行。</p>
+
+<ul>
+<li><p>path
+表示Task全路径的字符串。一般的该值就是task的name属性，但是当被其他的build文件调用时，就不一样了。</p></li>
+<li><p>logger
+Gradle内部logger的引用，它实现了org.slf4j.Logger接口，但是添加了更多额外的logging level（DEBUG, INFO
+, LIFECYCLE, WARN, QUIET, ERROR）。</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>logger的level </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">logLevel</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">levels</span> <span class="o">=</span> <span class="o">[</span>
+</span><span class='line'>                  <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;LIFECYCLE&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;QUIET&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;WARN&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;ERROR&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">levels</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="n">level</span> <span class="o">-&gt;</span>
+</span><span class='line'>      <span class="n">logging</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">level</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">logMessage</span> <span class="o">=</span> <span class="s2">&quot;SETTING LogLevel=${level}&quot;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="n">logMessage</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="n">logMessage</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="n">logger</span><span class="o">.</span><span class="n">debug</span> <span class="s1">&#39;DEBUG ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">info</span> <span class="s1">&#39;INFO ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">lifecycle</span> <span class="s1">&#39;LIFECYCLE ENABLED&#39;</span> <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s1">&#39;WARN ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">quiet</span> <span class="s1">&#39;QUIET ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="s1">&#39;ERROR ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">println</span> <span class="s1">&#39;THIS IS println OUTPUT&#39;</span> <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="s1">&#39; &#39;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>logging<br/>
+logging用于访问logger的日志级别，参见上面的例子。</p></li>
+<li><p>description</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>description的不同设置方式 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">helloWorld</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="s1">&#39;Says hello to the world&#39;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;hello, world&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="n">helloWorld</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;hello, world&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">helloWorld</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Says hello to the world&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">Another</span> <span class="n">way</span> <span class="n">to</span> <span class="k">do</span> <span class="n">it</span>
+</span><span class='line'><span class="n">helloWorld</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Says hello to the world&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>temporaryDir<br/>
+返回零时目录File的引用</p></li>
+<li><p>动态Property</p></li>
+</ul>
+
+
+<h1>Task类型</h1>
+
+<p>除了默认的DefaultTask，Gradle也定义了一些通用的task类型。</p>
+
+<h2>自定义Task类型</h2>
+
+<p>当Gradle提供的Task类型不够用的时候，我们可以自己定义一些我们的Task类型。</p>
+
+<h3>Custom Tasks Types in the Build file</h3>
+
+<figure class='code'><figcaption><span>description的不同设置方式 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">createDatabase</span><span class="p">(</span><span class="n">type</span><span class="p">:</span> <span class="no">MySqlTask</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;CREATE DATABASE IF NOT EXISTS example&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">MySqlTask</span> <span class="n">extends</span> <span class="no">DefaultTask</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">hostname</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">port</span> <span class="o">=</span> <span class="mi">3306</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">sql</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">database</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">username</span> <span class="o">=</span> <span class="s1">&#39;root&#39;</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span>
+</span><span class='line'>  <span class="vi">@TaskAction</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">runQuery</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">cmd</span>
+</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="n">database</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;mysql -u ${username} -p${password} -h ${hostname} -P ${port} ${database} -e &quot;</span>
+</span><span class='line'>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;mysql -u ${username} -p${password} -h ${hostname} -P ${port} -e &quot;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="n">project</span><span class="o">.</span><span class="n">exec</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">commandLine</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">()</span><span class="o">.</span><span class="n">toList</span><span class="p">()</span> <span class="o">+</span> <span class="n">sql</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<pre><code>* 自定义Task需要继承自DefaultTask 
+* hostname，port等都是Task自定义的属性
+* 使用@TaskAction标示一个方法为Task的Action
+</code></pre>
+
+<h3>Custom Tasks in the Source Tree</h3>
+
+<p>在project的根目录下建一个buildSrc的文件夹，然后在文件夹里创建groove的源文件，在Gradle运行task的时候，会找该目录下的文件。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-29T09:19:00+08:00" pubdate data-updated="true">2012-09-29 Sat</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gradle/'>Gradle</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/29/advance-of-task-in-gradle/#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2012
+
+    海洋
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'reverocean';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle/';
+        var disqus_url = 'http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

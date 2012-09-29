@@ -3,22 +3,15 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>About Me - 海洋的Blog</title>
+	<title>Project in gradle - 海洋的Blog</title>
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="老程序员初入ThoughtWorks 1
+	<meta name="description" content="针对每一个项目的build.gradle，在运行的时候Gradle都会创建一个Project对象： 在build脚本里调用没有定义的方法都会被代理到project对象
+在build脚本里没有定义的属性也会被代理到project对象 1
 2
-3
-4
-5
-6
-最熟悉Java，Spring
-最喜欢Ruby，ROR
-也喜欢JavaScript
-C#，Flex，Python, Django还不错
-喜欢电影，乒乓球，篮球，星际争霸和宅
-给儿子的话：凡事预则立，不预则废 联系方式 邮箱：&#x72 &hellip;">
+println name
+println project. &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -80,39 +73,109 @@ C#，Flex，Python, Django还不错
 	
 		
 	
-	<div id="content" class="inner"><article class="page">
-    
-    <h1 class="title">About Me</h1>
-    
-    <div class="entry-content"><blockquote><h1>老程序员初入ThoughtWorks</h1></blockquote>
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Project in Gradle</h1>
+	<div class="entry-content"><p>针对每一个项目的build.gradle，在运行的时候Gradle都会创建一个<strong>Project</strong>对象：</p>
 
-<p><img src="/images/my.JPG" title="" ></p>
+<ul>
+<li>在build脚本里调用没有定义的方法都会被代理到project对象</li>
+<li>在build脚本里没有定义的属性也会被代理到project对象</li>
+</ul>
+
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>最熟悉Java，Spring
-</span><span class='line'>最喜欢Ruby，ROR
-</span><span class='line'>也喜欢JavaScript
-</span><span class='line'>C#，Flex，Python, Django还不错
-</span><span class='line'>喜欢电影，乒乓球，篮球，星际争霸和宅
-</span><span class='line'>给儿子的话：凡事预则立，不预则废</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>println name
+</span><span class='line'>println project.name</span></code></pre></td></tr></table></div></figure>
 
 
-<hr />
+<h1>Project的属性</h1>
 
-<blockquote><p><strong>联系方式</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">Name        </th>
+<th align="center"> Type          </th>
+<th align="left"> Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">project     </td>
+<td align="center"> Project       </td>
+<td align="left"> The Project instance</td>
+</tr>
+<tr>
+<td align="left">name        </td>
+<td align="center"> String        </td>
+<td align="left"> The name of the project directory.</td>
+</tr>
+<tr>
+<td align="left">path        </td>
+<td align="center"> String        </td>
+<td align="left"> The absolute path of the project.</td>
+</tr>
+<tr>
+<td align="left">description </td>
+<td align="center"> String        </td>
+<td align="left"> A description for the project.</td>
+</tr>
+<tr>
+<td align="left">projectDir  </td>
+<td align="center"> File          </td>
+<td align="left"> The directory containing the build script.</td>
+</tr>
+<tr>
+<td align="left">buildDir    </td>
+<td align="center"> File          </td>
+<td align="left"> projectDir/build</td>
+</tr>
+<tr>
+<td align="left">group       </td>
+<td align="center"> Object        </td>
+<td align="left"> unspecified</td>
+</tr>
+<tr>
+<td align="left">version     </td>
+<td align="center"> Object        </td>
+<td align="left"> unspecified</td>
+</tr>
+<tr>
+<td align="left">ant         </td>
+<td align="center"> AntBuilder    </td>
+<td align="left"> An AntBuilder instance</td>
+</tr>
+</tbody>
+</table>
 
-<hr />
-
-<p><strong>邮箱</strong>：<em><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#x72;&#x65;&#x76;&#x65;&#114;&#x6f;&#99;&#x65;&#97;&#110;&#x40;&#103;&#109;&#97;&#105;&#x6c;&#46;&#x63;&#111;&#109;">&#x72;&#101;&#118;&#x65;&#x72;&#x6f;&#99;&#x65;&#97;&#x6e;&#x40;&#x67;&#109;&#97;&#x69;&#x6c;&#46;&#x63;&#111;&#109;</a></em><br/>
-<strong>Skype</strong>：<em>reverocean</em><br/>
-<strong>MSN</strong>：<em>reverocean@hotmail.com</em></p></blockquote>
 </div>
-</article>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-27T14:07:00+08:00" pubdate data-updated="true">2012-09-27 Thu</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gradle/'>Gradle</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/27/project-in-gradle/#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 	<div class="share">
 	<div class="addthis_toolbox addthis_default_style ">
@@ -129,7 +192,6 @@ C#，Flex，Python, Django还不错
     <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
 </section>
-
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2012
 
@@ -150,8 +212,8 @@ C#，Flex，Python, Django还不错
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://reverocean.github.com/about/index.html';
-        var disqus_url = 'http://reverocean.github.com/about/index.html';
+        var disqus_identifier = 'http://reverocean.github.com/blog/2012/09/27/project-in-gradle/';
+        var disqus_url = 'http://reverocean.github.com/blog/2012/09/27/project-in-gradle/';
         var disqus_script = 'embed.js';
       
     (function () {

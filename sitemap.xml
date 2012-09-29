@@ -52,7 +52,15 @@
     </url>
     <url>
         <loc>http://reverocean.github.com/blog/2012/09/27/gradle-for-java/</loc>
-        <lastmod>2012-09-27T13:27:17+08:00</lastmod>
+        <lastmod>2012-09-27T14:06:38+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/27/project-in-gradle/</loc>
+        <lastmod>2012-09-29T09:17:56+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle/</loc>
+        <lastmod>2012-09-29T13:58:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/about/</loc>
@@ -60,10 +68,10 @@
     </url>
     <url>
         <loc>http://reverocean.github.com/blog/archives/</loc>
-        <lastmod>2012-09-27T13:27:17+08:00</lastmod>
+        <lastmod>2012-09-29T13:58:26+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/</loc>
-        <lastmod>2012-09-27T13:27:17+08:00</lastmod>
+        <lastmod>2012-09-29T13:58:26+08:00</lastmod>
     </url>
 </urlset>
