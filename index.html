@@ -7,9 +7,9 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="Gradle在执行的时候有三个生命周期： initialization
-configuration
-execution Configuration configuration一般用于设置Task在运行时所需的变量和数据结构，每次运行Gradle build文件的时候， &hellip;">
+	<meta name="description" content="执行Gradle命令一些用法 一次运行多个task gradle dist test
+使用-x参数可以指定哪些task不执行 gradle dist -x test
+使用&#8211;continue当有错误时继续执行未执行的task gradle dist test &#8211; &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -72,6 +72,62 @@ execution Configuration configuration一般用于设置Task在运行时所需的
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/10/12/using-the-gradle-command-line/">Using the Gradle Command-Line</a></h1>
+	<div class="entry-content">
+		<p>执行Gradle命令一些用法</p>
+
+<ul>
+<li>一次运行多个task<br/>
+  <strong><em>gradle dist test</em></strong></li>
+<li>使用-x参数可以指定哪些task不执行 <br/>
+  <strong><em>gradle dist -x test</em></strong></li>
+<li>使用&#8211;continue当有错误时继续执行未执行的task<br/>
+  <strong><em>gradle dist test &#8211;continue</em></strong></li>
+<li>使用task的缩写执行task <br/>
+  <strong><em>gradle cT</em></strong> <br/>
+  执行compileTest task</li>
+<li>使用-b指定build脚本文件</li>
+<li>gradle projects</li>
+<li>gradle tasks</li>
+<li>gradle dependencies</li>
+<li>gradle properties</li>
+<li>gradle -m clean compile列出要执行哪些task</li>
+</ul>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-12T14:21:00+08:00" pubdate data-updated="true">2012-10-12 Fri</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gradle/'>Gradle</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/10/12/using-the-gradle-command-line//index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">
@@ -1525,86 +1581,6 @@ Android在android.test.mock包下提供了一些mock对象，用于隔离测试�
 </div>
 	
 		<span class="comments"><a href="/blog/2012/09/25/extend-spring-at-mvc//index.html#disqus_thread">Comments</a></span>
-	
-</div></article>
-
-
-    <article class="post">
-	<h1 class="title"><a href="/blog/2012/09/24/exception-handling-in-spring-at-mvc/">Exception Handling in Spring @MVC</a></h1>
-	<div class="entry-content">
-		<h1>Exception Handler</h1>
-
-<figure class='code'><figcaption><span>Exception Handler接口  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframeowork</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">HandlerExceptionResolver</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">ModelAndView</span> <span class="nf">resolveException</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
-</span><span class='line'>                                <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>
-</span><span class='line'>                                <span class="n">Object</span> <span class="n">handler</span><span class="o">,</span>
-</span><span class='line'>                                <span class="n">Exception</span> <span class="n">ex</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Dispatcher servlet会查找application context里的所有实现了HandlerExceptionResolver接口的Bean。</li>
-<li>如果有多个ExceptionResolver实现，在有异常出现时，Dispatcher Servlet会一次调用，直到viewname被返回或者response被写入。</li>
-<li>如果异常没有被处理，那么异常会重新抛出。</li>
-</ul>
-
-
-<h2>Spring提供的HandlerExceptionResolver实现</h2>
-
-<ul>
-<li>AnnotationMethodHandlerExceptionResolver</li>
-<li>ExceptionHandlerExceptionResolver</li>
-<li>DefaultHandlerExceptionResolver</li>
-<li>ResponseStatusExceptionResolver</li>
-<li>SimpleMappingExceptionResolver</li>
-<li>HandlerExceptionResolverComposite</li>
-</ul>
-
-
-<p>￼￼</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-24T16:34:00+08:00" pubdate data-updated="true">2012-09-24 Mon</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
-
-
-</div>
-	
-		<span class="comments"><a href="/blog/2012/09/24/exception-handling-in-spring-at-mvc//index.html#disqus_thread">Comments</a></span>
 	
 </div></article>
 

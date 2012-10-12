@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gradle | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/gradle/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-09-29T14:04:22+08:00</updated>
+  <updated>2012-10-12T14:41:29+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,34 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Using the Gradle Command-Line]]></title>
+    <link href="http://reverocean.github.com/blog/2012/10/12/using-the-gradle-command-line/"/>
+    <updated>2012-10-12T14:21:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/10/12/using-the-gradle-command-line</id>
+    <content type="html"><![CDATA[<p>执行Gradle命令一些用法</p>
+
+<ul>
+<li>一次运行多个task<br/>
+  <strong><em>gradle dist test</em></strong></li>
+<li>使用-x参数可以指定哪些task不执行 <br/>
+  <strong><em>gradle dist -x test</em></strong></li>
+<li>使用--continue当有错误时继续执行未执行的task<br/>
+  <strong><em>gradle dist test --continue</em></strong></li>
+<li>使用task的缩写执行task <br/>
+  <strong><em>gradle cT</em></strong> <br/>
+  执行compileTest task</li>
+<li>使用-b指定build脚本文件</li>
+<li>gradle projects</li>
+<li>gradle tasks</li>
+<li>gradle dependencies</li>
+<li>gradle properties</li>
+<li>gradle -m clean compile列出要执行哪些task</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Advance of task in gradle]]></title>
