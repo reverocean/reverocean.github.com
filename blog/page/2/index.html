@@ -7,7 +7,7 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="Exception Handler Exception Handler接口 1
+	<meta name="description" content="setup-sdk.sh 1
 2
 3
 4
@@ -16,8 +16,11 @@
 7
 8
 9
-package org.springframeowork.web.servlet;
-import javax.servlet.http.HttpServletRequest; &hellip;">
+10
+11
+wget http://dl.google.com/android/android-sdk_r20.0.3-macosx.zip
+tar xvzf android-sdk_r20.0.3-macosx.zip
+cd &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -80,6 +83,156 @@ import javax.servlet.http.HttpServletRequest; &hellip;">
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/09/25/android-sdk-setup/">Android SDK Setup</a></h1>
+	<div class="entry-content">
+		
+
+<figure class='code'><figcaption><span>setup-sdk.sh </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>wget http://dl.google.com/android/android-sdk_r20.0.3-macosx.zip
+</span><span class='line'>tar xvzf android-sdk_r20.0.3-macosx.zip
+</span><span class='line'><span class="nb">cd </span>android-sdk_r20.0.3-macosx.zip
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;SDK Platform Android 4.0.3, API 15, revision 3&#39;</span> | cut -c 4-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;Android SDK Platform-tools, revision 11&#39;</span> | cut -c 4-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;Android SDK Tools, revision 19&#39;</span> | cut -c 4-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;ARM EABI v7a System Image, Android API 15, revision 2&#39;</span> | cut -c 3-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;Google APIs, Android API 15, revision 2&#39;</span> | cut -c 3-4<span class="sb">`</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export PATH=$PATH:`pwd`/platform-tools:`pwd`/tools&#39;</span> &gt;&gt; ~/.zshrc
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export ANDROID_HOME=`pwd`&#39;</span> &gt;&gt; ~/.zshrc
+</span><span class='line'>. ~/.zshrc
+</span></code></pre></td></tr></table></div></figure>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-25T11:47:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>Android</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/25/android-sdk-setup//blog/page/2/index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/09/25/extend-spring-at-mvc/">Extend Spring @MVC</a></h1>
+	<div class="entry-content">
+		<h1>Extending RequestMappingHandlerMapping</h1>
+
+<p>Spring @MVC通过在方法上使用RequestMapping来确认应该使用哪个方法来响应相应的请求，而RequestMapping又通过各种RequestCondition的实现来完成各种过滤（比如：consumes，headers，methods，params，produces以及value等）。在Spring @MVC框架中使用RequestConditionHolder和RequestMappingInfo这两个实现。</p>
+
+<h2>自定义RequestCondition</h2>
+
+<ul>
+<li>实现RequestCondition接口</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>RequestCondition接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">mvc</span><span class="o">.</span><span class="na">condition</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RequestCondition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">combine</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">getMatchingCondition</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>继承RequestMappingHandlerMapping
+
+<ul>
+<li> getCustomTypeCondition方法根据对应的Handler<strong>类</strong>返回类级别的condition</li>
+<li> getCustomMethodCondition方法根据对应的Handler<strong>方法</strong>返回方法级别的condition</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>扩展RequestMappingHandlerAdapter</h1>
+
+<p>在Reques™appingHandlerAdapterli里，Spring @MVC通过各种HandlerMethodArgumentResolver的实现来决定传什么参数给Handler的方法。</p>
+
+<p><strong><em>To be continue …</em></strong></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-25T09:21:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/25/extend-spring-at-mvc//blog/page/2/index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">
@@ -985,7 +1138,7 @@ import javax.servlet.http.HttpServletRequest; &hellip;">
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
-	<footer id="footer" class="inner">Copyright &copy; 2012
+	<footer id="footer" class="inner">Copyright &copy; 2013
 
     海洋
 

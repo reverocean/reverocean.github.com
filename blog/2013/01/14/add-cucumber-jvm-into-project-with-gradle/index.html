@@ -1,0 +1,313 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Add cucumber-JVM into project with gradle - 海洋的Blog</title>
+	<meta name="author" content="海洋">
+
+	
+	<meta name="description" content="众所周知，Cucumber是Ruby的一个用来BDD的测试框架。Cucumber-Java则是Java版的Cucumber，它模拟Ruby里的DSL，使用Annotation创建了一套Java的BDD测试框架。Cucumber-JVM项目中只有通过ant和maven来使用Cucumber- &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="海洋的Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.ico" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">海洋的Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:reverocean.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+        <a class="sina-weibo" href="http://weibo.com/2249767451" target="_blank">
+            <svg width="40" height="40" class="sina-weibo" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path fill="" d="M9.641,17.231c-3.799,0.374-7.079-1.343-7.326-3.838c-0.246-2.494,2.634-4.82,6.434-5.196  c3.798-0.377,7.079,1.34,7.326,3.835C16.32,14.529,13.44,16.855,9.641,17.231 M17.24,8.952c-0.322-0.098-0.544-0.163-0.375-0.587  c0.365-0.921,0.403-1.718,0.007-2.286c-0.745-1.063-2.783-1.005-5.12-0.027c0-0.002-0.734,0.321-0.546-0.261  c0.359-1.156,0.305-2.123-0.254-2.682c-1.267-1.271-4.639,0.047-7.53,2.936C1.257,8.209,0,10.504,0,12.488  c0,3.796,4.866,6.104,9.628,6.104c6.241,0,10.393-3.627,10.393-6.506C20.021,10.347,18.557,9.358,17.24,8.952" />
+                <path fill="" d="M21.384,2.005c-1.507-1.671-3.73-2.308-5.782-1.872l0,0c-0.475,0.102-0.778,0.569-0.676,1.043  c0.101,0.473,0.567,0.777,1.043,0.674c1.459-0.31,3.039,0.145,4.111,1.332c1.069,1.188,1.362,2.806,0.902,4.225v0.001  c-0.149,0.462,0.104,0.957,0.566,1.106c0.461,0.149,0.956-0.104,1.105-0.565c0,0,0-0.002,0-0.004  C23.299,5.95,22.894,3.674,21.384,2.005" />
+                <path fill="" d="M19.07,4.094c-0.734-0.814-1.817-1.123-2.817-0.912c-0.409,0.088-0.671,0.49-0.581,0.899  c0.088,0.407,0.489,0.67,0.896,0.58v0.001c0.488-0.104,1.019,0.047,1.379,0.445c0.359,0.398,0.455,0.941,0.301,1.416l0,0  c-0.127,0.398,0.09,0.825,0.488,0.954c0.396,0.127,0.824-0.091,0.952-0.488C20,6.017,19.805,4.908,19.07,4.094" />
+                <path fill="" d="M9.85,12.713c-0.132,0.229-0.426,0.338-0.656,0.242c-0.227-0.094-0.297-0.348-0.169-0.572  c0.132-0.221,0.416-0.328,0.64-0.239C9.895,12.227,9.978,12.483,9.85,12.713 M8.64,14.268c-0.367,0.586-1.154,0.843-1.747,0.57  c-0.584-0.265-0.756-0.945-0.389-1.518c0.362-0.568,1.124-0.824,1.712-0.574C8.811,12.998,9.001,13.675,8.64,14.268 M10.021,10.118  c-1.808-0.47-3.852,0.431-4.637,2.023c-0.8,1.624-0.026,3.428,1.801,4.017c1.892,0.612,4.122-0.324,4.898-2.078  C12.848,12.367,11.891,10.602,10.021,10.118" />
+            </svg>
+        </a>
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:reverocean.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Add cucumber-JVM Into Project With Gradle</h1>
+	<div class="entry-content"><p>众所周知，Cucumber是Ruby的一个用来BDD的测试框架。<a href="http://">Cucumber-Java</a>则是Java版的Cucumber，它模拟Ruby里的DSL，使用Annotation创建了一套Java的BDD测试框架。Cucumber-JVM项目中只有通过ant和maven来使用Cucumber-JVM的例子，这里我记录一下Cucumber-JVM如何在Gradle里使用。</p>
+
+<h2>为项目引入Cucumber-JVM</h2>
+
+<p>首先在build.gradle文件中加入对于Cucumber-JVM的依赖：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">testCompile</span><span class="o">(</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;junit:junit:4.10&#39;</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h2>添加task运行Cucumber</h2>
+
+<p>添加完stories和steps之后，就可以运行Cucumber-JVM了，看看我们的测试是否通过。虽然在Gradle里文档里说了运行<strong>gradle test</strong>时，会扫描classpath路径下具有@RunWith annotation的类，并作为JUnit的测试去运行。但是，我在使用的时候（gradlew1.3），运行<strong>gradle test</strong>找不到标记了@RunWith的JUnit Runner（这个是gradle的一个bug，已经有人报上去了）。<br/>
+在研究了Cucumber-JVM自带的例子里的ant脚本之后，我通过添加一个task来运行Cucumber-JVM的测试：</p>
+
+<figure class='code'><figcaption><span>cucumber task</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">task</span> <span class="nf">cucumber</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">dependsOn</span> <span class="n">classes</span>
+</span><span class='line'>    <span class="n">doLast</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">javaexec</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<ul>
+<li>这里实际上就是运行Cucumber-JVM提供的Java类cucumber.api.cli.Main去运行@RunWith的JUnit Runner。</li>
+<li>需要给cucumber.api.cli.Main类指定classpath：<em>sourceSets.test.output.classesDir</em>，<em>sourceSets.main.output.classesDir</em>以及<em>configurations.cucumberRuntime</em>。configurations.cucumberRuntime的配置如下：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">configurations</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">cucumberRuntime</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">extendsFrom</span> <span class="n">testCompile</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+ * 通过args指定steps的包（cucumber.examples.java.helloworld）和stories的目录（src/test/resources）</p>
+
+<p> <!--more-->
+ ##完整build.gradle</p>
+
+<figure class='code'><figcaption><span>build.gradle  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;idea&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">configurations</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">cucumberRuntime</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">extendsFrom</span> <span class="n">testRuntime</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">testCompile</span><span class="o">(</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;junit:junit:4.10&#39;</span>
+</span><span class='line'>    <span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="nf">cucumber</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">dependsOn</span> <span class="n">classes</span>
+</span><span class='line'>    <span class="n">doLast</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">javaexec</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-14T17:19:00+08:00" pubdate data-updated="true">2013-01-14 Mon</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/cucumber/'>Cucumber</a>, <a class='category' href='/blog/categories/gradle/'>Gradle</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    海洋
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'reverocean';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/';
+        var disqus_url = 'http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

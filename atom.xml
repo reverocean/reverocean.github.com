@@ -4,7 +4,7 @@
   <title><![CDATA[海洋的Blog]]></title>
   <link href="http://reverocean.github.com/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2012-10-12T14:41:29+08:00</updated>
+  <updated>2013-01-14T18:04:51+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,363 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Add cucumber-JVM into project with gradle]]></title>
+    <link href="http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/"/>
+    <updated>2013-01-14T17:19:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle</id>
+    <content type="html"><![CDATA[<p>众所周知，Cucumber是Ruby的一个用来BDD的测试框架。<a href="http://">Cucumber-Java</a>则是Java版的Cucumber，它模拟Ruby里的DSL，使用Annotation创建了一套Java的BDD测试框架。Cucumber-JVM项目中只有通过ant和maven来使用Cucumber-JVM的例子，这里我记录一下Cucumber-JVM如何在Gradle里使用。</p>
+
+<h2>为项目引入Cucumber-JVM</h2>
+
+<p>首先在build.gradle文件中加入对于Cucumber-JVM的依赖：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">testCompile</span><span class="o">(</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;junit:junit:4.10&#39;</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h2>添加task运行Cucumber</h2>
+
+<p>添加完stories和steps之后，就可以运行Cucumber-JVM了，看看我们的测试是否通过。虽然在Gradle里文档里说了运行<strong>gradle test</strong>时，会扫描classpath路径下具有@RunWith annotation的类，并作为JUnit的测试去运行。但是，我在使用的时候（gradlew1.3），运行<strong>gradle test</strong>找不到标记了@RunWith的JUnit Runner（这个是gradle的一个bug，已经有人报上去了）。<br/>
+在研究了Cucumber-JVM自带的例子里的ant脚本之后，我通过添加一个task来运行Cucumber-JVM的测试：</p>
+
+<figure class='code'><figcaption><span>cucumber task</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">task</span> <span class="nf">cucumber</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">dependsOn</span> <span class="n">classes</span>
+</span><span class='line'>    <span class="n">doLast</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">javaexec</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<ul>
+<li>这里实际上就是运行Cucumber-JVM提供的Java类cucumber.api.cli.Main去运行@RunWith的JUnit Runner。</li>
+<li>需要给cucumber.api.cli.Main类指定classpath：<em>sourceSets.test.output.classesDir</em>，<em>sourceSets.main.output.classesDir</em>以及<em>configurations.cucumberRuntime</em>。configurations.cucumberRuntime的配置如下：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">configurations</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">cucumberRuntime</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">extendsFrom</span> <span class="n">testCompile</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+ * 通过args指定steps的包（cucumber.examples.java.helloworld）和stories的目录（src/test/resources）</p>
+
+<p> <!--more-->
+ ##完整build.gradle</p>
+
+<figure class='code'><figcaption><span>build.gradle  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;idea&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">configurations</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">cucumberRuntime</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">extendsFrom</span> <span class="n">testRuntime</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">testCompile</span><span class="o">(</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;junit:junit:4.10&#39;</span>
+</span><span class='line'>    <span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="nf">cucumber</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">dependsOn</span> <span class="n">classes</span>
+</span><span class='line'>    <span class="n">doLast</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">javaexec</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Writing Building Script]]></title>
+    <link href="http://reverocean.github.com/blog/2012/10/12/writing-building-script/"/>
+    <updated>2012-10-12T14:43:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/10/12/writing-building-script</id>
+    <content type="html"><![CDATA[<p>在Gradle运行的时候，会创建一个Project的实例。同时每个Script文件也会被编译为一个实现了<strong>Script</strong>的类，也就意味着在<strong>Script</strong>接口里声明的属性和方法在你的Script文件里都是有效的。</p>
+
+<h1>定义变量</h1>
+
+<h2>局部变量</h2>
+
+<figure class='code'><figcaption><span>Local variables  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'>   <span class="kt">def</span> <span class="n">dest</span> <span class="o">=</span> <span class="s2">&quot;dest&quot;</span>
+</span><span class='line'>  <span class="n">task</span> <span class="nf">copy</span><span class="o">(</span><span class="nl">type:</span> <span class="n">Copy</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">from</span> <span class="s2">&quot;source&quot;</span>
+</span><span class='line'>      <span class="n">into</span> <span class="n">dest</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Extra properties</h2>
+
+<figure class='code'><figcaption><span>Extra properties  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s2">&quot;java&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ext</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">springVersion</span> <span class="o">=</span> <span class="s2">&quot;3.1.0.RELEASE&quot;</span>
+</span><span class='line'>    <span class="n">emailNotification</span> <span class="o">=</span> <span class="s2">&quot;build@master.org&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sourceSets</span><span class="o">.</span><span class="na">all</span> <span class="o">{</span> <span class="n">ext</span><span class="o">.</span><span class="na">purpose</span> <span class="o">=</span> <span class="kc">null</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sourceSets</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">main</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">test</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">plugin</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="n">printProperties</span> <span class="o">&lt;&lt;</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">println</span> <span class="n">springVersion</span>
+</span><span class='line'>    <span class="n">println</span> <span class="n">emailNotification</span>
+</span><span class='line'>    <span class="n">sourceSets</span><span class="o">.</span><span class="na">matching</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">purpose</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span> <span class="o">}.</span><span class="na">each</span> <span class="o">{</span> <span class="n">println</span> <span class="n">it</span><span class="o">.</span><span class="na">name</span> <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Gradle的每个对象都可以通过ext来定义属性</li>
+<li><em>sourceSets.all { ext.purpose = null }</em>为<strong>sourceSets</strong>包含的每个对象设置一个<em>ext.purpose</em>属性(相当于初始化)，不要这句的话，build也能正常运行，但是会有Warning</li>
+<li><strong>sourceSets</strong>是Configures the source sets of this project</li>
+<li><em>sourceSets.matching { it.purpose == &#8220;production&#8221; }.each { println it.name }</em>是Groovy语法，匹配上“production”的再遍历</li>
+</ul>
+
+
+<h1>Groovy语法</h1>
+
+<h2>Property accessor</h2>
+
+<p>Groovy自动为属性添加getter和setter方法</p>
+
+<figure class='code'><figcaption><span>Property accessor  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Using a getter method</span>
+</span><span class='line'><span class="n">println</span> <span class="n">project</span><span class="o">.</span><span class="na">buildDir</span>
+</span><span class='line'><span class="n">println</span> <span class="nf">getProject</span><span class="o">().</span><span class="na">getBuildDir</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Using a setter method</span>
+</span><span class='line'><span class="n">project</span><span class="o">.</span><span class="na">buildDir</span> <span class="o">=</span> <span class="s1">&#39;target&#39;</span>
+</span><span class='line'><span class="n">getProject</span><span class="o">().</span><span class="na">setBuildDir</span><span class="o">(</span><span class="s1">&#39;target&#39;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Optional parentheses on method calls</h2>
+
+<p>方法调用的时候括号是可选的</p>
+
+<figure class='code'><figcaption><span>Optional parentheses  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">systemProperty</span> <span class="s1">&#39;some.prop&#39;</span><span class="o">,</span> <span class="s1">&#39;value&#39;</span>
+</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">systemProperty</span><span class="o">(</span><span class="s1">&#39;some.prop&#39;</span><span class="o">,</span> <span class="s1">&#39;value&#39;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>List</h2>
+
+<figure class='code'><figcaption><span>List  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// List literal</span>
+</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">includes</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;org/gradle/api/**&#39;</span><span class="o">,</span> <span class="s1">&#39;org/gradle/internal/**&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;()</span>
+</span><span class='line'><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s1">&#39;org/gradle/api/**&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s1">&#39;org/gradle/internal/**&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">includes</span> <span class="o">=</span> <span class="n">list</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Map</h2>
+
+<figure class='code'><figcaption><span>Map  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Map literal</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;()</span>
+</span><span class='line'><span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s1">&#39;plugin&#39;</span><span class="o">,</span> <span class="s1">&#39;java&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="n">apply</span><span class="o">(</span><span class="n">map</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>这里<strong>apply plugin: &#8216;java&#8217;</strong>相当于Ruby里的<strong>apply plugin=>&#8217;java&#8217;</strong>
+
+<h2>Closures as the last parameter in a method</h2></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>Closure  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">repositories</span><span class="o">()</span> <span class="o">{</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">}</span>
+</span><span class='line'><span class="n">repositories</span><span class="o">({</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using the Gradle Command-Line]]></title>
