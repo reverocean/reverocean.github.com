@@ -74,7 +74,11 @@
         <loc>
             http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/
         </loc>
-        <lastmod>2013-01-14T18:04:51+08:00</lastmod>
+        <lastmod>2013-03-23T08:31:40+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2013/03/23/mapreduce-in-hadoop/</loc>
+        <lastmod>2013-03-24T16:18:14+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/about/</loc>
@@ -82,10 +86,10 @@
     </url>
     <url>
         <loc>http://reverocean.github.com/blog/archives/</loc>
-        <lastmod>2013-01-14T18:04:51+08:00</lastmod>
+        <lastmod>2013-03-24T16:18:14+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/</loc>
-        <lastmod>2013-01-14T18:04:51+08:00</lastmod>
+        <lastmod>2013-03-24T16:18:14+08:00</lastmod>
     </url>
 </urlset>

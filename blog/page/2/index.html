@@ -7,20 +7,8 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="setup-sdk.sh 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-wget http://dl.google.com/android/android-sdk_r20.0.3-macosx.zip
-tar xvzf android-sdk_r20.0.3-macosx.zip
-cd &hellip;">
+	<meta name="description" content="一般不需要测试那些不会失败的代码，例如getter和setter方法。 Activity lifecycle events 我们应该测试Activity是否正确处理了lifecycle events。比如：
+* &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -83,6 +71,67 @@ cd &hellip;">
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/09/25/what-should-be-test-in-android/">What Should Be Tested in Android</a></h1>
+	<div class="entry-content">
+		<p>一般不需要测试那些不会失败的代码，例如getter和setter方法。</p>
+
+<h1>Activity lifecycle events</h1>
+
+<p>我们应该测试Activity是否正确处理了lifecycle events。比如：<br/>
+*  如果Activity在onPause或者onDestory事件里保存了Activity的状态，在onCreate里restore了保存的状态，那么你就应该测试这些状态是否被正确的保存和恢复了。<br/>
+*  Configuration-changed事件也需要被测试</p>
+
+<h1>Database和filesystem操作</h1>
+
+<p>我们应该测试数据库和文件系统操作是否正确处理。我们需要在隔离的低级别，高级别的ContentProviders以及从application本身上测试这些操作。
+Android在android.test.mock包下提供了一些mock对象，用于隔离测试。</p>
+
+<h1>Physical characteristics of the device</h1>
+
+<p>需要测试应用可以在不同的设备上都能运行，包括如下方面：<br/>
+*  Network capabilities<br/>
+*  Screen desities<br/>
+*  Screen resolutions<br/>
+*  Screen sizes<br/>
+*  Availability of sensors<br/>
+*  Keyboard and other input devices<br/>
+*  GPS<br/>
+*  External storage<br/>
+可以配置不同的AVD来进行各种设备上的测试。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-25T12:31:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>Android</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/25/what-should-be-test-in-android//blog/page/2/index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">

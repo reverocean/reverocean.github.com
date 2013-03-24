@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gradle | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/gradle/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-01-14T18:04:51+08:00</updated>
+  <updated>2013-03-24T16:23:27+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -18,7 +18,7 @@
     <link href="http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/"/>
     <updated>2013-01-14T17:19:00+08:00</updated>
     <id>http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle</id>
-    <content type="html"><![CDATA[<p>众所周知，Cucumber是Ruby的一个用来BDD的测试框架。<a href="http://">Cucumber-Java</a>则是Java版的Cucumber，它模拟Ruby里的DSL，使用Annotation创建了一套Java的BDD测试框架。Cucumber-JVM项目中只有通过ant和maven来使用Cucumber-JVM的例子，这里我记录一下Cucumber-JVM如何在Gradle里使用。</p>
+    <content type="html"><![CDATA[<p>众所周知，Cucumber是Ruby的一个用来BDD的测试框架。<a href="https://github.com/cucumber/cucumber-jvm">Cucumber-Java</a>则是Java版的Cucumber，它模拟Ruby里的DSL，使用Annotation创建了一套Java的BDD测试框架。Cucumber-JVM项目中只有通过ant和maven来使用Cucumber-JVM的例子，这里我记录一下Cucumber-JVM如何在Gradle里使用。</p>
 
 <h2>为项目引入Cucumber-JVM</h2>
 
