@@ -1,0 +1,2494 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[海洋的Blog]]></title>
+  <link href="http://reverocean.github.com/atom.xml" rel="self"/>
+  <link href="http://reverocean.github.com/"/>
+  <updated>2013-03-29T00:51:25+08:00</updated>
+  <id>http://reverocean.github.com/</id>
+  <author>
+    <name><![CDATA[海洋]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Smart GCIS]]></title>
+    <link href="http://reverocean.github.com/blog/2013/03/28/smart-gcis/"/>
+    <updated>2013-03-28T20:14:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/03/28/smart-gcis</id>
+    <content type="html"><![CDATA[<p>在大数据如此活跃的今天，我们这两天也跟大数据来了一次亲密接触。我们六个人的小组在一天时间里完成了一个简单的产品智能推荐系统，我们称为<a href="https://github.com/reverocean/Stuart">Smart GCIS</a>。</p>
+
+<h1>项目结构</h1>
+
+<p>我们决定提供Micro-Service，所以在项目里面我们分了好如下几个模块：</p>
+
+<ul>
+<li>smart-persistence</li>
+<li>smart-match</li>
+<li>smart-recommendation</li>
+<li>smart-web
+其中smart-persistence提供持久层服务，我们使用Hibernate来访问Mysql；smart-match提供match功能，通过Spring-Batch调用Match引擎来匹配相同的用户；smart-recommendation为客户推荐可能要购买的产品；smart-web提供一个界面用于市场人员查看客户以及其推荐产品，同事smart-web还提供RESTd的Micro-Service。</li>
+</ul>
+
+
+<h1>构建脚本</h1>
+
+<p>针对这样的一个多模块项目，我们使用<a href="http://www.gradle.org/">Gradle</a>作为我们项目的构建脚本。</p>
+
+<h2>问题</h2>
+
+<p>在项目的初期，搭建项目的时候，我犯了一个致命的疏忽。就是在配置多模块的项目时需要一个settings.gradle的文件，我少写了一个<strong>s</strong>，导致子模块在Idea里不是Java项目。这个废了我不少时间，最后还是<a href="http://dreamhead.blogbus.com/">dreamhead</a>帮助才发现问题。<br/>
+<strong>我要跟s做斗争</strong></p>
+
+<h2>进步</h2>
+
+<p>我们在项目里面使用<a href="http://dropwizard.codahale.com/">DropWizard</a>作为Micro-Service的web开发，而Dropwizard的一个特点就是它通过一个main函数启动并提供web服务。在DropWizard官方文档里是要让打成jar包，然后通过Java -jar来运行。这样是很方便，但是在开发过程中就不方便了，因为要打Jar包之后运行，才能看见结果。<br/>
+所以我引入了Gradle的<a href="http://www.gradle.org/docs/current/userguide/application_plugin.html">application</a>插件，在smart-web的build.gradle文件中apply这个插件，并且指定要运行的main之后就可以在命令行里运行：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">gradle</span> <span class="o">:</span><span class="n">smart</span><span class="o">-</span><span class="nl">web:</span><span class="n">run</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>来运行DropWizard了。不过这里还有个问题就是在运行DropWizard的时候，需要为main函数提供一个server和configuration.yml的参数，但是在gradle :smart-web:run后面加上这两个参数有会报错。好在Gradle的appliation插件提供了相应的配置：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">run</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">args</span> <span class="s1">&#39;server&#39;</span><span class="o">,</span> <span class="s1">&#39;src/main/resources/stuart.yaml&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就解决问题了。
+ <!--more--></p>
+
+<h1>DropWizard</h1>
+
+<p>在<a href="http://www.thoughtworks.com/cn/articles/technology-radar-october-2012-0">ThoughtWorks2012年的技术雷达</a>中，提到了一个趋势，就是embedded servlet containers。<a href="http://dropwizard.codahale.com/">DropWizard</a>就是这样一个embedded servlet containers。<br/>
+Dropwizard的文档很详细，我就不赘述了，但是在这个项目中，我们使用Dropwizard提供web页面（Freemarker），就必然要访问css和javascript。目前，Dropwizard还不支持提供assets，好在我们碰见的问题都不时问题，已经有人已经提供好了<a href="https://github.com/bazaarvoice/dropwizard-configurable-assets-bundle">扩展</a>，我们只需要include进来就可以了。</p>
+
+<ul>
+<li>首先，需要在build.gradle中加入&#8221;com.bazaarvoice.dropwizard:dropwizard-configurable-assets-bundle:0.1.9&#8221;的依赖</li>
+<li>其次按照扩展的说明文档，很容易就能配好</li>
+<li>但是有一个坑，就是assets的目录需要映射的，在文档中是dashboard，需要改成自己需要的就可以了</li>
+</ul>
+
+
+<h1>其他</h1>
+
+<p>这次活动一共6个人，一个人准备数据，一个人完成持久层，一个人完成匹配引擎，一个人完成推荐系统，两个人pair做界面，感觉配合的非常好。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[MapReduce in Hadoop]]></title>
+    <link href="http://reverocean.github.com/blog/2013/03/23/mapreduce-in-hadoop/"/>
+    <updated>2013-03-23T08:29:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/03/23/mapreduce-in-hadoop</id>
+    <content type="html"><![CDATA[<p>大数据被大家越来越重视，而在大数据的领域里，Hadoop基本上是行业里的事实标准。而MapReduce又是Hadoop中的一个重要特性，这里总结一下MapReduce相关的特性。</p>
+
+<h2>MapReduce的Job是如何工作的</h2>
+
+<p>客户端提交一个Job到Hadoop的MapReduce之后，Hadoop的JobTracker（Hadoop集群中的Master）会把任务分发到TaskTracker（Hadoop集群中的slave）上，先执行Map Task，再执行Reduce的任务。大体流程如下图所示：<br/>
+<img src="http://reverocean.github.com/images/hadoop/mapreduce/job.jpg" title="" >
+ <!--more--></p>
+
+<h2>High Level actors in MapReduce</h2>
+
+<p>如下图所示：<br/>
+<img src="http://reverocean.github.com/images/hadoop/mapreduce/high_level.jpg" title="" >
+在MapReduce里面分为如下几个方面：</p>
+
+<ul>
+<li>Input阶段通过InputFormat和RecordReader决定什么样的数据输入到Map中去</li>
+<li><ul>
+<li>Create split分割Input Data</li>
+</ul>
+</li>
+<li><ul>
+<li>Read split通过RecordReader的nextKeyValue为Map输入数据</li>
+</ul>
+</li>
+<li>Map</li>
+<li>Partitioning阶段把Map的输出进行Shuffle和Sort</li>
+<li>Reduce</li>
+<li>Output阶段将Reduce阶段的输出写到data sink</li>
+</ul>
+
+
+<h2>Map</h2>
+
+<ul>
+<li>输入：根据split的不同，Map的输入数据可以是文件的一行，也可以是数据库表的一行记录。</li>
+<li>输出：零个或者多个key、value对。</li>
+</ul>
+
+
+<h2>Shuffle和Sort</h2>
+
+<p>在MapReduce里，Map处理完Input Data之后的key、value输出需要通过Shuffle和Sort之后，再将数据传递给Reducer。在Shuffle和Sort阶段有两个任务：</p>
+
+<ul>
+<li>决定Reducer应该处理哪些key/value对（被称为partitioning）</li>
+<li>确定给Reducer的数据是被排过序的
+从下图中的例子可以看到，Mapper 1的输出cat, doc1 以及Mapper 2的输出cat, doc2，在经过Shuffle之后被汇总成cat，list(doc1, doc2)。同时，经过Sort之后，传到Reducer里的数据是按照Key排过序的（cat, chipmunk, dog, haster）<br/>
+<img src="http://reverocean.github.com/images/hadoop/mapreduce/shuffle.jpg" title="" ></li>
+</ul>
+
+
+<h2>Reduce</h2>
+
+<p>处理经过Shuffle和Sort之后的数据，并更具需求输出一个或者多个key/value对。可以输出到HDFS上的一个文件里，也可以输出到NoSQL，或者其他任何Data Sink</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Add cucumber-JVM into project with gradle]]></title>
+    <link href="http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/"/>
+    <updated>2013-01-14T17:19:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle</id>
+    <content type="html"><![CDATA[<p>众所周知，Cucumber是Ruby的一个用来BDD的测试框架。<a href="https://github.com/cucumber/cucumber-jvm">Cucumber-Java</a>则是Java版的Cucumber，它模拟Ruby里的DSL，使用Annotation创建了一套Java的BDD测试框架。Cucumber-JVM项目中只有通过ant和maven来使用Cucumber-JVM的例子，这里我记录一下Cucumber-JVM如何在Gradle里使用。</p>
+
+<h2>为项目引入Cucumber-JVM</h2>
+
+<p>首先在build.gradle文件中加入对于Cucumber-JVM的依赖：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">testCompile</span><span class="o">(</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;junit:junit:4.10&#39;</span>
+</span><span class='line'><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h2>添加task运行Cucumber</h2>
+
+<p>添加完stories和steps之后，就可以运行Cucumber-JVM了，看看我们的测试是否通过。虽然在Gradle里文档里说了运行<strong>gradle test</strong>时，会扫描classpath路径下具有@RunWith annotation的类，并作为JUnit的测试去运行。但是，我在使用的时候（gradlew1.3），运行<strong>gradle test</strong>找不到标记了@RunWith的JUnit Runner（这个是gradle的一个bug，已经有人报上去了）。<br/>
+在研究了Cucumber-JVM自带的例子里的ant脚本之后，我通过添加一个task来运行Cucumber-JVM的测试：</p>
+
+<figure class='code'><figcaption><span>cucumber task</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">task</span> <span class="nf">cucumber</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">dependsOn</span> <span class="n">classes</span>
+</span><span class='line'>    <span class="n">doLast</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">javaexec</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<ul>
+<li>这里实际上就是运行Cucumber-JVM提供的Java类cucumber.api.cli.Main去运行@RunWith的JUnit Runner。</li>
+<li>需要给cucumber.api.cli.Main类指定classpath：<em>sourceSets.test.output.classesDir</em>，<em>sourceSets.main.output.classesDir</em>以及<em>configurations.cucumberRuntime</em>。configurations.cucumberRuntime的配置如下：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">configurations</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">cucumberRuntime</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">extendsFrom</span> <span class="n">testCompile</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+ * 通过args指定steps的包（cucumber.examples.java.helloworld）和stories的目录（src/test/resources）</p>
+
+<p> <!--more-->
+ ##完整build.gradle</p>
+
+<figure class='code'><figcaption><span>build.gradle  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;idea&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">configurations</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">cucumberRuntime</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">extendsFrom</span> <span class="n">testRuntime</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">testCompile</span><span class="o">(</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>            <span class="s1">&#39;junit:junit:4.10&#39;</span>
+</span><span class='line'>    <span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="nf">cucumber</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">dependsOn</span> <span class="n">classes</span>
+</span><span class='line'>    <span class="n">doLast</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">javaexec</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>            <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Writing Building Script]]></title>
+    <link href="http://reverocean.github.com/blog/2012/10/12/writing-building-script/"/>
+    <updated>2012-10-12T14:43:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/10/12/writing-building-script</id>
+    <content type="html"><![CDATA[<p>在Gradle运行的时候，会创建一个Project的实例。同时每个Script文件也会被编译为一个实现了<strong>Script</strong>的类，也就意味着在<strong>Script</strong>接口里声明的属性和方法在你的Script文件里都是有效的。</p>
+
+<h1>定义变量</h1>
+
+<h2>局部变量</h2>
+
+<figure class='code'><figcaption><span>Local variables  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'>   <span class="kt">def</span> <span class="n">dest</span> <span class="o">=</span> <span class="s2">&quot;dest&quot;</span>
+</span><span class='line'>  <span class="n">task</span> <span class="nf">copy</span><span class="o">(</span><span class="nl">type:</span> <span class="n">Copy</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">from</span> <span class="s2">&quot;source&quot;</span>
+</span><span class='line'>      <span class="n">into</span> <span class="n">dest</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Extra properties</h2>
+
+<figure class='code'><figcaption><span>Extra properties  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s2">&quot;java&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ext</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">springVersion</span> <span class="o">=</span> <span class="s2">&quot;3.1.0.RELEASE&quot;</span>
+</span><span class='line'>    <span class="n">emailNotification</span> <span class="o">=</span> <span class="s2">&quot;build@master.org&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sourceSets</span><span class="o">.</span><span class="na">all</span> <span class="o">{</span> <span class="n">ext</span><span class="o">.</span><span class="na">purpose</span> <span class="o">=</span> <span class="kc">null</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sourceSets</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">main</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">test</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">plugin</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;production&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="n">printProperties</span> <span class="o">&lt;&lt;</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">println</span> <span class="n">springVersion</span>
+</span><span class='line'>    <span class="n">println</span> <span class="n">emailNotification</span>
+</span><span class='line'>    <span class="n">sourceSets</span><span class="o">.</span><span class="na">matching</span> <span class="o">{</span> <span class="n">it</span><span class="o">.</span><span class="na">purpose</span> <span class="o">==</span> <span class="s2">&quot;production&quot;</span> <span class="o">}.</span><span class="na">each</span> <span class="o">{</span> <span class="n">println</span> <span class="n">it</span><span class="o">.</span><span class="na">name</span> <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Gradle的每个对象都可以通过ext来定义属性</li>
+<li><em>sourceSets.all { ext.purpose = null }</em>为<strong>sourceSets</strong>包含的每个对象设置一个<em>ext.purpose</em>属性(相当于初始化)，不要这句的话，build也能正常运行，但是会有Warning</li>
+<li><strong>sourceSets</strong>是Configures the source sets of this project</li>
+<li><em>sourceSets.matching { it.purpose == &#8220;production&#8221; }.each { println it.name }</em>是Groovy语法，匹配上“production”的再遍历</li>
+</ul>
+
+
+<h1>Groovy语法</h1>
+
+<h2>Property accessor</h2>
+
+<p>Groovy自动为属性添加getter和setter方法</p>
+
+<figure class='code'><figcaption><span>Property accessor  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Using a getter method</span>
+</span><span class='line'><span class="n">println</span> <span class="n">project</span><span class="o">.</span><span class="na">buildDir</span>
+</span><span class='line'><span class="n">println</span> <span class="nf">getProject</span><span class="o">().</span><span class="na">getBuildDir</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Using a setter method</span>
+</span><span class='line'><span class="n">project</span><span class="o">.</span><span class="na">buildDir</span> <span class="o">=</span> <span class="s1">&#39;target&#39;</span>
+</span><span class='line'><span class="n">getProject</span><span class="o">().</span><span class="na">setBuildDir</span><span class="o">(</span><span class="s1">&#39;target&#39;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Optional parentheses on method calls</h2>
+
+<p>方法调用的时候括号是可选的</p>
+
+<figure class='code'><figcaption><span>Optional parentheses  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">systemProperty</span> <span class="s1">&#39;some.prop&#39;</span><span class="o">,</span> <span class="s1">&#39;value&#39;</span>
+</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">systemProperty</span><span class="o">(</span><span class="s1">&#39;some.prop&#39;</span><span class="o">,</span> <span class="s1">&#39;value&#39;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>List</h2>
+
+<figure class='code'><figcaption><span>List  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// List literal</span>
+</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">includes</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;org/gradle/api/**&#39;</span><span class="o">,</span> <span class="s1">&#39;org/gradle/internal/**&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;()</span>
+</span><span class='line'><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s1">&#39;org/gradle/api/**&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s1">&#39;org/gradle/internal/**&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">includes</span> <span class="o">=</span> <span class="n">list</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Map</h2>
+
+<figure class='code'><figcaption><span>Map  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Map literal</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;()</span>
+</span><span class='line'><span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s1">&#39;plugin&#39;</span><span class="o">,</span> <span class="s1">&#39;java&#39;</span><span class="o">)</span>
+</span><span class='line'><span class="n">apply</span><span class="o">(</span><span class="n">map</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>这里<strong>apply plugin: &#8216;java&#8217;</strong>相当于Ruby里的<strong>apply plugin=>&#8217;java&#8217;</strong>
+
+<h2>Closures as the last parameter in a method</h2></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>Closure  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">repositories</span><span class="o">()</span> <span class="o">{</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">}</span>
+</span><span class='line'><span class="n">repositories</span><span class="o">({</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Using the Gradle Command-Line]]></title>
+    <link href="http://reverocean.github.com/blog/2012/10/12/using-the-gradle-command-line/"/>
+    <updated>2012-10-12T14:21:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/10/12/using-the-gradle-command-line</id>
+    <content type="html"><![CDATA[<p>执行Gradle命令一些用法</p>
+
+<ul>
+<li>一次运行多个task<br/>
+  <strong><em>gradle dist test</em></strong></li>
+<li>使用-x参数可以指定哪些task不执行 <br/>
+  <strong><em>gradle dist -x test</em></strong></li>
+<li>使用&#8211;continue当有错误时继续执行未执行的task<br/>
+  <strong><em>gradle dist test &#8211;continue</em></strong></li>
+<li>使用task的缩写执行task <br/>
+  <strong><em>gradle cT</em></strong> <br/>
+  执行compileTest task</li>
+<li>使用-b指定build脚本文件</li>
+<li>gradle projects</li>
+<li>gradle tasks</li>
+<li>gradle dependencies</li>
+<li>gradle properties</li>
+<li>gradle -m clean compile列出要执行哪些task</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Advance of task in gradle]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle/"/>
+    <updated>2012-09-29T09:19:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle</id>
+    <content type="html"><![CDATA[<p>Gradle在执行的时候有三个生命周期：</p>
+
+<ol>
+<li>initialization</li>
+<li>configuration</li>
+<li>execution</li>
+</ol>
+
+
+<h1>Configuration</h1>
+
+<p>configuration一般用于设置Task在运行时所需的变量和数据结构，每次运行Gradle build文件的时候，都会运行一次configuration代码。</p>
+
+<figure class='code'><figcaption><span>Configuration of task </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task initializeDatabase
+</span><span class='line'>initializeDatabase { print 'configuring ' } 
+</span><span class='line'>initializeDatabase { println 'database connection' }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意这里的configuration块和定义task的块是一样的，不一样的地方就是在task后面没有&#8221;&lt;&lt;&#8221;活着doLast等。</p>
+
+<h1>Task是对象</h1>
+
+<p>Gradle为每一个Task都会创建一个具有属性，方法的对象。我们可以控制每个Task对象的访问顺序，类型以及其功能。一般的每个新的Task都是DefaultTask类型（就像Java里的java.lang.Object一样）。DefaultTask没有实际的功能，只提供一些Gradle需要的接口。</p>
+
+<h2>DefaultTask的方法</h2>
+
+<ul>
+<li>dependsOn</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>不同的方式调用dependsOn </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span> <span class="no">Declare</span> <span class="n">that</span> <span class="n">world</span> <span class="n">depends</span> <span class="n">on</span> <span class="n">hello</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">Preserves</span> <span class="n">any</span> <span class="n">previously</span> <span class="n">defined</span> <span class="n">dependencies</span> <span class="n">as</span> <span class="n">well</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>  
+</span><span class='line'>  <span class="n">dependsOn</span> <span class="n">createSchema</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">//</span> <span class="no">An</span> <span class="n">alternate</span> <span class="n">way</span> <span class="n">to</span> <span class="n">express</span> <span class="n">the</span> <span class="n">same</span> <span class="n">dependency</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>  
+</span><span class='line'>  <span class="n">dependsOn</span> <span class="o">&lt;&lt;</span> <span class="n">createSchema</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">Do</span> <span class="n">the</span> <span class="n">same</span> <span class="n">using</span> <span class="n">single</span> <span class="n">quotes</span> <span class="p">(</span><span class="n">which</span> <span class="n">are</span> <span class="n">usually</span> <span class="n">optional</span><span class="p">)</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>  
+</span><span class='line'>  <span class="n">dependsOn</span> <span class="err">&#39;</span><span class="n">createSchem</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">//</span> <span class="no">Explicitly</span> <span class="n">call</span> <span class="n">the</span> <span class="nb">method</span> <span class="n">on</span> <span class="n">the</span> <span class="n">task</span> <span class="n">object</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span>
+</span><span class='line'><span class="n">loadTestData</span><span class="o">.</span><span class="n">dependsOn</span> <span class="n">createSema</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">//</span> <span class="n">A</span> <span class="n">shortcut</span> <span class="k">for</span> <span class="n">declaring</span> <span class="n">dependencies</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">createSchema</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>doFirst<br/>
+可以添加一段在执行task的之前执行的代码，doFirst可以在已经存在的Task上添加代码。当多次定义doFirst的时候，每个代码块都会被累加到doFirst里去，运行的时候是安装先定义的后执行的顺序。</p></li>
+<li><p>doLast<br/>
+doLast除了在执行完Task之后执行和doFirst不一样之外，其他都一样。</p></li>
+<li><p>onlyIf<br/>
+onlyIf会判断你传入的闭包是否满足条件，如果满足条件就执行Task，否则就不执行。使用onlyIf方法，你可以使用System property来切换Task是否可以被调用。也可以读文件、调用web services、检查安全等来控制。</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>onlyIf的例子  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">createSchema</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;create database schema&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">createSchema</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;load test data&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">loadTestData</span><span class="o">.</span><span class="n">onlyIf</span> <span class="p">{</span>
+</span><span class='line'>  <span class="no">System</span><span class="o">.</span><span class="n">properties</span><span class="o">[</span><span class="s1">&#39;load.data&#39;</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>不传人property执行结果 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gradle</span> <span class="n">loadTestData</span>
+</span><span class='line'><span class="n">create</span> <span class="n">database</span> <span class="n">schema</span>
+</span><span class='line'><span class="ss">:loadTestData</span> <span class="no">SKIPPED</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>传人property执行结果  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gradle</span> <span class="o">-</span><span class="no">Dload</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="kp">true</span> <span class="n">loadTestData</span>
+</span><span class='line'><span class="ss">:createSchema</span>
+</span><span class='line'><span class="n">create</span> <span class="n">database</span> <span class="n">schema</span>
+</span><span class='line'><span class="ss">:loadTestData</span>
+</span><span class='line'><span class="nb">load</span> <span class="nb">test</span> <span class="n">data</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>DefaultTask的属性</h2>
+
+<ul>
+<li>didWork<br/>
+表示Task是否执行完毕的布尔值。不时所有的Task都有didWork这个属性，但是一些内置的Task都有，比如Compile，Copy以及Delete都有didWork这个Property，用于表示是否成功执行完成。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>利用compileJava的didWork </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apply</span> <span class="n">plugin</span><span class="p">:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'><span class="n">task</span> <span class="n">emailMe</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">compileJava</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">tasks</span><span class="o">.</span><span class="n">compileJava</span><span class="o">.</span><span class="n">didWork</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">println</span> <span class="s1">&#39;SEND EMAIL ANNOUNCING SUCCESS&#39;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>enabled<br/>
+用于表示Task是否会被执行的布尔值。当被设置为false的时候，task就不会被执行。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>设置task的enabled </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">templates</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;process email templates&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">task</span> <span class="n">sendEmails</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">templates</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;send emails&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">sendEmails</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kp">false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个build在执行gradle sendEmails的时候，因为sendEmails的enabled设置成了false，所以他不会被执行，但是他依赖的templates会被执行。</p>
+
+<ul>
+<li><p>path
+表示Task全路径的字符串。一般的该值就是task的name属性，但是当被其他的build文件调用时，就不一样了。</p></li>
+<li><p>logger
+Gradle内部logger的引用，它实现了org.slf4j.Logger接口，但是添加了更多额外的logging level（DEBUG, INFO
+, LIFECYCLE, WARN, QUIET, ERROR）。</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>logger的level </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">logLevel</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">levels</span> <span class="o">=</span> <span class="o">[</span>
+</span><span class='line'>                  <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;LIFECYCLE&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;QUIET&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;WARN&#39;</span><span class="p">,</span>
+</span><span class='line'>                  <span class="s1">&#39;ERROR&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">levels</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="n">level</span> <span class="o">-&gt;</span>
+</span><span class='line'>      <span class="n">logging</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">level</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">logMessage</span> <span class="o">=</span> <span class="s2">&quot;SETTING LogLevel=${level}&quot;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="n">logMessage</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="n">logMessage</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="n">logger</span><span class="o">.</span><span class="n">debug</span> <span class="s1">&#39;DEBUG ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">info</span> <span class="s1">&#39;INFO ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">lifecycle</span> <span class="s1">&#39;LIFECYCLE ENABLED&#39;</span> <span class="n">logger</span><span class="o">.</span><span class="n">warn</span> <span class="s1">&#39;WARN ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">quiet</span> <span class="s1">&#39;QUIET ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="s1">&#39;ERROR ENABLED&#39;</span>
+</span><span class='line'>      <span class="n">println</span> <span class="s1">&#39;THIS IS println OUTPUT&#39;</span> <span class="n">logger</span><span class="o">.</span><span class="n">error</span> <span class="s1">&#39; &#39;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>logging<br/>
+logging用于访问logger的日志级别，参见上面的例子。</p></li>
+<li><p>description</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span>description的不同设置方式 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">helloWorld</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="s1">&#39;Says hello to the world&#39;</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;hello, world&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="n">helloWorld</span> <span class="o">&lt;&lt;</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;hello, world&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">helloWorld</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Says hello to the world&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="sr">//</span> <span class="no">Another</span> <span class="n">way</span> <span class="n">to</span> <span class="k">do</span> <span class="n">it</span>
+</span><span class='line'><span class="n">helloWorld</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Says hello to the world&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>temporaryDir<br/>
+返回零时目录File的引用</p></li>
+<li><p>动态Property</p></li>
+</ul>
+
+
+<h1>Task类型</h1>
+
+<p>除了默认的DefaultTask，Gradle也定义了一些通用的task类型。</p>
+
+<h2>自定义Task类型</h2>
+
+<p>当Gradle提供的Task类型不够用的时候，我们可以自己定义一些我们的Task类型。</p>
+
+<h3>Custom Tasks Types in the Build file</h3>
+
+<figure class='code'><figcaption><span>description的不同设置方式 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">createDatabase</span><span class="p">(</span><span class="n">type</span><span class="p">:</span> <span class="no">MySqlTask</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;CREATE DATABASE IF NOT EXISTS example&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">MySqlTask</span> <span class="n">extends</span> <span class="no">DefaultTask</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">hostname</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">port</span> <span class="o">=</span> <span class="mi">3306</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">sql</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">database</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">username</span> <span class="o">=</span> <span class="s1">&#39;root&#39;</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span>
+</span><span class='line'>  <span class="vi">@TaskAction</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">runQuery</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">cmd</span>
+</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="n">database</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;mysql -u ${username} -p${password} -h ${hostname} -P ${port} ${database} -e &quot;</span>
+</span><span class='line'>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;mysql -u ${username} -p${password} -h ${hostname} -P ${port} -e &quot;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="n">project</span><span class="o">.</span><span class="n">exec</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">commandLine</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">()</span><span class="o">.</span><span class="n">toList</span><span class="p">()</span> <span class="o">+</span> <span class="n">sql</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<pre><code>* 自定义Task需要继承自DefaultTask 
+* hostname，port等都是Task自定义的属性
+* 使用@TaskAction标示一个方法为Task的Action
+</code></pre>
+
+<h3>Custom Tasks in the Source Tree</h3>
+
+<p>在project的根目录下建一个buildSrc的文件夹，然后在文件夹里创建groove的源文件，在Gradle运行task的时候，会找该目录下的文件。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Project in gradle]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/27/project-in-gradle/"/>
+    <updated>2012-09-27T14:07:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/27/project-in-gradle</id>
+    <content type="html"><![CDATA[<p>针对每一个项目的build.gradle，在运行的时候Gradle都会创建一个<strong>Project</strong>对象：</p>
+
+<ul>
+<li>在build脚本里调用没有定义的方法都会被代理到project对象</li>
+<li>在build脚本里没有定义的属性也会被代理到project对象</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>println name
+</span><span class='line'>println project.name</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Project的属性</h1>
+
+<table>
+<thead>
+<tr>
+<th align="left">Name        </th>
+<th align="center"> Type          </th>
+<th align="left"> Default Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">project     </td>
+<td align="center"> Project       </td>
+<td align="left"> The Project instance</td>
+</tr>
+<tr>
+<td align="left">name        </td>
+<td align="center"> String        </td>
+<td align="left"> The name of the project directory.</td>
+</tr>
+<tr>
+<td align="left">path        </td>
+<td align="center"> String        </td>
+<td align="left"> The absolute path of the project.</td>
+</tr>
+<tr>
+<td align="left">description </td>
+<td align="center"> String        </td>
+<td align="left"> A description for the project.</td>
+</tr>
+<tr>
+<td align="left">projectDir  </td>
+<td align="center"> File          </td>
+<td align="left"> The directory containing the build script.</td>
+</tr>
+<tr>
+<td align="left">buildDir    </td>
+<td align="center"> File          </td>
+<td align="left"> projectDir/build</td>
+</tr>
+<tr>
+<td align="left">group       </td>
+<td align="center"> Object        </td>
+<td align="left"> unspecified</td>
+</tr>
+<tr>
+<td align="left">version     </td>
+<td align="center"> Object        </td>
+<td align="left"> unspecified</td>
+</tr>
+<tr>
+<td align="left">ant         </td>
+<td align="center"> AntBuilder    </td>
+<td align="left"> An AntBuilder instance</td>
+</tr>
+</tbody>
+</table>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Gradle for Java]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/27/gradle-for-java/"/>
+    <updated>2012-09-27T10:15:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/27/gradle-for-java</id>
+    <content type="html"><![CDATA[<p>Gradle针对Java开发提供了‘java’插件，非常方便。如果安装约定的目录结构组织项目，几乎不用修改build.gradle。当然也很方便修改build.gradle去适应你的项目结构。</p>
+
+<h1>A basic Java project</h1>
+
+<figure class='code'><figcaption><span>使用Java plugin </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'java'</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>gradle的Java插件约定的项目结构跟Maven的项目结构一样</li>
+<li>所有的output文件放在build文件夹下</li>
+</ul>
+
+
+<h1>Tasks</h1>
+
+<ul>
+<li>build：编译，测试并创建一个包含main下面的类和资源文件的JAR</li>
+<li>clean：删除build文件夹，做清理</li>
+<li>assemble：编译并打一个JAR包，不测试代码。加了War插件之后会打一个war包</li>
+<li>check：编译，测试。也可以添加其他的插件（Code-quality）来检查你的代码格式</li>
+</ul>
+
+
+<h1>管理依赖</h1>
+
+<p>依赖管理分为两个部分，第一是本项目依赖外部的其他jar，第二是本项目会产生一个jar包，别的项目会依赖当前项目的jar包，所以需要把jar包放置到一个公共的位置。</p>
+
+<h2>管理外部依赖</h2>
+
+<ul>
+<li>添加Maven的Repository</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>添加respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
+</span><span class='line'>    mavenCentral()
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>添加respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
+</span><span class='line'>    maven {
+</span><span class='line'>        url "http://repo.mycompany.com/maven2"
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>添加lvy respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
+</span><span class='line'>    ivy {
+</span><span class='line'>        url "http://repo.mycompany.com/repo"
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>添加lvy local respositories </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
+</span><span class='line'>    ivy {
+</span><span class='line'>        url "../local-repo"
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<pre><code>*  Gradle支持Maven和lvy的Respository
+*  Gradle可以通过local file system或者HTTP访问Respository
+*  Gradle默认不配置respository
+</code></pre>
+
+<ul>
+<li>添加dependencies</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>添加dependencies </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
+</span><span class='line'>    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+</span><span class='line'>    testCompile group: 'junit', name: 'junit', version: '4.+'
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>添加dependencies </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
+</span><span class='line'>    compile 'org.hibernate:hibernate-core:3.6.7.Final'
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<pre><code>*  跟Maven一样，依赖分为几个声明周期：
+    *  compile
+    *  runtime
+    *  testCompile
+    *  testRuntime
+*  同样跟Maven一样，需要指定依赖包的group，name以及version。也可以通过简单的方法“group:name:version”来指定
+</code></pre>
+
+<h2>Publishing artifacts</h2>
+
+<figure class='code'><figcaption><span>设置publish到lvy </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {
+</span><span class='line'>    repositories {
+</span><span class='line'>        ivy {
+</span><span class='line'>            credentials {
+</span><span class='line'>                username "username"
+</span><span class='line'>                password "pw"
+</span><span class='line'>            }
+</span><span class='line'>            url "http://repo.mycompany.com"
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>设置publish到Maven </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'maven'
+</span><span class='line'>
+</span><span class='line'>uploadArchives {
+</span><span class='line'>    repositories {
+</span><span class='line'>        mavenDeployer {
+</span><span class='line'>            repository(url: "file://localhost/tmp/myRepo/")
+</span><span class='line'>        }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>设置publish到文件夹 </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {
+</span><span class='line'>    repositories {
+</span><span class='line'>       flatDir {
+</span><span class='line'>           dirs 'repos'
+</span><span class='line'>       }
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>IDE插件</h1>
+
+<p>apply plugin: &#8216;eclipse&#8217;
+apply plugin: &#8216;idea&#8217;</p>
+
+<p>gradle idea</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Gradle Task]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/26/gradle-task/"/>
+    <updated>2012-09-26T17:18:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/26/gradle-task</id>
+    <content type="html"><![CDATA[<p>Gradle里的task用来描述构建中不可分割的原子任务，例如编译，打包JAR，生存javadoc等，都是task。</p>
+
+<h1>定义Task</h1>
+
+<figure class='code'><figcaption><span>定义Task </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task hello {
+</span><span class='line'>     doLast {
+</span><span class='line'>          println "Hello World!"
+</span><span class='line'>       }
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>简单定义Task </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task upper &lt;&lt; {
+</span><span class='line'>      String someString = 'mY_nAmE'
+</span><span class='line'>      println "Original: " + someString 
+</span><span class='line'>      println "Upper case: " + someString.toUpperCase()
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意：</p>
+
+<ul>
+<li>这里直接使用“&lt;&lt;”来定义Task，“&lt;&lt;”是doLast的别名</li>
+<li>定义Task的时候就是写代码，这里先定义了一个变量，然后调用toUpperCase方法</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>另外一个Task </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task count &lt;&lt; {
+</span><span class='line'>      4.times { print "$it " }
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>运行Task</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gradle -q hello
+</span><span class='line'>Hello World!</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其中：</p>
+
+<ul>
+<li>-q是gradle的命令行参数，用于阻止gradle的log输出，这样就只输出gradle脚本里输出的内容。</li>
+<li>Hello World！是我们定义的task的输出。</li>
+</ul>
+
+
+<h1>Task依赖</h1>
+
+<figure class='code'><figcaption><span>Task依赖 </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task hello &lt;&lt; {
+</span><span class='line'>      println 'Hello world!'
+</span><span class='line'>  }
+</span><span class='line'>  task intro(dependsOn: hello) &lt;&lt; {
+</span><span class='line'>      println "I'm Gradle"
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>使用dependsOn来定义当前task依赖的task</li>
+<li>依赖的Task可以在当前的Task之后定义</li>
+</ul>
+
+
+<h1>动态Task</h1>
+
+<figure class='code'><figcaption><span>Task依赖 </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>4.times { counter ->
+</span><span class='line'>      task "task$counter" &lt;&lt; {
+</span><span class='line'>          println "I'm task number $counter"
+</span><span class='line'>      }
+</span><span class='line'>  }
+</span><span class='line'>  task0.dependsOn task2, task3</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>使用counter作为变量，在定义task的时候使用“<strong>task$counter</strong>”会动态定义出task0，task1，task2，task3</li>
+<li><strong>task0.dependsOn task2, task3</strong>通过调用task0的dependsOn的方法，也可以定义Task的依赖</li>
+</ul>
+
+
+<h1>Task的API</h1>
+
+<figure class='code'><figcaption><span>Task API </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task hello &lt;&lt; {
+</span><span class='line'>      println 'Hello Earth'
+</span><span class='line'>  }
+</span><span class='line'>  hello.doFirst {
+</span><span class='line'>          println 'Hello Venus'
+</span><span class='line'>  }
+</span><span class='line'>  hello.doLast {
+</span><span class='line'>      println 'Hello Mars'
+</span><span class='line'>  }
+</span><span class='line'>  hello &lt;&lt; {
+</span><span class='line'>      println 'Hello Jupiter'
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>doFirst和doLast可以被执行多次</li>
+<li>定义完task之后，就可以调用doLast，doFirst和&lt;&lt;</li>
+</ul>
+
+
+<h1>Task的属性</h1>
+
+<figure class='code'><figcaption><span>Task API </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task myTask {
+</span><span class='line'>      ext.myProperty = "myValue"
+</span><span class='line'>  }
+</span><span class='line'>  task printTaskProperties &lt;&lt; {
+</span><span class='line'>      println myTask.myProperty
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>在定义Task的时候，使用<strong>ext.myProperty</strong>为Task添加属性</li>
+<li>在别的Task里，直接使用<strong>myTask.myProperty</strong>来访问Task的属性</li>
+</ul>
+
+
+<h1>定义函数</h1>
+
+<figure class='code'><figcaption><span>Task API </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>task checksum &lt;&lt; {
+</span><span class='line'>      fileList('../antLoadfileResources').each {File file ->
+</span><span class='line'>          ant.checksum(file: file, property: "cs_$file.name")
+</span><span class='line'>          println "$file.name Checksum: ${ant.properties["cs_$file.name"]}"
+</span><span class='line'>      }
+</span><span class='line'>  }
+</span><span class='line'>  task loadfile &lt;&lt; {
+</span><span class='line'>      fileList('../antLoadfileResources').each {File file ->
+</span><span class='line'>          ant.loadfile(srcFile: file, property: file.name)
+</span><span class='line'>          println "I'm fond of $file.name"
+</span><span class='line'>      }
+</span><span class='line'>  }
+</span><span class='line'>  File[] fileList(String dir) {
+</span><span class='line'>      file(dir).listFiles({file -> file.isFile() } as         FileFilter).sort()
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>在后面定义了fileList函数</li>
+<li>在定义Task的时候，调用fileList函数</li>
+</ul>
+
+
+<h1>默认Task</h1>
+
+<figure class='code'><figcaption><span>Task API </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>defaultTasks 'clean', 'run'
+</span><span class='line'>  task clean &lt;&lt; {
+</span><span class='line'>      println 'Default Cleaning!'
+</span><span class='line'>  }
+</span><span class='line'>  task run &lt;&lt; {
+</span><span class='line'>      println 'Default Running!'
+</span><span class='line'>  }
+</span><span class='line'>  task other &lt;&lt; {
+</span><span class='line'>      println "I'm not a default task!"
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>使用<strong>defaultTasks &#8216;clean&#8217;, &#8216;run&#8217;</strong>定义哪些task是默认的</li>
+<li>可以定义多个默认的Task</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android test framework]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/android-test-framework/"/>
+    <updated>2012-09-25T17:58:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/android-test-framework</id>
+    <content type="html"><![CDATA[<p>Android提供了一套基于JUnit的测试框架&#8211;Instrumentation，key features：<br/>
+*  方便访问Android的系统对象<br/>
+*  Instrumentation框架方便用于测试控制和检测应用<br/>
+*  Mock Objects<br/>
+*  可以单独跑一个测试或者test suite<br/>
+*  提供ADT插件支持管理测试和测试项目</p>
+
+<p>Instrumentation是Android测试框架的基础，在测试时注入application需要的的mock组件来隔离依赖。</p>
+
+<p>一般需要建立一个和项目名+Test的测试项目，在项目里的AndroidManifest.xml文件里声明Instrumentation。</p>
+
+<figure class='code'><figcaption><span>被测试project的AndroidManifest.xml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>
+</span><span class='line'>  <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span>
+</span><span class='line'>  <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.SampleActivity&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/activity&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/application&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>测试project的AndroidManifest.xml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample.test&quot;</span>
+</span><span class='line'>  <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span>
+</span><span class='line'>  <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;uses-library</span> <span class="na">android:name=</span><span class="s">&quot;android.test.runner&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/application&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;instrumentation</span> <span class="na">android:targetPackage=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>
+</span><span class='line'>      <span class="na">android:name=</span><span class="s">&quot;android.test.InstrumentationTestRunner&quot;</span>
+</span><span class='line'>      <span class="na">android:label=</span><span class="s">&quot;Sample Tests&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot; android.permission.INJECT_EVENTS&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意：<br/>
+* Test项目的package是被测项目的package后面加上<em>.test</em><br/>
+* 指定<strong>android.test.InstrumentationTestRunner</strong>为Test runner<br/>
+* 被测项目和测试项目都是Android应用，他们自己对应的APK都会被安装到设备上。他们会共享同样的进程，因此他们具有同样的特征。<br/>
+* 运行测试应用的时候，Activity Manager使用Instrumentation开始和控制test runner<br/>
+* 在Instrumentation声明里指定了<strong>targetPackage</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Types of test in Android]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/types-of-test-in-android/"/>
+    <updated>2012-09-25T15:34:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/types-of-test-in-android</id>
+    <content type="html"><![CDATA[<h1>Unit Tests</h1>
+
+<p>使用JUnit来写Android的Unit Tests。</p>
+
+<h3>Unit Tests组成模块</h3>
+
+<ul>
+<li>test fixture：A test fixture is the well known state defined as a baseline to run the tests and isshared by all the test cases, and thus plays a fundamental role in the design of thetests.</li>
+<li>setUp：用来初始化fixture</li>
+<li>tearDown：释放fixture</li>
+</ul>
+
+
+<h3>Test preconditions</h3>
+
+<p>因为JUnit框架通过反射来运行test的方法，所以没有固定的顺序来运行所有的test。但是我们一般创建一个testPreconditions()方法来测试preconditions。</p>
+
+<h3>真正的测试</h3>
+
+<p>在JUnit3里，所有的以test开头的public void方法，都是Unit test。在JUnit4里使用@Test来标注哪些是Unit Tests。<br/>
+Android提供了@SmallTest，@MediumTest，@LargeTest，@Smoke, @FlakyTest, @UIThreadTest和@Suppress来给测试分类，这样你可以使用test runner来跑单独的类别。<br/>
+使用assert*<br/>
+Android提供了MoreAsserts和ViewAsserts</p>
+
+<h3>Mock objects</h3>
+
+<p>Android在android.test.mock包下提供了几个mock objects，在写测试的时候很有帮助：<br/>
+* MockApplication<br/>
+* MockContentProvider<br/>
+* MockContentResolver<br/>
+* MockContext<br/>
+* MockCursor<br/>
+* MockDialogInterface<br/>
+* MockPackageManager<br/>
+* MockResources<br/>
+这些都是stub，不是真正的实现，你需要继承他们并且实现自己的mock objects。</p>
+
+<h1>UI tests</h1>
+
+<p>众所周知，在Android里只有主线程可以更改UI元素，所以被@UIThreadTest标注的测试会在主线程上运行，并修改UI。另外，如果你只想一部分测试运行在UI线程上，你可以使用Activity.runOnUiThread方法来实现。<br/>
+Android提供了TouchUtils来测试，并提供了以下的方法：<br/>
+* click<br/>
+* drag<br/>
+* long click<br/>
+* scroll<br/>
+* tap<br/>
+* touch</p>
+
+<h1>Integration tests</h1>
+
+<h1>Functional or acceptance tests</h1>
+
+<p>FitNesse(http://www.fitnesse.org)<br/>
+BDD(http://behaviour-driven.org)<br/>
+jbehave(http://jbehave.org)</p>
+
+<h1>Performance tests</h1>
+
+<h1>System tests</h1>
+
+<p>包括：<br/>
+* GUI tests<br/>
+* Smoke tests<br/>
+* Performace tests<br/>
+* Installation tests</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[What should be tested in Android]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/what-should-be-test-in-android/"/>
+    <updated>2012-09-25T12:31:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/what-should-be-test-in-android</id>
+    <content type="html"><![CDATA[<p>一般不需要测试那些不会失败的代码，例如getter和setter方法。</p>
+
+<h1>Activity lifecycle events</h1>
+
+<p>我们应该测试Activity是否正确处理了lifecycle events。比如：<br/>
+*  如果Activity在onPause或者onDestory事件里保存了Activity的状态，在onCreate里restore了保存的状态，那么你就应该测试这些状态是否被正确的保存和恢复了。<br/>
+*  Configuration-changed事件也需要被测试</p>
+
+<h1>Database和filesystem操作</h1>
+
+<p>我们应该测试数据库和文件系统操作是否正确处理。我们需要在隔离的低级别，高级别的ContentProviders以及从application本身上测试这些操作。
+Android在android.test.mock包下提供了一些mock对象，用于隔离测试。</p>
+
+<h1>Physical characteristics of the device</h1>
+
+<p>需要测试应用可以在不同的设备上都能运行，包括如下方面：<br/>
+*  Network capabilities<br/>
+*  Screen desities<br/>
+*  Screen resolutions<br/>
+*  Screen sizes<br/>
+*  Availability of sensors<br/>
+*  Keyboard and other input devices<br/>
+*  GPS<br/>
+*  External storage<br/>
+可以配置不同的AVD来进行各种设备上的测试。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android SDK setup]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/android-sdk-setup/"/>
+    <updated>2012-09-25T11:47:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/android-sdk-setup</id>
+    <content type="html"><![CDATA[
+
+<figure class='code'><figcaption><span>setup-sdk.sh </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>wget http://dl.google.com/android/android-sdk_r20.0.3-macosx.zip
+</span><span class='line'>tar xvzf android-sdk_r20.0.3-macosx.zip
+</span><span class='line'><span class="nb">cd </span>android-sdk_r20.0.3-macosx.zip
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;SDK Platform Android 4.0.3, API 15, revision 3&#39;</span> | cut -c 4-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;Android SDK Platform-tools, revision 11&#39;</span> | cut -c 4-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;Android SDK Tools, revision 19&#39;</span> | cut -c 4-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;ARM EABI v7a System Image, Android API 15, revision 2&#39;</span> | cut -c 3-4<span class="sb">`</span>
+</span><span class='line'>./tools/android update sdk --no-ui --filter <span class="sb">`</span>./tools/android list sdk | grep <span class="s1">&#39;Google APIs, Android API 15, revision 2&#39;</span> | cut -c 3-4<span class="sb">`</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export PATH=$PATH:`pwd`/platform-tools:`pwd`/tools&#39;</span> &gt;&gt; ~/.zshrc
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export ANDROID_HOME=`pwd`&#39;</span> &gt;&gt; ~/.zshrc
+</span><span class='line'>. ~/.zshrc
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Extend Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc/"/>
+    <updated>2012-09-25T09:21:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Extending RequestMappingHandlerMapping</h1>
+
+<p>Spring @MVC通过在方法上使用RequestMapping来确认应该使用哪个方法来响应相应的请求，而RequestMapping又通过各种RequestCondition的实现来完成各种过滤（比如：consumes，headers，methods，params，produces以及value等）。在Spring @MVC框架中使用RequestConditionHolder和RequestMappingInfo这两个实现。</p>
+
+<h2>自定义RequestCondition</h2>
+
+<ul>
+<li>实现RequestCondition接口</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>RequestCondition接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">mvc</span><span class="o">.</span><span class="na">condition</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RequestCondition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">combine</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">T</span> <span class="nf">getMatchingCondition</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>继承RequestMappingHandlerMapping
+
+<ul>
+<li> getCustomTypeCondition方法根据对应的Handler<strong>类</strong>返回类级别的condition</li>
+<li> getCustomMethodCondition方法根据对应的Handler<strong>方法</strong>返回方法级别的condition</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>扩展RequestMappingHandlerAdapter</h1>
+
+<p>在Reques™appingHandlerAdapterli里，Spring @MVC通过各种HandlerMethodArgumentResolver的实现来决定传什么参数给Handler的方法。</p>
+
+<p><strong><em>To be continue …</em></strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Exception Handling in Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc/"/>
+    <updated>2012-09-24T16:34:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Exception Handler</h1>
+
+<figure class='code'><figcaption><span>Exception Handler接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframeowork</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">HandlerExceptionResolver</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">ModelAndView</span> <span class="nf">resolveException</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">Object</span> <span class="n">handler</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">Exception</span> <span class="n">ex</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Dispatcher servlet会查找application context里的所有实现了HandlerExceptionResolver接口的Bean。</li>
+<li>如果有多个ExceptionResolver实现，在有异常出现时，Dispatcher Servlet会一次调用，直到viewname被返回或者response被写入。</li>
+<li>如果异常没有被处理，那么异常会重新抛出。</li>
+</ul>
+
+
+<h2>Spring提供的HandlerExceptionResolver实现</h2>
+
+<ul>
+<li>AnnotationMethodHandlerExceptionResolver</li>
+<li>ExceptionHandlerExceptionResolver</li>
+<li>DefaultHandlerExceptionResolver</li>
+<li>ResponseStatusExceptionResolver</li>
+<li>SimpleMappingExceptionResolver</li>
+<li>HandlerExceptionResolverComposite</li>
+</ul>
+
+
+<p>￼￼</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inteceptor in Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/24/inteceptor-in-spring-at-mvc/"/>
+    <updated>2012-09-24T14:48:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/24/inteceptor-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h1>Interceptors</h1>
+
+<p>Interceptor和Filter的功能一样，都是用于拦截incoming HTTP requests。但是Filter要比interceptor更强大些，因为Filter能够修改incoming request/response。</p>
+
+<h2>Interceptor的回调接口</h2>
+
+<ul>
+<li>preHandler： Called before the handler is invoked</li>
+<li>postHandler: 在Handler调用之后，View渲染之前调用。可以用于替换model里的共享对象</li>
+<li>afterCompletion：在request处理完成之后。该方法无论preHandler方法调用成功与否都会被调用。可以用于清除一些资源。</li>
+</ul>
+
+
+<h2>Interceptor接口</h2>
+
+<ul>
+<li>org.springframework.web.servlet.HandlerInterceptor</li>
+<li>org.springframework.web.context.request.WebRequestInterceptor
+这两个Interceptor的最大区别在与WebRequestInterceptor跟底层技术独立，可以用于JSF或者Servlet，而HandlerIntercepotr只能用于Servlet。HandlerInterceptor的preHandler方法返回false可以用于阻止handler的调用。</li>
+</ul>
+
+
+<h1>Configuring</h1>
+
+<p>配置Interceptor分为两步：<br/>
+*  配置Interceptor<br/>
+*  关联Interceptor和Handler：有两个方法来完成关联：</p>
+
+<pre><code>1. 显示的把interceptors添加到handler mapping的配置里去  
+2. 使用org.springframework.web.servlet .config.annotation.InterceptorRegistry添加（推荐这种方式）
+</code></pre>
+
+<figure class='code'><figcaption><span>显示关联HandlerMapping和Interceptor  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.annotation.ComponentScan</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.EnableWebMvc</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping</span><span class="o">;</span>
+</span><span class='line'><span class="nd">@Configuration</span>
+</span><span class='line'><span class="nd">@EnableWebMvc</span>
+</span><span class='line'><span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurationSupport</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">RequestMappingHandlerMapping</span> <span class="nf">requestMappingHandlerMapping</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">RequestMappingHandlerMapping</span> <span class="n">handlerMapping</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">handlerMapping</span> <span class="o">=</span> <span class="kd">super</span><span class="o">.</span><span class="na">requestMappingHandlerMapping</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">handlerMapping</span><span class="o">.</span><span class="na">setInterceptors</span><span class="o">(</span><span class="n">getAllInterceptors</span><span class="o">());</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">handlerMapping</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>使用InterceptorRegistry关联HandlerMapping和Interceptor  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="c1">//Other imports omitted</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.HandlerInterceptor</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.InterceptorRegistry</span><span class="o">;</span>
+</span><span class='line'><span class="nd">@Configuration</span>
+</span><span class='line'><span class="nd">@EnableWebMvc</span>
+</span><span class='line'><span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addInterceptors</span><span class="o">(</span><span class="n">InterceptorRegistry</span> <span class="n">registry</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="n">localeChangeInterceptor</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">HandlerInterceptor</span> <span class="nf">localeChangeInterceptor</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">LocaleChangeInterceptor</span> <span class="n">localeChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">localeChangeInterceptor</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LocaleChangeInterceptor</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">localeChangeInterceptor</span><span class="o">.</span><span class="na">setParamName</span><span class="o">(</span><span class="s">&quot;lang&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">localeChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">//... Other methods omitted</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Limiting an Interceptor to Certain URLs  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="c1">//Imports omitted</span>
+</span><span class='line'><span class="nd">@Configuration</span>
+</span><span class='line'><span class="nd">@EnableWebMvc</span>
+</span><span class='line'><span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addInterceptors</span><span class="o">(</span><span class="n">InterceptorRegistry</span> <span class="n">registry</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">InterceptorRegistration</span> <span class="n">registration</span><span class="o">;</span>
+</span><span class='line'>      <span class="n">registration</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="n">localeChangeInterceptor</span><span class="o">());</span>
+</span><span class='line'>      <span class="n">registation</span><span class="o">.</span><span class="na">addPathPatterns</span><span class="o">(</span><span class="s">&quot;/customers/**&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>    <span class="c1">//Other methods omitted</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Using Scoped Beans]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/11/using-scoped-beans/"/>
+    <updated>2012-09-11T09:22:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/11/using-scoped-beans</id>
+    <content type="html"><![CDATA[<h1>Bean的Scope</h1>
+
+<p>Spring支持的Scope有：
+*  singleton: 默认scope<br/>
+*  prototype<br/>
+*  thread<br/>
+*  request<br/>
+*  session<br/>
+*  globalSession<br/>
+*  application</p>
+
+<p>在定义Bean的地方添加<em>org.springframework.context.annotation.Scope</em>annotation，为定义的Bean指定不同的Scope。该annotation可以用在type-level和method-level上。<br/>
+*  type-level: 该类型的所有的Bean都是指定的Scope<br/>
+*  method-level： 当前方法所定义的Bean是指定的Scope</p>
+
+<p>Scope Annotation的属性：<br/>
+*  value： 指定Bean的scope类型<br/>
+*  proxyModel： 指定是否需要proxy以及proxy的机制。<strong>ScopedProxyModel.TARGET_CLASS</strong>用于指定该Bean所对应的类型没有接口，需要默认值是NO</p>
+
+<h1>Example of session scope</h1>
+
+<figure class='code'><figcaption><span>配置session scope的Bean  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'>  <span class="c1">//Other imports omitted</span>
+</span><span class='line'>  <span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Scope</span><span class="o">;</span>
+</span><span class='line'>  <span class="kn">import</span> <span class="nn">org.springframework.context.annotation.ScopedProxyMode</span><span class="o">;</span>
+</span><span class='line'>  <span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.Cart</span><span class="o">;</span>
+</span><span class='line'>  <span class="nd">@Configuration</span>
+</span><span class='line'>  <span class="nd">@EnableWebMvc</span>
+</span><span class='line'>  <span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span>      <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+</span><span class='line'><span class="c1">//Other methods omitted</span>
+</span><span class='line'><span class="nd">@Bean</span>
+</span><span class='line'><span class="nd">@Scope</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">&quot;session&quot;</span><span class="o">,</span> <span class="n">proxyMode</span> <span class="o">=</span> <span class="n">ScopedProxyMode</span><span class="o">.</span><span class="na">TARGET_CLASS</span><span class="o">)</span>
+</span><span class='line'>  
+</span><span class='line'><span class="kd">public</span> <span class="n">Cart</span> <span class="nf">cart</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">Cart</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>使用SessionStatus管理session scope bean的状态</h1>
+
+<figure class='code'><figcaption><span>SessionStatus实例 </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">method</span> <span class="o">=</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">,</span> <span class="n">params</span> <span class="o">=</span> <span class="s">&quot;order&quot;</span><span class="o">)</span>      
+</span><span class='line'> <span class="kd">public</span> <span class="n">String</span> <span class="nf">checkout</span><span class="o">(</span><span class="n">SessionStatus</span> <span class="n">status</span><span class="o">,</span><span class="nd">@Validated</span> <span class="nd">@ModelAttribute</span> <span class="n">Order</span> <span class="n">order</span><span class="o">,</span>
+</span><span class='line'>                           <span class="n">BindingResult</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">errors</span><span class="o">.</span><span class="na">hasErrors</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;cart/checkout&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">bookstoreService</span><span class="o">.</span><span class="na">store</span><span class="o">(</span><span class="n">order</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">status</span><span class="o">.</span><span class="na">setComplete</span><span class="o">();</span> <span class="c1">//remove order from session</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">cart</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span> <span class="c1">// clear the cart</span>
+</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;redirect:/index.htm&quot;</span><span class="o">;</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Internationalization in Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/09/internationalization-in-spring-at-mvc/"/>
+    <updated>2012-09-09T20:05:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/09/internationalization-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h2>Spring中i18n的组件</h2>
+
+<ol>
+<li><em>org.springframework.context.MessageSource</em>基于message code和Locale转换成相应的message</li>
+<li><em>org.springframework.web.servlet.LocaleResolver</em>从session或者cookie里取的locale</li>
+<li><em>org.springframework.web.servlet.i18n.LocaleChangeInterceptor</em>改变locale</li>
+</ol>
+
+
+<h1>MessageSource</h1>
+
+<h3>MessageSource的实现</h3>
+
+<p>Spring在<em>org.springframework.context.support</em>包下提供了两个MessageSource的实现：<br/>
+1. <em>ResourceBundleMessageSource</em>：使用JVM提供的ResourceBundle实现，只能在classpath里加载资源<br/>
+2. <em>ReloadableResourceBundleMessageSource</em>：和<em>ResourceBundleMessageSource</em>非常类似，但是提供了<strong>自动重新加载</strong>和<strong>缓存</strong>能力，以及可以从文件系统读取资源文件</p>
+
+<h3>配置MessageSource</h3>
+
+<figure class='code'><figcaption><span>配置MessageSource  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.support.ReloadableResourceBundleMessageSource</span><span class="o">;</span> <span class="c1">// Other imports omitted</span>
+</span><span class='line'><span class="nd">@Configuration</span>
+</span><span class='line'><span class="nd">@EnableWebMvc</span>
+</span><span class='line'><span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">MessageSource</span> <span class="nf">messageSource</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">ReloadableResourceBundleMessageSource</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">messageSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReloadableResourceBundleMessageSource</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setBasename</span><span class="o">(</span><span class="s">&quot;classpath:/messages&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setUseCodeAsDefaultMessage</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>配置一个name是<strong>messageSource</strong>的Bean</li>
+<li>该配置会从classpath加载所有的messages.properties和messages_[locale].properties文件</li>
+</ul>
+
+
+<h1>LocaleResolver</h1>
+
+<p>LocaleResolver用来判断使用什么Locale，Spring在<em>org.springframework.web.servlet.i18n</em>包里具有如下实现：
+*  FixedLocaleResolver：固定Locale，不支持改变locale
+*  SessionLocaleResolver
+*  AcceptHeaderLocaleResolver：从Http头的accept里取的locale，一般和用户的操作系统一样，因此也不支持改变locale。是默认<strong>LocaleResolver</strong>
+*  CookieLocaleResolver</p>
+
+<h1>LocaleChangeInterceptor</h1>
+
+<p><strong>LocaleChangeInterceptor</strong>检查当前的request中是否有locale的参数，如果有，interceptor会使用配置的LocaleResolver去改变当前用户的locale。参数的名子（locale）是可配置的。</p>
+
+<h1>配置Spring的i18n</h1>
+
+<figure class='code'><figcaption><span>Spring的i18n配置  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.MessageSource</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.support.ReloadableResourceBundleMessageSource</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.HandlerInterceptor</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.LocaleResolver</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.InterceptorRegistry</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.i18n.CookieLocaleResolver</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.i18n.LocaleChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'><span class="c1">// Other imports omitted</span>
+</span><span class='line'><span class="nd">@Configuration</span>
+</span><span class='line'><span class="nd">@EnableWebMvc</span>
+</span><span class='line'><span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addInterceptors</span><span class="o">(</span><span class="n">InterceptorRegistry</span> <span class="n">registry</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="n">localeChangeInterceptor</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">HandlerInterceptor</span> <span class="nf">localeChangeInterceptor</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">LocaleChangeInterceptor</span> <span class="n">localeChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">localeChangeInterceptor</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LocaleChangeInterceptor</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">localeChangeInterceptor</span><span class="o">.</span><span class="na">setParamName</span><span class="o">(</span><span class="s">&quot;lang&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">localeChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">LocaleResolver</span> <span class="nf">localeResolver</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">CookieLocaleResolver</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">MessageSource</span> <span class="nf">messageSource</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">ReloadableResourceBundleMessageSource</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">messageSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReloadableResourceBundleMessageSource</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setBasename</span><span class="o">(</span><span class="s">&quot;classpath:/messages&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setUseCodeAsDefaultMessage</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意：<br/>
+*  23行的代码<strong>localeChangeInterceptor.setParamName(&#8220;lang&#8221;)</strong>用来设置request中的参数名<br/>
+*  一般把LocaleChangeInterceptor配置为第一个interceptor，这样即使出现什么错误，任然能够改变用户的language</p>
+
+<hr />
+
+<blockquote><p>本文是基于Pro Spring MVC - With Web Flow的笔记，非原创</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Validating Model Attributes in Spring @MVC]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/"/>
+    <updated>2012-09-09T14:18:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc</id>
+    <content type="html"><![CDATA[<h2>Spring的Validator接口</h2>
+
+<p>Spring的Validation主要接口是：<em>org.springframework.validation.Validator</em></p>
+
+<figure class='code'><figcaption><span>Validator接口  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">validation</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Validator</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="nf">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">);</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>supports方法： 用来判断该validator是否可以验证对象。如果supports返回<strong>true</strong>，框架会调用validate方法去验证。</li>
+<li>validate方法： 实现验证
+在Spring @MVC里有两种方式触发验证：
+
+<ol>
+<li>把Validator注入到Controller，我们自己手工调validate方法。</li>
+<li>在方法上添加<em>javax.validation.Valid</em>或者<em>org.springframework.validation.annotation.Validated</em>annotation。Spring的annotation要比javax的强大些，可以指定hints和validation groups（如果和JSR-303validator联合使用）</li>
+</ol>
+</li>
+</ul>
+
+
+<p><strong>需要注意的是，validation结果要是有错误的话，validator会返回message code，需要配置MessageSource来让错误消息显示的更有意义些。</strong></p>
+
+<hr />
+
+<h2>实现一个Validator</h2>
+
+<p><strong>需求</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>实现一个验证Account的Validator
+</span><span class='line'>username, password和email必填
+</span><span class='line'>email是正确的email地址
+</span><span class='line'>地址，城市和国家是必填的</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">validation</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.regex.Pattern</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.validation.Errors</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.validation.ValidationUtils</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.validation.Validator</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.Account</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccountValidator</span> <span class="kd">implements</span> <span class="n">Validator</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EMAIL_PATTERN</span> <span class="o">=</span> <span class="s">&quot;^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@&quot;</span>
+</span><span class='line'>                                              <span class="o">+</span><span class="s">&quot;[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">supports</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="o">(</span><span class="n">Account</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="n">clazz</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">validate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;username&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Username&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">,</span>
+</span><span class='line'>              <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Password&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;emailAddress&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Email Address&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.street&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Street&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.city&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;City&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="n">ValidationUtils</span><span class="o">.</span><span class="na">rejectIfEmpty</span><span class="o">(</span><span class="n">errors</span><span class="o">,</span> <span class="s">&quot;address.country&quot;</span><span class="o">,</span>
+</span><span class='line'>                                  <span class="s">&quot;required&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;Country&quot;</span><span class="o">});</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">errors</span><span class="o">.</span><span class="na">hasFieldErrors</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Account</span> <span class="n">account</span> <span class="o">=</span> <span class="o">(</span><span class="n">Account</span><span class="o">)</span> <span class="n">target</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">String</span> <span class="n">email</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getEmailAddress</span><span class="o">();</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(!</span><span class="n">emai</span><span class="o">.</span><span class="na">matches</span><span class="o">(</span><span class="n">EMAIL_PATTERN</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">errors</span><span class="o">.</span><span class="na">rejectValue</span><span class="o">(</span><span class="s">&quot;emailAddress&quot;</span><span class="o">,</span> <span class="s">&quot;invalid&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>第14行的isAssignableFrom方法用于判断类Class1和另一个类Class2是否相同或是另一个类的超类或接口</li>
+<li><em>ValidationUtils.rejectIfEmpty</em>方法用来判断对象的属性是否为空，还有<em>ValidationUtils.rejectIfEmptyOrWhiteSpace</em>方法。但是判断属性是否为空还可以在<em>org.springframework.web.bind.WebDataBinder</em>里加以验证</li>
+<li><em>errors.hasFieldErrors(&#8220;emailAddress&#8221;)</em> 方法用来判断emailAddress是否有错误</li>
+<li><em>errors.rejectValue</em>用于手动往errors里添加一个错误</li>
+<li>这里的<em>required</em>都是Error Message的Key，需要Spring的框架处理</li>
+<li><em>address.street</em>是嵌套属性</li>
+</ul>
+
+
+<hr />
+
+<h2>配置并使用自定义Validator</h2>
+
+<figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">controller</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.AccountValidator</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span>
+</span><span class='line'><span class="c1">// Other imports omitted</span>
+</span><span class='line'><span class="nd">@Controller</span>
+</span><span class='line'><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/customer/register&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RegistrationController</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@InitBinder</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initBinder</span><span class="o">(</span><span class="n">WebDataBinder</span> <span class="n">binder</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">binder</span><span class="o">.</span><span class="na">setDisallowedFields</span><span class="o">(</span><span class="s">&quot;id&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">binder</span><span class="o">.</span><span class="na">setValidator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccountValidator</span><span class="o">());</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">method</span> <span class="o">=</span> <span class="o">{</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">,</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">PUT</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="n">String</span> <span class="nf">handleRegistration</span><span class="o">(</span><span class="nd">@Valid</span> <span class="nd">@ModelAttribute</span> <span class="n">Account</span> <span class="n">account</span><span class="o">,</span> <span class="n">BindingResult</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">hasErrors</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;customer/register&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">accountService</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">account</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&quot;redirect:/customer/account/&quot;</span> <span class="o">+</span> <span class="n">account</span><span class="o">.</span><span class="na">getId</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">// Other methods omitted</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><em>binder.setValidator(new AccountValidator())</em>在Controller中将我们自定义的Validator注册一下</li>
+<li><em>@Valid @ModelAttribute Account account</em>绑定到Account上，这样当页面提交之后就会触发验证</li>
+<li><em>BindingResult result</em>在binding和validation中的错误信息都会放到BindingResult里去</li>
+<li>使用<em>result.hasErrors()</em>判断是否有错误（包括binding和validation）</li>
+</ul>
+
+
+<hr />
+
+<h2>使用JSR-303 Validation</h2>
+
+<p>JSR-303提供了一种方便的方式来进行validation，不需要我们自己去实现接口，也不需要在init-binder方法中注册，只需要在要验证的类上加上响应的annotation就可以了。</p>
+
+<figure class='code'><figcaption><span>AccountValidator </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">domain</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.validation.Valid</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.Email</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.hibernate.validator.constraints.NotEmpty</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Account</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">firstName</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">lastName</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Date</span> <span class="n">dateOfBirth</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@Embedded</span>
+</span><span class='line'>    <span class="nd">@Valid</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Address</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Address</span><span class="o">();</span>
+</span><span class='line'>    <span class="nd">@NotEmpty</span>
+</span><span class='line'>    <span class="nd">@Email</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">emailAddress</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@NotEmpty</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>
+</span><span class='line'>    <span class="nd">@NotEmpty</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">password</span><span class="o">;</span>
+</span><span class='line'>    <span class="c1">// getters and setters omitted</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><em>@Embedded</em>表示嵌套对象</li>
+<li><em>@NotEmpty</em>验证不能为空</li>
+<li><em>@Email</em>验证Email地址的合法性<br/>
+<strong>这样看起来JSR-303简单很多</strong></li>
+</ul>
+
+
+<hr />
+
+<blockquote><p>本文是基于Pro Spring MVC - With Web Flow的笔记，非原创</p></blockquote>
+]]></content>
+  </entry>
+  
+</feed>

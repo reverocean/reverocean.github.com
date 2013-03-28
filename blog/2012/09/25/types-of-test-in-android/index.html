@@ -1,0 +1,219 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Types of test in Android - 海洋的Blog</title>
+	<meta name="author" content="海洋">
+
+	
+	<meta name="description" content="Unit Tests 使用JUnit来写Android的Unit Tests。 Unit Tests组成模块 test fixture：A test fixture is the well known state defined as a baseline to run the tests and &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="海洋的Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.ico" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">海洋的Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:reverocean.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+        <a class="sina-weibo" href="http://weibo.com/2249767451" target="_blank">
+            <svg width="40" height="40" class="sina-weibo" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path fill="" d="M9.641,17.231c-3.799,0.374-7.079-1.343-7.326-3.838c-0.246-2.494,2.634-4.82,6.434-5.196  c3.798-0.377,7.079,1.34,7.326,3.835C16.32,14.529,13.44,16.855,9.641,17.231 M17.24,8.952c-0.322-0.098-0.544-0.163-0.375-0.587  c0.365-0.921,0.403-1.718,0.007-2.286c-0.745-1.063-2.783-1.005-5.12-0.027c0-0.002-0.734,0.321-0.546-0.261  c0.359-1.156,0.305-2.123-0.254-2.682c-1.267-1.271-4.639,0.047-7.53,2.936C1.257,8.209,0,10.504,0,12.488  c0,3.796,4.866,6.104,9.628,6.104c6.241,0,10.393-3.627,10.393-6.506C20.021,10.347,18.557,9.358,17.24,8.952" />
+                <path fill="" d="M21.384,2.005c-1.507-1.671-3.73-2.308-5.782-1.872l0,0c-0.475,0.102-0.778,0.569-0.676,1.043  c0.101,0.473,0.567,0.777,1.043,0.674c1.459-0.31,3.039,0.145,4.111,1.332c1.069,1.188,1.362,2.806,0.902,4.225v0.001  c-0.149,0.462,0.104,0.957,0.566,1.106c0.461,0.149,0.956-0.104,1.105-0.565c0,0,0-0.002,0-0.004  C23.299,5.95,22.894,3.674,21.384,2.005" />
+                <path fill="" d="M19.07,4.094c-0.734-0.814-1.817-1.123-2.817-0.912c-0.409,0.088-0.671,0.49-0.581,0.899  c0.088,0.407,0.489,0.67,0.896,0.58v0.001c0.488-0.104,1.019,0.047,1.379,0.445c0.359,0.398,0.455,0.941,0.301,1.416l0,0  c-0.127,0.398,0.09,0.825,0.488,0.954c0.396,0.127,0.824-0.091,0.952-0.488C20,6.017,19.805,4.908,19.07,4.094" />
+                <path fill="" d="M9.85,12.713c-0.132,0.229-0.426,0.338-0.656,0.242c-0.227-0.094-0.297-0.348-0.169-0.572  c0.132-0.221,0.416-0.328,0.64-0.239C9.895,12.227,9.978,12.483,9.85,12.713 M8.64,14.268c-0.367,0.586-1.154,0.843-1.747,0.57  c-0.584-0.265-0.756-0.945-0.389-1.518c0.362-0.568,1.124-0.824,1.712-0.574C8.811,12.998,9.001,13.675,8.64,14.268 M10.021,10.118  c-1.808-0.47-3.852,0.431-4.637,2.023c-0.8,1.624-0.026,3.428,1.801,4.017c1.892,0.612,4.122-0.324,4.898-2.078  C12.848,12.367,11.891,10.602,10.021,10.118" />
+            </svg>
+        </a>
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:reverocean.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Types of Test in Android</h1>
+	<div class="entry-content"><h1>Unit Tests</h1>
+
+<p>使用JUnit来写Android的Unit Tests。</p>
+
+<h3>Unit Tests组成模块</h3>
+
+<ul>
+<li>test fixture：A test fixture is the well known state defined as a baseline to run the tests and isshared by all the test cases, and thus plays a fundamental role in the design of thetests.</li>
+<li>setUp：用来初始化fixture</li>
+<li>tearDown：释放fixture</li>
+</ul>
+
+
+<h3>Test preconditions</h3>
+
+<p>因为JUnit框架通过反射来运行test的方法，所以没有固定的顺序来运行所有的test。但是我们一般创建一个testPreconditions()方法来测试preconditions。</p>
+
+<h3>真正的测试</h3>
+
+<p>在JUnit3里，所有的以test开头的public void方法，都是Unit test。在JUnit4里使用@Test来标注哪些是Unit Tests。<br/>
+Android提供了@SmallTest，@MediumTest，@LargeTest，@Smoke, @FlakyTest, @UIThreadTest和@Suppress来给测试分类，这样你可以使用test runner来跑单独的类别。<br/>
+使用assert*<br/>
+Android提供了MoreAsserts和ViewAsserts</p>
+
+<h3>Mock objects</h3>
+
+<p>Android在android.test.mock包下提供了几个mock objects，在写测试的时候很有帮助：<br/>
+* MockApplication<br/>
+* MockContentProvider<br/>
+* MockContentResolver<br/>
+* MockContext<br/>
+* MockCursor<br/>
+* MockDialogInterface<br/>
+* MockPackageManager<br/>
+* MockResources<br/>
+这些都是stub，不是真正的实现，你需要继承他们并且实现自己的mock objects。</p>
+
+<h1>UI tests</h1>
+
+<p>众所周知，在Android里只有主线程可以更改UI元素，所以被@UIThreadTest标注的测试会在主线程上运行，并修改UI。另外，如果你只想一部分测试运行在UI线程上，你可以使用Activity.runOnUiThread方法来实现。<br/>
+Android提供了TouchUtils来测试，并提供了以下的方法：<br/>
+* click<br/>
+* drag<br/>
+* long click<br/>
+* scroll<br/>
+* tap<br/>
+* touch</p>
+
+<h1>Integration tests</h1>
+
+<h1>Functional or acceptance tests</h1>
+
+<p>FitNesse(http://www.fitnesse.org)<br/>
+BDD(http://behaviour-driven.org)<br/>
+jbehave(http://jbehave.org)</p>
+
+<h1>Performance tests</h1>
+
+<h1>System tests</h1>
+
+<p>包括：<br/>
+* GUI tests<br/>
+* Smoke tests<br/>
+* Performace tests<br/>
+* Installation tests</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-25T15:34:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/test/'>Test</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/25/types-of-test-in-android/#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    海洋
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'reverocean';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://reverocean.github.com/blog/2012/09/25/types-of-test-in-android/';
+        var disqus_url = 'http://reverocean.github.com/blog/2012/09/25/types-of-test-in-android/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

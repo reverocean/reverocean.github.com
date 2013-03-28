@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android | 海洋的Blog]]></title>
+  <link href="http://reverocean.github.com/blog/categories/android/atom.xml" rel="self"/>
+  <link href="http://reverocean.github.com/"/>
+  <updated>2013-03-29T00:51:25+08:00</updated>
+  <id>http://reverocean.github.com/</id>
+  <author>
+    <name><![CDATA[海洋]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android test framework]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/android-test-framework/"/>
+    <updated>2012-09-25T17:58:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/android-test-framework</id>
+    <content type="html"><![CDATA[<p>Android提供了一套基于JUnit的测试框架--Instrumentation，key features：<br/>
+*  方便访问Android的系统对象<br/>
+*  Instrumentation框架方便用于测试控制和检测应用<br/>
+*  Mock Objects<br/>
+*  可以单独跑一个测试或者test suite<br/>
+*  提供ADT插件支持管理测试和测试项目</p>
+
+<p>Instrumentation是Android测试框架的基础，在测试时注入application需要的的mock组件来隔离依赖。</p>
+
+<p>一般需要建立一个和项目名+Test的测试项目，在项目里的AndroidManifest.xml文件里声明Instrumentation。
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>被测试project的AndroidManifest.xml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="ni">&amp;lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;<span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>   <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span> <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>        <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.SampleActivity&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>          <span class="nt">&lt;intent-filter&gt;</span>             <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>                <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>            <span class="nt">&lt;/intent-filter&gt;</span>        <span class="nt">&lt;/activity&gt;</span> <span class="nt">&lt;/application&gt;</span>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>测试project的AndroidManifest.xml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="ni">&amp;lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;<span class="ni">&amp;lt;</span>manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  package=&quot;com.example.aatg.sample.test&quot;  android:versionCode=&quot;1&quot;<span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;pre&gt;&lt;code&gt;</span>android:versionName=&quot;1.0&quot;<span class="ni">&amp;gt;</span>  <span class="ni">&amp;lt;</span>application android:icon=&quot;@drawable/icon&quot; android:label=&quot;@string/app_name&quot;<span class="ni">&amp;gt;</span>        <span class="ni">&amp;lt;</span>uses-library android:name=&quot;android.test.runner&quot; /<span class="ni">&amp;gt;</span> <span class="ni">&amp;lt;</span>/application<span class="ni">&amp;gt;</span>  <span class="ni">&amp;lt;</span>uses-sdk android:minSdkVersion=&quot;7&quot; /<span class="ni">&amp;gt;</span>  <span class="ni">&amp;lt;</span>instrumentation android:targetPackage=&quot;com.example.aatg.sample&quot;        android:name=&quot;android.test.InstrumentationTestRunner&quot;       android:label=&quot;Sample Tests&quot; /<span class="ni">&amp;gt;</span> <span class="ni">&amp;lt;</span>uses-permission android:name=&quot; android.permission.INJECT_EVENTS&quot; /<span class="ni">&amp;gt;&amp;lt;</span>/manifest<span class="ni">&amp;gt;</span>
+</span><span class='line'><span class="nt">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>注意：<br/>
+* Test项目的package是被测项目的package后面加上<em>.test</em><br/>
+* 指定<strong>android.test.InstrumentationTestRunner</strong>为Test runner<br/>
+* 被测项目和测试项目都是Android应用，他们自己对应的APK都会被安装到设备上。他们会共享同样的进程，因此他们具有同样的特征。<br/>
+* 运行测试应用的时候，Activity Manager使用Instrumentation开始和控制test runner<br/>
+* 在Instrumentation声明里指定了<strong>targetPackage</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Types of test in Android]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/types-of-test-in-android/"/>
+    <updated>2012-09-25T15:34:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/types-of-test-in-android</id>
+    <content type="html"><![CDATA[<h1>Unit Tests</h1>
+
+<p>使用JUnit来写Android的Unit Tests。</p>
+
+<h3>Unit Tests组成模块</h3>
+
+<ul>
+<li>test fixture：A test fixture is the well known state defined as a baseline to run the tests and isshared by all the test cases, and thus plays a fundamental role in the design of thetests.</li>
+<li>setUp：用来初始化fixture</li>
+<li>tearDown：释放fixture</li>
+</ul>
+
+
+<h3>Test preconditions</h3>
+
+<p>因为JUnit框架通过反射来运行test的方法，所以没有固定的顺序来运行所有的test。但是我们一般创建一个testPreconditions()方法来测试preconditions。</p>
+
+<h3>真正的测试</h3>
+
+<p>在JUnit3里，所有的以test开头的public void方法，都是Unit test。在JUnit4里使用@Test来标注哪些是Unit Tests。<br/>
+Android提供了@SmallTest，@MediumTest，@LargeTest，@Smoke, @FlakyTest, @UIThreadTest和@Suppress来给测试分类，这样你可以使用test runner来跑单独的类别。<br/>
+使用assert*<br/>
+Android提供了MoreAsserts和ViewAsserts</p>
+
+<h3>Mock objects</h3>
+
+<p>Android在android.test.mock包下提供了几个mock objects，在写测试的时候很有帮助：<br/>
+* MockApplication<br/>
+* MockContentProvider<br/>
+* MockContentResolver<br/>
+* MockContext<br/>
+* MockCursor<br/>
+* MockDialogInterface<br/>
+* MockPackageManager<br/>
+* MockResources<br/>
+这些都是stub，不是真正的实现，你需要继承他们并且实现自己的mock objects。</p>
+
+<h1>UI tests</h1>
+
+<p>众所周知，在Android里只有主线程可以更改UI元素，所以被@UIThreadTest标注的测试会在主线程上运行，并修改UI。另外，如果你只想一部分测试运行在UI线程上，你可以使用Activity.runOnUiThread方法来实现。<br/>
+Android提供了TouchUtils来测试，并提供了以下的方法：<br/>
+* click<br/>
+* drag<br/>
+* long click<br/>
+* scroll<br/>
+* tap<br/>
+* touch</p>
+
+<h1>Integration tests</h1>
+
+<h1>Functional or acceptance tests</h1>
+
+<p>FitNesse(http://www.fitnesse.org)<br/>
+BDD(http://behaviour-driven.org)<br/>
+jbehave(http://jbehave.org)</p>
+
+<h1>Performance tests</h1>
+
+<h1>System tests</h1>
+
+<p>包括：<br/>
+* GUI tests<br/>
+* Smoke tests<br/>
+* Performace tests<br/>
+* Installation tests</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[What should be tested in Android]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/what-should-be-test-in-android/"/>
+    <updated>2012-09-25T12:31:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/what-should-be-test-in-android</id>
+    <content type="html"><![CDATA[<p>一般不需要测试那些不会失败的代码，例如getter和setter方法。</p>
+
+<h1>Activity lifecycle events</h1>
+
+<p>我们应该测试Activity是否正确处理了lifecycle events。比如：<br/>
+*  如果Activity在onPause或者onDestory事件里保存了Activity的状态，在onCreate里restore了保存的状态，那么你就应该测试这些状态是否被正确的保存和恢复了。<br/>
+*  Configuration-changed事件也需要被测试</p>
+
+<h1>Database和filesystem操作</h1>
+
+<p>我们应该测试数据库和文件系统操作是否正确处理。我们需要在隔离的低级别，高级别的ContentProviders以及从application本身上测试这些操作。
+Android在android.test.mock包下提供了一些mock对象，用于隔离测试。</p>
+
+<h1>Physical characteristics of the device</h1>
+
+<p>需要测试应用可以在不同的设备上都能运行，包括如下方面：<br/>
+*  Network capabilities<br/>
+*  Screen desities<br/>
+*  Screen resolutions<br/>
+*  Screen sizes<br/>
+*  Availability of sensors<br/>
+*  Keyboard and other input devices<br/>
+*  GPS<br/>
+*  External storage<br/>
+可以配置不同的AVD来进行各种设备上的测试。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android SDK setup]]></title>
+    <link href="http://reverocean.github.com/blog/2012/09/25/android-sdk-setup/"/>
+    <updated>2012-09-25T11:47:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2012/09/25/android-sdk-setup</id>
+    <content type="html"><![CDATA[<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>setup-sdk.sh </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>wget http://dl.google.com/android/android-sdk_r20.0.3-macosx.zip
+</span><span class='line'>tar xvzf android-sdk_r20.0.3-macosx.zip
+</span><span class='line'><span class="nb">cd </span>android-sdk_r20.0.3-macosx.zip
+</span><span class='line'>./tools/android update sdk --no-ui --filter &lt;code&gt;./tools/android list sdk | grep <span class="s1">&#39;SDK Platform Android 4.0.3, API 15, revision 3&#39;</span> | cut -c 4-4&lt;/code&gt;
+</span><span class='line'>./tools/android update sdk --no-ui --filter &lt;code&gt;./tools/android list sdk | grep <span class="s1">&#39;Android SDK Platform-tools, revision 11&#39;</span> | cut -c 4-4&lt;/code&gt;
+</span><span class='line'>./tools/android update sdk --no-ui --filter &lt;code&gt;./tools/android list sdk | grep <span class="s1">&#39;Android SDK Tools, revision 19&#39;</span> | cut -c 4-4&lt;/code&gt;
+</span><span class='line'>./tools/android update sdk --no-ui --filter &lt;code&gt;./tools/android list sdk | grep <span class="s1">&#39;ARM EABI v7a System Image, Android API 15, revision 2&#39;</span> | cut -c 3-4&lt;/code&gt;
+</span><span class='line'>./tools/android update sdk --no-ui --filter &lt;code&gt;./tools/android list sdk | grep <span class="s1">&#39;Google APIs, Android API 15, revision 2&#39;</span> | cut -c 3-4&lt;/code&gt;
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export PATH=$PATH:&lt;code&gt;pwd&lt;/code&gt;/platform-tools:&lt;code&gt;pwd&lt;/code&gt;/tools&#39;</span> &gt;&gt; ~/.zshrc
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export ANDROID_HOME=&lt;code&gt;pwd&lt;/code&gt;&#39;</span> &gt;&gt; ~/.zshrc
+</span><span class='line'>. ~/.zshrc
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+</feed>
