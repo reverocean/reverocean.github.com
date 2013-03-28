@@ -4,12 +4,17 @@
         <loc>
             http://reverocean.github.com/blog/2012/09/09/validating-model-attributes-in-spring-at-mvc/
         </loc>
+<<<<<<< HEAD
         <lastmod>2013-03-29T00:50:33+08:00</lastmod>
+=======
+        <lastmod>2012-09-09T17:38:50+08:00</lastmod>
+>>>>>>> 9c7ac599745a4e17d47b325300d2d0f341b28408
     </url>
     <url>
         <loc>
             http://reverocean.github.com/blog/2012/09/09/internationalization-in-spring-at-mvc/
         </loc>
+<<<<<<< HEAD
         <lastmod>2013-03-29T00:50:33+08:00</lastmod>
     </url>
     <url>
@@ -19,11 +24,23 @@
     <url>
         <loc>http://reverocean.github.com/blog/2012/09/24/inteceptor-in-spring-at-mvc/</loc>
         <lastmod>2013-03-29T00:50:33+08:00</lastmod>
+=======
+        <lastmod>2012-09-10T17:48:22+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/11/using-scoped-beans/</loc>
+        <lastmod>2012-09-12T23:01:32+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/24/inteceptor-in-spring-at-mvc/</loc>
+        <lastmod>2012-09-24T16:26:05+08:00</lastmod>
+>>>>>>> 9c7ac599745a4e17d47b325300d2d0f341b28408
     </url>
     <url>
         <loc>
             http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc/
         </loc>
+<<<<<<< HEAD
         <lastmod>2013-03-29T00:50:33+08:00</lastmod>
     </url>
     <url>
@@ -69,11 +86,59 @@
     <url>
         <loc>http://reverocean.github.com/blog/2012/10/12/writing-building-script/</loc>
         <lastmod>2013-03-29T00:50:33+08:00</lastmod>
+=======
+        <lastmod>2012-09-24T16:52:12+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/25/extend-spring-at-mvc/</loc>
+        <lastmod>2012-09-25T11:53:51+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/25/android-sdk-setup/</loc>
+        <lastmod>2012-09-25T11:52:01+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/25/what-should-be-test-in-android/</loc>
+        <lastmod>2012-09-25T15:31:05+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/25/types-of-test-in-android/</loc>
+        <lastmod>2012-09-26T10:25:18+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/25/android-test-framework/</loc>
+        <lastmod>2012-09-26T10:12:26+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/26/gradle-task/</loc>
+        <lastmod>2012-09-27T10:12:45+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/27/gradle-for-java/</loc>
+        <lastmod>2012-09-27T14:06:38+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/27/project-in-gradle/</loc>
+        <lastmod>2012-09-29T09:17:56+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle/</loc>
+        <lastmod>2012-09-29T13:58:26+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/10/12/using-the-gradle-command-line/</loc>
+        <lastmod>2012-10-12T14:35:45+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2012/10/12/writing-building-script/</loc>
+        <lastmod>2012-10-12T16:09:51+08:00</lastmod>
+>>>>>>> 9c7ac599745a4e17d47b325300d2d0f341b28408
     </url>
     <url>
         <loc>
             http://reverocean.github.com/blog/2013/01/14/add-cucumber-jvm-into-project-with-gradle/
         </loc>
+<<<<<<< HEAD
         <lastmod>2013-03-29T00:50:33+08:00</lastmod>
     </url>
     <url>
@@ -95,5 +160,28 @@
     <url>
         <loc>http://reverocean.github.com/</loc>
         <lastmod>2013-03-29T00:50:33+08:00</lastmod>
+=======
+        <lastmod>2013-03-23T08:31:40+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2013/03/23/mapreduce-in-hadoop/</loc>
+        <lastmod>2013-03-24T16:18:14+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/2013/03/28/smart-gcis/</loc>
+        <lastmod>2013-03-28T21:31:01+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/about/</loc>
+        <lastmod>2012-09-09T15:51:09+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/blog/archives/</loc>
+        <lastmod>2013-03-28T21:31:01+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://reverocean.github.com/</loc>
+        <lastmod>2013-03-28T21:31:01+08:00</lastmod>
+>>>>>>> 9c7ac599745a4e17d47b325300d2d0f341b28408
     </url>
 </urlset>
