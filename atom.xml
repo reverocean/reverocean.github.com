@@ -4,7 +4,7 @@
   <title><![CDATA[海洋的Blog]]></title>
   <link href="http://reverocean.github.com/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-03-24T16:23:27+08:00</updated>
+  <updated>2013-03-28T21:31:01+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,77 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Smart GCIS]]></title>
+    <link href="http://reverocean.github.com/blog/2013/03/28/smart-gcis/"/>
+    <updated>2013-03-28T20:14:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/03/28/smart-gcis</id>
+    <content type="html"><![CDATA[<p>在大数据如此活跃的今天，我们这两天也跟大数据来了一次亲密接触。我们六个人的小组在一天时间里完成了一个简单的产品智能推荐系统，我们称为<a href="https://github.com/reverocean/Stuart">Smart GCIS</a>。</p>
+
+<h1>项目结构</h1>
+
+<p>我们决定提供Micro-Service，所以在项目里面我们分了好如下几个模块：</p>
+
+<ul>
+<li>smart-persistence</li>
+<li>smart-match</li>
+<li>smart-recommendation</li>
+<li>smart-web
+其中smart-persistence提供持久层服务，我们使用Hibernate来访问Mysql；smart-match提供match功能，通过Spring-Batch调用Match引擎来匹配相同的用户；smart-recommendation为客户推荐可能要购买的产品；smart-web提供一个界面用于市场人员查看客户以及其推荐产品，同事smart-web还提供RESTd的Micro-Service。</li>
+</ul>
+
+
+<h1>构建脚本</h1>
+
+<p>针对这样的一个多模块项目，我们使用<a href="http://www.gradle.org/">Gradle</a>作为我们项目的构建脚本。</p>
+
+<h2>问题</h2>
+
+<p>在项目的初期，搭建项目的时候，我犯了一个致命的疏忽。就是在配置多模块的项目时需要一个settings.gradle的文件，我少写了一个<strong>s</strong>，导致子模块在Idea里不是Java项目。这个废了我不少时间，最后还是<a href="http://dreamhead.blogbus.com/">dreamhead</a>帮助才发现问题。<br/>
+<strong>我要跟s做斗争</strong></p>
+
+<h2>进步</h2>
+
+<p>我们在项目里面使用<a href="http://dropwizard.codahale.com/">DropWizard</a>作为Micro-Service的web开发，而Dropwizard的一个特点就是它通过一个main函数启动并提供web服务。在DropWizard官方文档里是要让打成jar包，然后通过Java -jar来运行。这样是很方便，但是在开发过程中就不方便了，因为要打Jar包之后运行，才能看见结果。<br/>
+所以我引入了Gradle的<a href="http://www.gradle.org/docs/current/userguide/application_plugin.html">application</a>插件，在smart-web的build.gradle文件中apply这个插件，并且指定要运行的main之后就可以在命令行里运行：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">gradle</span> <span class="o">:</span><span class="n">smart</span><span class="o">-</span><span class="nl">web:</span><span class="n">run</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>来运行DropWizard了。不过这里还有个问题就是在运行DropWizard的时候，需要为main函数提供一个server和configuration.yml的参数，但是在gradle :smart-web:run后面加上这两个参数有会报错。好在Gradle的appliation插件提供了相应的配置：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">run</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">args</span> <span class="s1">&#39;server&#39;</span><span class="o">,</span> <span class="s1">&#39;src/main/resources/stuart.yaml&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就解决问题了。
+ <!--more--></p>
+
+<h1>DropWizard</h1>
+
+<p>在<a href="http://www.thoughtworks.com/cn/articles/technology-radar-october-2012-0">ThoughtWorks2012年的技术雷达</a>中，提到了一个趋势，就是embedded servlet containers。<a href="http://dropwizard.codahale.com/">DropWizard</a>就是这样一个embedded servlet containers。<br/>
+Dropwizard的文档很详细，我就不赘述了，但是在这个项目中，我们使用Dropwizard提供web页面（Freemarker），就必然要访问css和javascript。目前，Dropwizard还不支持提供assets，好在我们碰见的问题都不时问题，已经有人已经提供好了<a href="https://github.com/bazaarvoice/dropwizard-configurable-assets-bundle">扩展</a>，我们只需要include进来就可以了。</p>
+
+<ul>
+<li>首先，需要在build.gradle中加入&#8221;com.bazaarvoice.dropwizard:dropwizard-configurable-assets-bundle:0.1.9&#8221;的依赖</li>
+<li>其次按照扩展的说明文档，很容易就能配好</li>
+<li>但是有一个坑，就是assets的目录需要映射的，在文档中是dashboard，需要改成自己需要的就可以了</li>
+</ul>
+
+
+<h1>其他</h1>
+
+<p>这次活动一共6个人，一个人准备数据，一个人完成持久层，一个人完成匹配引擎，一个人完成推荐系统，两个人pair做界面，感觉配合的非常好。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[MapReduce in Hadoop]]></title>

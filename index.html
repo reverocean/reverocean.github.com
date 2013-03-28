@@ -7,7 +7,8 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="大数据被大家越来越重视，而在大数据的领域里，Hadoop基本上是行业里的事实标准。而MapReduce又是Hadoop中的一个重要特性，这里总结一下MapReduce相关的特性。 MapReduce的Job是如何工作的 客户端提交一个Job到Hadoop的MapReduce之后， &hellip;">
+	<meta name="description" content="在大数据如此活跃的今天，我们这两天也跟大数据来了一次亲密接触。我们六个人的小组在一天时间里完成了一个简单的产品智能推荐系统，我们称为Smart GCIS。 项目结构 我们决定提供Micro-Service，所以在项目里面我们分了好如下几个模块： smart-persistence
+smart- &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -70,6 +71,88 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2013/03/28/smart-gcis/">Smart GCIS</a></h1>
+	<div class="entry-content">
+		<p>在大数据如此活跃的今天，我们这两天也跟大数据来了一次亲密接触。我们六个人的小组在一天时间里完成了一个简单的产品智能推荐系统，我们称为<a href="https://github.com/reverocean/Stuart">Smart GCIS</a>。</p>
+
+<h1>项目结构</h1>
+
+<p>我们决定提供Micro-Service，所以在项目里面我们分了好如下几个模块：</p>
+
+<ul>
+<li>smart-persistence</li>
+<li>smart-match</li>
+<li>smart-recommendation</li>
+<li>smart-web
+其中smart-persistence提供持久层服务，我们使用Hibernate来访问Mysql；smart-match提供match功能，通过Spring-Batch调用Match引擎来匹配相同的用户；smart-recommendation为客户推荐可能要购买的产品；smart-web提供一个界面用于市场人员查看客户以及其推荐产品，同事smart-web还提供RESTd的Micro-Service。</li>
+</ul>
+
+
+<h1>构建脚本</h1>
+
+<p>针对这样的一个多模块项目，我们使用<a href="http://www.gradle.org/">Gradle</a>作为我们项目的构建脚本。</p>
+
+<h2>问题</h2>
+
+<p>在项目的初期，搭建项目的时候，我犯了一个致命的疏忽。就是在配置多模块的项目时需要一个settings.gradle的文件，我少写了一个<strong>s</strong>，导致子模块在Idea里不是Java项目。这个废了我不少时间，最后还是<a href="http://dreamhead.blogbus.com/">dreamhead</a>帮助才发现问题。<br/>
+<strong>我要跟s做斗争</strong></p>
+
+<h2>进步</h2>
+
+<p>我们在项目里面使用<a href="http://dropwizard.codahale.com/">DropWizard</a>作为Micro-Service的web开发，而Dropwizard的一个特点就是它通过一个main函数启动并提供web服务。在DropWizard官方文档里是要让打成jar包，然后通过Java -jar来运行。这样是很方便，但是在开发过程中就不方便了，因为要打Jar包之后运行，才能看见结果。<br/>
+所以我引入了Gradle的<a href="http://www.gradle.org/docs/current/userguide/application_plugin.html">application</a>插件，在smart-web的build.gradle文件中apply这个插件，并且指定要运行的main之后就可以在命令行里运行：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">gradle</span> <span class="o">:</span><span class="n">smart</span><span class="o">-</span><span class="nl">web:</span><span class="n">run</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>来运行DropWizard了。不过这里还有个问题就是在运行DropWizard的时候，需要为main函数提供一个server和configuration.yml的参数，但是在gradle :smart-web:run后面加上这两个参数有会报错。好在Gradle的appliation插件提供了相应的配置：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">run</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">args</span> <span class="s1">&#39;server&#39;</span><span class="o">,</span> <span class="s1">&#39;src/main/resources/stuart.yaml&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就解决问题了。
+ 
+		
+		<a href="/blog/2013/03/28/smart-gcis/" class="more-link">继续阅读 &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-28T20:14:00+08:00" pubdate data-updated="true">2013-03-28 Thu</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/dropwizard/'>DropWizard</a>, <a class='category' href='/blog/categories/gradle/'>Gradle</a>, <a class='category' href='/blog/categories/java/'>Java</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/03/28/smart-gcis//index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">
@@ -1642,107 +1725,6 @@ apply plugin: &#8216;idea&#8217;</p>
 </div>
 	
 		<span class="comments"><a href="/blog/2012/09/25/android-test-framework//index.html#disqus_thread">Comments</a></span>
-	
-</div></article>
-
-
-    <article class="post">
-	<h1 class="title"><a href="/blog/2012/09/25/types-of-test-in-android/">Types of Test in Android</a></h1>
-	<div class="entry-content">
-		<h1>Unit Tests</h1>
-
-<p>使用JUnit来写Android的Unit Tests。</p>
-
-<h3>Unit Tests组成模块</h3>
-
-<ul>
-<li>test fixture：A test fixture is the well known state defined as a baseline to run the tests and isshared by all the test cases, and thus plays a fundamental role in the design of thetests.</li>
-<li>setUp：用来初始化fixture</li>
-<li>tearDown：释放fixture</li>
-</ul>
-
-
-<h3>Test preconditions</h3>
-
-<p>因为JUnit框架通过反射来运行test的方法，所以没有固定的顺序来运行所有的test。但是我们一般创建一个testPreconditions()方法来测试preconditions。</p>
-
-<h3>真正的测试</h3>
-
-<p>在JUnit3里，所有的以test开头的public void方法，都是Unit test。在JUnit4里使用@Test来标注哪些是Unit Tests。<br/>
-Android提供了@SmallTest，@MediumTest，@LargeTest，@Smoke, @FlakyTest, @UIThreadTest和@Suppress来给测试分类，这样你可以使用test runner来跑单独的类别。<br/>
-使用assert*<br/>
-Android提供了MoreAsserts和ViewAsserts</p>
-
-<h3>Mock objects</h3>
-
-<p>Android在android.test.mock包下提供了几个mock objects，在写测试的时候很有帮助：<br/>
-* MockApplication<br/>
-* MockContentProvider<br/>
-* MockContentResolver<br/>
-* MockContext<br/>
-* MockCursor<br/>
-* MockDialogInterface<br/>
-* MockPackageManager<br/>
-* MockResources<br/>
-这些都是stub，不是真正的实现，你需要继承他们并且实现自己的mock objects。</p>
-
-<h1>UI tests</h1>
-
-<p>众所周知，在Android里只有主线程可以更改UI元素，所以被@UIThreadTest标注的测试会在主线程上运行，并修改UI。另外，如果你只想一部分测试运行在UI线程上，你可以使用Activity.runOnUiThread方法来实现。<br/>
-Android提供了TouchUtils来测试，并提供了以下的方法：<br/>
-* click<br/>
-* drag<br/>
-* long click<br/>
-* scroll<br/>
-* tap<br/>
-* touch</p>
-
-<h1>Integration tests</h1>
-
-<h1>Functional or acceptance tests</h1>
-
-<p>FitNesse(http://www.fitnesse.org)<br/>
-BDD(http://behaviour-driven.org)<br/>
-jbehave(http://jbehave.org)</p>
-
-<h1>Performance tests</h1>
-
-<h1>System tests</h1>
-
-<p>包括：<br/>
-* GUI tests<br/>
-* Smoke tests<br/>
-* Performace tests<br/>
-* Installation tests</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-25T15:34:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/test/'>Test</a>
-
-
-</div>
-	
-		<span class="comments"><a href="/blog/2012/09/25/types-of-test-in-android//index.html#disqus_thread">Comments</a></span>
 	
 </div></article>
 
