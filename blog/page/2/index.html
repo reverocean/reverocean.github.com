@@ -7,7 +7,11 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="Unit Tests 使用JUnit来写Android的Unit Tests。 Unit Tests组成模块 test fixture：A test fixture is the well known state defined as a baseline to run the tests &hellip;">
+	<meta name="description" content="Android提供了一套基于JUnit的测试框架&#8211;Instrumentation，key features：
+* 方便访问Android的系统对象
+* Instrumentation框架方便用于测试控制和检测应用
+* Mock Objects
+* 可以单独跑一个测试或者test &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -70,6 +74,127 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/09/25/android-test-framework/">Android Test Framework</a></h1>
+	<div class="entry-content">
+		<p>Android提供了一套基于JUnit的测试框架&#8211;Instrumentation，key features：<br/>
+*  方便访问Android的系统对象<br/>
+*  Instrumentation框架方便用于测试控制和检测应用<br/>
+*  Mock Objects<br/>
+*  可以单独跑一个测试或者test suite<br/>
+*  提供ADT插件支持管理测试和测试项目</p>
+
+<p>Instrumentation是Android测试框架的基础，在测试时注入application需要的的mock组件来隔离依赖。</p>
+
+<p>一般需要建立一个和项目名+Test的测试项目，在项目里的AndroidManifest.xml文件里声明Instrumentation。</p>
+
+<figure class='code'><figcaption><span>被测试project的AndroidManifest.xml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>
+</span><span class='line'>  <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span>
+</span><span class='line'>  <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.SampleActivity&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/activity&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/application&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>测试project的AndroidManifest.xml  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample.test&quot;</span>
+</span><span class='line'>  <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span>
+</span><span class='line'>  <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;uses-library</span> <span class="na">android:name=</span><span class="s">&quot;android.test.runner&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/application&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;instrumentation</span> <span class="na">android:targetPackage=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>
+</span><span class='line'>      <span class="na">android:name=</span><span class="s">&quot;android.test.InstrumentationTestRunner&quot;</span>
+</span><span class='line'>      <span class="na">android:label=</span><span class="s">&quot;Sample Tests&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot; android.permission.INJECT_EVENTS&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意：<br/>
+* Test项目的package是被测项目的package后面加上<em>.test</em><br/>
+* 指定<strong>android.test.InstrumentationTestRunner</strong>为Test runner<br/>
+* 被测项目和测试项目都是Android应用，他们自己对应的APK都会被安装到设备上。他们会共享同样的进程，因此他们具有同样的特征。<br/>
+* 运行测试应用的时候，Activity Manager使用Instrumentation开始和控制test runner<br/>
+* 在Instrumentation声明里指定了<strong>targetPackage</strong></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-25T17:58:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/test/'>Test</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/25/android-test-framework//blog/page/2/index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">

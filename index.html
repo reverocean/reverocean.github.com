@@ -7,8 +7,7 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="在大数据如此活跃的今天，我们这两天也跟大数据来了一次亲密接触。我们六个人的小组在一天时间里完成了一个简单的产品智能推荐系统，我们称为Smart GCIS。 项目结构 我们决定提供Micro-Service，所以在项目里面我们分了好如下几个模块： smart-persistence
-smart- &hellip;">
+	<meta name="description" content="这算是一篇Hadoop的八卦，干货不多。 Hadoop历史 在介绍Hadoop之前，我们先来看看Hadoop的历史，这样能够更好的理解Hadoop的来龙去脉。 Hadoop之父 要说Hadoop的历史，我们不能不先说Hadoop之父Doug Cutting。说到Doug &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -74,6 +73,63 @@ smart- &hellip;">
 
 
     <article class="post">
+	<h1 class="title"><a href="/blog/2013/11/18/hadoop-introduce/">HBase——Hadoop Introduce</a></h1>
+	<div class="entry-content">
+		<p>这算是一篇Hadoop的八卦，干货不多。</p>
+
+<hr />
+
+<h1>Hadoop历史</h1>
+
+<p>在介绍Hadoop之前，我们先来看看Hadoop的历史，这样能够更好的理解Hadoop的来龙去脉。</p>
+
+<h2>Hadoop之父</h2>
+
+<p>要说Hadoop的历史，我们不能不先说Hadoop之父Doug Cutting。说到Doug Cutting知道的人可能不多，但是说到他发起的Lucence，可能知道的人就多了。为了能够还清助学贷款以及为以后的生活考虑，Cutting决定开始从事IT相关的工作。1985年，Cutting毕业于美国斯坦福大学，加入Xerox（施乐）公司。说道施乐公司大家未必知道，但是如果告诉大家是施乐发明的东西，大家就会知道了：</p>
+
+<ul>
+<li>第一台PC</li>
+<li>最先发明了图形用户界面，乔布斯就是从施乐那里偷的图形用户界面的概念</li>
+<li>最先发明了所见即所得文字处理程序</li>
+<li>发明了因特网</li>
+</ul>
+
+
+<p>就可见施乐公司有多么牛b，施乐对Cutting后来研究搜索技术起到了决定性的影响。在施乐的这段时间让他在搜索技术的知识上有了很大提高。他花了四年的时间搞研发，这四年中，他阅读了大量的论文，同时，自己也发表了很多论文，用Cutting自己的话说——“我的研究生是在Xerox读的。”
+ 
+		
+		<a href="/blog/2013/11/18/hadoop-introduce/" class="more-link">继续阅读 &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-18T09:27:00+08:00" pubdate data-updated="true">2013-11-18 Mon</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/hadoop/'>Hadoop</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/11/18/hadoop-introduce//index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+
+    <article class="post">
 	<h1 class="title"><a href="/blog/2013/03/28/smart-gcis/">Smart GCIS</a></h1>
 	<div class="entry-content">
 		<p>在大数据如此活跃的今天，我们这两天也跟大数据来了一次亲密接触。我们六个人的小组在一天时间里完成了一个简单的产品智能推荐系统，我们称为<a href="https://github.com/reverocean/Stuart">Smart GCIS</a>。</p>
@@ -86,7 +142,7 @@ smart- &hellip;">
 <li>smart-persistence</li>
 <li>smart-match</li>
 <li>smart-recommendation</li>
-<li>smart-web
+<li>smart-web<br/>
 其中smart-persistence提供持久层服务，我们使用Hibernate来访问Mysql；smart-match提供match功能，通过Spring-Batch调用Match引擎来匹配相同的用户；smart-recommendation为客户推荐可能要购买的产品；smart-web提供一个界面用于市场人员查看客户以及其推荐产品，同事smart-web还提供RESTd的Micro-Service。</li>
 </ul>
 
@@ -1604,127 +1660,6 @@ apply plugin: &#8216;idea&#8217;</p>
 </div>
 	
 		<span class="comments"><a href="/blog/2012/09/26/gradle-task//index.html#disqus_thread">Comments</a></span>
-	
-</div></article>
-
-
-    <article class="post">
-	<h1 class="title"><a href="/blog/2012/09/25/android-test-framework/">Android Test Framework</a></h1>
-	<div class="entry-content">
-		<p>Android提供了一套基于JUnit的测试框架&#8211;Instrumentation，key features：<br/>
-*  方便访问Android的系统对象<br/>
-*  Instrumentation框架方便用于测试控制和检测应用<br/>
-*  Mock Objects<br/>
-*  可以单独跑一个测试或者test suite<br/>
-*  提供ADT插件支持管理测试和测试项目</p>
-
-<p>Instrumentation是Android测试框架的基础，在测试时注入application需要的的mock组件来隔离依赖。</p>
-
-<p>一般需要建立一个和项目名+Test的测试项目，在项目里的AndroidManifest.xml文件里声明Instrumentation。</p>
-
-<figure class='code'><figcaption><span>被测试project的AndroidManifest.xml  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
-</span><span class='line'><span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
-</span><span class='line'>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>
-</span><span class='line'>  <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span>
-</span><span class='line'>  <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.SampleActivity&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>          <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>              <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>              <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>          <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;/activity&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;/application&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>测试project的AndroidManifest.xml  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
-</span><span class='line'><span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
-</span><span class='line'>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample.test&quot;</span>
-</span><span class='line'>  <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span>
-</span><span class='line'>  <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>      <span class="nt">&lt;uses-library</span> <span class="na">android:name=</span><span class="s">&quot;android.test.runner&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;/application&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;instrumentation</span> <span class="na">android:targetPackage=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>
-</span><span class='line'>      <span class="na">android:name=</span><span class="s">&quot;android.test.InstrumentationTestRunner&quot;</span>
-</span><span class='line'>      <span class="na">android:label=</span><span class="s">&quot;Sample Tests&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>  <span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot; android.permission.INJECT_EVENTS&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>注意：<br/>
-* Test项目的package是被测项目的package后面加上<em>.test</em><br/>
-* 指定<strong>android.test.InstrumentationTestRunner</strong>为Test runner<br/>
-* 被测项目和测试项目都是Android应用，他们自己对应的APK都会被安装到设备上。他们会共享同样的进程，因此他们具有同样的特征。<br/>
-* 运行测试应用的时候，Activity Manager使用Instrumentation开始和控制test runner<br/>
-* 在Instrumentation声明里指定了<strong>targetPackage</strong></p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-25T17:58:00+08:00" pubdate data-updated="true">2012-09-25 Tue</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/test/'>Test</a>
-
-
-</div>
-	
-		<span class="comments"><a href="/blog/2012/09/25/android-test-framework//index.html#disqus_thread">Comments</a></span>
 	
 </div></article>
 

@@ -122,6 +122,8 @@
 </ul>
 
 
+<p>Shuffle好理解，上面已经解释了原因，Sort又耗时又没有意义（因为对于Reduce而言，什么顺序都不会影响结果的），为什么要Sort之后才传给Reduce呢？ 经过多方查证，原来在Google的MapReduce论文里就是这样定义的，主要是Google在Reduce之后存储，要是有序的话，查询会更方便些。Hadoop在实现Google的MapReduce论文时，也实现了Sort阶段。</p>
+
 <h2>Reduce</h2>
 
 <p>处理经过Shuffle和Sort之后的数据，并更具需求输出一个或者多个key/value对。可以输出到HDFS上的一个文件里，也可以输出到NoSQL，或者其他任何Data Sink</p>
