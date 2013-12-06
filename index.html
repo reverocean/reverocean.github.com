@@ -7,7 +7,8 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="这算是一篇Hadoop的八卦，干货不多。 Hadoop历史 在介绍Hadoop之前，我们先来看看Hadoop的历史，这样能够更好的理解Hadoop的来龙去脉。 Hadoop之父 要说Hadoop的历史，我们不能不先说Hadoop之父Doug Cutting。说到Doug &hellip;">
+	<meta name="description" content="到年底了，Training Budget需要报销。在一年里陆陆续续买了些书，但是也有很多书会在最后一起买，因为怕Budget会花在别的地方。
+选了一些书之后，下一个任务就是要把书名拷贝到邮件里，一本书这样做当然无妨，但是要书多的话，这就不是一个程序员该做的事情了。因为我是在Amazon买的书， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -70,6 +71,69 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2013/12/05/get-all-books-name-from-amazon/">Get All Books Name From Amazon</a></h1>
+	<div class="entry-content">
+		<p>到年底了，Training Budget需要报销。在一年里陆陆续续买了些书，但是也有很多书会在最后一起买，因为怕Budget会花在别的地方。<br/>
+选了一些书之后，下一个任务就是要把书名拷贝到邮件里，一本书这样做当然无妨，但是要书多的话，这就不是一个程序员该做的事情了。因为我是在Amazon买的书，所以下面提供一个从Amazon订单里提取书名的方法：</p>
+
+<h1>引入JQuery</h1>
+
+<p>去年的Amazon还有JQuery在页面上，但是很不幸，今年Amazon上已经没有JQuery的引用了，那么我们需要从外部引入JQuery。最简单的办法当然就是在Chrome的Console里从Google的CDN加载JQueery，在Console里输入如下的代码：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var jq = document.createElement('script');
+</span><span class='line'>jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js";
+</span><span class='line'>document.getElementsByTagName('head')[0].appendChild(jq);
+</span><span class='line'>jQuery.noConflict();</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>获取书名</h1>
+
+<p>有了JQuery之后，我们就可以使用JQuery牛B的selector选择我们的书名了，script如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$('.product-title a').each(function(i, e){console.log($(e).text())})</span></code></pre></td></tr></table></div></figure>
+
+
+<p>大功告成，书名就都输出在Console里了，拷贝出来，放到邮件即可。
+modify</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-05T11:22:00+08:00" pubdate data-updated="true">2013-12-05 Thu</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/other/'>Other</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/12/05/get-all-books-name-from-amazon//index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">
@@ -1384,282 +1448,6 @@ apply plugin: &#8216;idea&#8217;</p>
 </div>
 	
 		<span class="comments"><a href="/blog/2012/09/27/gradle-for-java//index.html#disqus_thread">Comments</a></span>
-	
-</div></article>
-
-
-    <article class="post">
-	<h1 class="title"><a href="/blog/2012/09/26/gradle-task/">Gradle Task</a></h1>
-	<div class="entry-content">
-		<p>Gradle里的task用来描述构建中不可分割的原子任务，例如编译，打包JAR，生存javadoc等，都是task。</p>
-
-<h1>定义Task</h1>
-
-<figure class='code'><figcaption><span>定义Task </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task hello {
-</span><span class='line'>     doLast {
-</span><span class='line'>          println "Hello World!"
-</span><span class='line'>       }
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>简单定义Task </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task upper &lt;&lt; {
-</span><span class='line'>      String someString = 'mY_nAmE'
-</span><span class='line'>      println "Original: " + someString 
-</span><span class='line'>      println "Upper case: " + someString.toUpperCase()
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-<p>注意：</p>
-
-<ul>
-<li>这里直接使用“&lt;&lt;”来定义Task，“&lt;&lt;”是doLast的别名</li>
-<li>定义Task的时候就是写代码，这里先定义了一个变量，然后调用toUpperCase方法</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>另外一个Task </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task count &lt;&lt; {
-</span><span class='line'>      4.times { print "$it " }
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>运行Task</h1>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>gradle -q hello
-</span><span class='line'>Hello World!</span></code></pre></td></tr></table></div></figure>
-
-
-<p>其中：</p>
-
-<ul>
-<li>-q是gradle的命令行参数，用于阻止gradle的log输出，这样就只输出gradle脚本里输出的内容。</li>
-<li>Hello World！是我们定义的task的输出。</li>
-</ul>
-
-
-<h1>Task依赖</h1>
-
-<figure class='code'><figcaption><span>Task依赖 </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task hello &lt;&lt; {
-</span><span class='line'>      println 'Hello world!'
-</span><span class='line'>  }
-</span><span class='line'>  task intro(dependsOn: hello) &lt;&lt; {
-</span><span class='line'>      println "I'm Gradle"
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>使用dependsOn来定义当前task依赖的task</li>
-<li>依赖的Task可以在当前的Task之后定义</li>
-</ul>
-
-
-<h1>动态Task</h1>
-
-<figure class='code'><figcaption><span>Task依赖 </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>4.times { counter ->
-</span><span class='line'>      task "task$counter" &lt;&lt; {
-</span><span class='line'>          println "I'm task number $counter"
-</span><span class='line'>      }
-</span><span class='line'>  }
-</span><span class='line'>  task0.dependsOn task2, task3</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>使用counter作为变量，在定义task的时候使用“<strong>task$counter</strong>”会动态定义出task0，task1，task2，task3</li>
-<li><strong>task0.dependsOn task2, task3</strong>通过调用task0的dependsOn的方法，也可以定义Task的依赖</li>
-</ul>
-
-
-<h1>Task的API</h1>
-
-<figure class='code'><figcaption><span>Task API </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task hello &lt;&lt; {
-</span><span class='line'>      println 'Hello Earth'
-</span><span class='line'>  }
-</span><span class='line'>  hello.doFirst {
-</span><span class='line'>          println 'Hello Venus'
-</span><span class='line'>  }
-</span><span class='line'>  hello.doLast {
-</span><span class='line'>      println 'Hello Mars'
-</span><span class='line'>  }
-</span><span class='line'>  hello &lt;&lt; {
-</span><span class='line'>      println 'Hello Jupiter'
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>doFirst和doLast可以被执行多次</li>
-<li>定义完task之后，就可以调用doLast，doFirst和&lt;&lt;</li>
-</ul>
-
-
-<h1>Task的属性</h1>
-
-<figure class='code'><figcaption><span>Task API </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task myTask {
-</span><span class='line'>      ext.myProperty = "myValue"
-</span><span class='line'>  }
-</span><span class='line'>  task printTaskProperties &lt;&lt; {
-</span><span class='line'>      println myTask.myProperty
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>在定义Task的时候，使用<strong>ext.myProperty</strong>为Task添加属性</li>
-<li>在别的Task里，直接使用<strong>myTask.myProperty</strong>来访问Task的属性</li>
-</ul>
-
-
-<h1>定义函数</h1>
-
-<figure class='code'><figcaption><span>Task API </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task checksum &lt;&lt; {
-</span><span class='line'>      fileList('../antLoadfileResources').each {File file ->
-</span><span class='line'>          ant.checksum(file: file, property: "cs_$file.name")
-</span><span class='line'>          println "$file.name Checksum: ${ant.properties["cs_$file.name"]}"
-</span><span class='line'>      }
-</span><span class='line'>  }
-</span><span class='line'>  task loadfile &lt;&lt; {
-</span><span class='line'>      fileList('../antLoadfileResources').each {File file ->
-</span><span class='line'>          ant.loadfile(srcFile: file, property: file.name)
-</span><span class='line'>          println "I'm fond of $file.name"
-</span><span class='line'>      }
-</span><span class='line'>  }
-</span><span class='line'>  File[] fileList(String dir) {
-</span><span class='line'>      file(dir).listFiles({file -> file.isFile() } as         FileFilter).sort()
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>在后面定义了fileList函数</li>
-<li>在定义Task的时候，调用fileList函数</li>
-</ul>
-
-
-<h1>默认Task</h1>
-
-<figure class='code'><figcaption><span>Task API </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>defaultTasks 'clean', 'run'
-</span><span class='line'>  task clean &lt;&lt; {
-</span><span class='line'>      println 'Default Cleaning!'
-</span><span class='line'>  }
-</span><span class='line'>  task run &lt;&lt; {
-</span><span class='line'>      println 'Default Running!'
-</span><span class='line'>  }
-</span><span class='line'>  task other &lt;&lt; {
-</span><span class='line'>      println "I'm not a default task!"
-</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>使用<strong>defaultTasks &#8216;clean&#8217;, &#8216;run&#8217;</strong>定义哪些task是默认的</li>
-<li>可以定义多个默认的Task</li>
-</ul>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-26T17:18:00+08:00" pubdate data-updated="true">2012-09-26 Wed</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gradle/'>Gradle</a>
-
-
-</div>
-	
-		<span class="comments"><a href="/blog/2012/09/26/gradle-task//index.html#disqus_thread">Comments</a></span>
 	
 </div></article>
 

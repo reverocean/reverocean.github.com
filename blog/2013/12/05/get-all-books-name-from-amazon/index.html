@@ -3,22 +3,12 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>About Me - 海洋的Blog</title>
+	<title>Get all books name from Amazon - 海洋的Blog</title>
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="江湖人称何大壮 1
-2
-3
-4
-5
-6
-最熟悉Java，Spring
-最喜欢Ruby，ROR
-也喜欢JavaScript
-C#，Flex，Python, Django还不错
-喜欢电影，乒乓球，篮球，星际争霸和宅
-给儿子的话：凡事预则立，不预则废 联系方式 邮箱：&#x72;&#101;&#118 &hellip;">
+	<meta name="description" content="到年底了，Training Budget需要报销。在一年里陆陆续续买了些书，但是也有很多书会在最后一起买，因为怕Budget会花在别的地方。
+选了一些书之后，下一个任务就是要把书名拷贝到邮件里，一本书这样做当然无妨，但是要书多的话，这就不是一个程序员该做的事情了。因为我是在Amazon买的书， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -80,37 +70,63 @@ C#，Flex，Python, Django还不错
 	
 		
 	
-	<div id="content" class="inner"><article class="page">
-    
-    <h1 class="title">About Me</h1>
-    
-    <div class="entry-content"><blockquote><h1>江湖人称何大壮</h1></blockquote>
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Get All Books Name From Amazon</h1>
+	<div class="entry-content"><p>到年底了，Training Budget需要报销。在一年里陆陆续续买了些书，但是也有很多书会在最后一起买，因为怕Budget会花在别的地方。<br/>
+选了一些书之后，下一个任务就是要把书名拷贝到邮件里，一本书这样做当然无妨，但是要书多的话，这就不是一个程序员该做的事情了。因为我是在Amazon买的书，所以下面提供一个从Amazon订单里提取书名的方法：</p>
+
+<h1>引入JQuery</h1>
+
+<p>去年的Amazon还有JQuery在页面上，但是很不幸，今年Amazon上已经没有JQuery的引用了，那么我们需要从外部引入JQuery。最简单的办法当然就是在Chrome的Console里从Google的CDN加载JQueery，在Console里输入如下的代码：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>最熟悉Java，Spring
-</span><span class='line'>最喜欢Ruby，ROR
-</span><span class='line'>也喜欢JavaScript
-</span><span class='line'>C#，Flex，Python, Django还不错
-</span><span class='line'>喜欢电影，乒乓球，篮球，星际争霸和宅
-</span><span class='line'>给儿子的话：凡事预则立，不预则废</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var jq = document.createElement('script');
+</span><span class='line'>jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js";
+</span><span class='line'>document.getElementsByTagName('head')[0].appendChild(jq);
+</span><span class='line'>jQuery.noConflict();</span></code></pre></td></tr></table></div></figure>
 
 
-<hr />
+<h1>获取书名</h1>
 
-<blockquote><p><strong>联系方式</strong></p>
+<p>有了JQuery之后，我们就可以使用JQuery牛B的selector选择我们的书名了，script如下：</p>
 
-<hr />
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$('.product-title a').each(function(i, e){console.log($(e).text())})</span></code></pre></td></tr></table></div></figure>
 
-<p><strong>邮箱</strong>：<em><a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#58;&#114;&#101;&#118;&#x65;&#114;&#111;&#x63;&#101;&#97;&#x6e;&#64;&#x67;&#x6d;&#97;&#x69;&#x6c;&#x2e;&#99;&#x6f;&#x6d;">&#x72;&#101;&#118;&#101;&#x72;&#111;&#x63;&#101;&#x61;&#x6e;&#64;&#x67;&#109;&#x61;&#x69;&#108;&#x2e;&#99;&#111;&#x6d;</a></em><br/>
-<strong>Skype</strong>：<em>reverocean</em> <br/>
-<strong>微博</strong>：<em>reverocean@hotmail.com</em></p></blockquote>
+
+<p>大功告成，书名就都输出在Console里了，拷贝出来，放到邮件即可。
+modify</p>
 </div>
-</article>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-05T11:22:00+08:00" pubdate data-updated="true">2013-12-05 Thu</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/other/'>Other</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/12/05/get-all-books-name-from-amazon/#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 	<div class="share">
 	<div class="addthis_toolbox addthis_default_style ">
@@ -127,7 +143,6 @@ C#，Flex，Python, Django还不错
     <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
 </section>
-
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2013
 
@@ -148,8 +163,8 @@ C#，Flex，Python, Django还不错
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://reverocean.github.com/about/index.html';
-        var disqus_url = 'http://reverocean.github.com/about/index.html';
+        var disqus_identifier = 'http://reverocean.github.com/blog/2013/12/05/get-all-books-name-from-amazon/';
+        var disqus_url = 'http://reverocean.github.com/blog/2013/12/05/get-all-books-name-from-amazon/';
         var disqus_script = 'embed.js';
       
     (function () {
