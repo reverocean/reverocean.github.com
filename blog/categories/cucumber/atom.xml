@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Cucumber | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/cucumber/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-12-10T14:41:28+08:00</updated>
+  <updated>2013-12-10T14:47:27+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -77,54 +77,102 @@ cucumberRuntime {
 <p> <!--more-->
  ##完整build.gradle</p>
 
-<p>{% codeblock build.gradle lang:groovy %}
-apply plugin: 'java'
-apply plugin: 'idea'</p>
-
-<p>repositories {</p>
-
-<pre><code>mavenCentral()
-</code></pre>
-
-<p>}</p>
-
-<p>configurations {</p>
-
-<pre><code>cucumberRuntime {
-    extendsFrom testRuntime
-}
-</code></pre>
-
-<p>}</p>
-
-<p>dependencies {</p>
-
-<pre><code>testCompile(
-        'info.cukes:cucumber-java:1.1.1',
-        'info.cukes:cucumber-junit:1.1.1',
-        'junit:junit:4.10'
-)
-</code></pre>
-
-<p>}</p>
-
-<p>task cucumber() {</p>
-
-<pre><code>dependsOn classes
-doLast {
-    javaexec {
-        main = "cucumber.api.cli.Main"
-        classpath configurations.cucumberRuntime
-        classpath sourceSets.main.output.classesDir
-        classpath sourceSets.test.output.classesDir
-        args = ['-f', 'pretty', '--glue', 'cucumber.examples.java.helloworld', 'src/test/resources']
-
-    }
-}
-</code></pre>
-
-<p>}
- {% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>build.gradle  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;idea&#39;</span><span class="o">&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;p&gt;repositories {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;p&gt;configurations {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">cucumberRuntime</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">extendsFrom</span> <span class="n">testRuntime</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;p&gt;dependencies {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">testCompile</span><span class="o">(</span>
+</span><span class='line'>        <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>        <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
+</span><span class='line'>        <span class="s1">&#39;junit:junit:4.10&#39;</span>
+</span><span class='line'><span class="o">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;p&gt;task cucumber() {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">dependsOn</span> <span class="n">classes</span>
+</span><span class='line'><span class="n">doLast</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">javaexec</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
+</span><span class='line'>        <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
+</span><span class='line'>        <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>        <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
+</span><span class='line'>        <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   
