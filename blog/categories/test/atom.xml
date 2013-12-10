@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Test | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/test/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-12-06T10:18:15+08:00</updated>
+  <updated>2013-12-10T14:41:28+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -28,24 +28,16 @@
 <p>Instrumentation是Android测试框架的基础，在测试时注入application需要的的mock组件来隔离依赖。</p>
 
 <p>一般需要建立一个和项目名+Test的测试项目，在项目里的AndroidManifest.xml文件里声明Instrumentation。
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>被测试project的AndroidManifest.xml  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="ni">&amp;lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;<span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>  <span class="na">package=</span><span class="s">&quot;com.example.aatg.sample&quot;</span>   <span class="na">android:versionCode=</span><span class="s">&quot;1&quot;</span> <span class="na">android:versionName=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>  <span class="nt">&lt;application</span> <span class="na">android:icon=</span><span class="s">&quot;@drawable/icon&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>        <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.SampleActivity&quot;</span> <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span><span class="nt">&gt;</span>          <span class="nt">&lt;intent-filter&gt;</span>             <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>                <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>            <span class="nt">&lt;/intent-filter&gt;</span>        <span class="nt">&lt;/activity&gt;</span> <span class="nt">&lt;/application&gt;</span>  <span class="nt">&lt;uses-sdk</span> <span class="na">android:minSdkVersion=</span><span class="s">&quot;7&quot;</span> <span class="nt">/&gt;&lt;/manifest&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>测试project的AndroidManifest.xml  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="ni">&amp;lt;</span>?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;<span class="ni">&amp;lt;</span>manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  package=&quot;com.example.aatg.sample.test&quot;  android:versionCode=&quot;1&quot;<span class="nt">&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;pre&gt;&lt;code&gt;</span>android:versionName=&quot;1.0&quot;<span class="ni">&amp;gt;</span>  <span class="ni">&amp;lt;</span>application android:icon=&quot;@drawable/icon&quot; android:label=&quot;@string/app_name&quot;<span class="ni">&amp;gt;</span>        <span class="ni">&amp;lt;</span>uses-library android:name=&quot;android.test.runner&quot; /<span class="ni">&amp;gt;</span> <span class="ni">&amp;lt;</span>/application<span class="ni">&amp;gt;</span>  <span class="ni">&amp;lt;</span>uses-sdk android:minSdkVersion=&quot;7&quot; /<span class="ni">&amp;gt;</span>  <span class="ni">&amp;lt;</span>instrumentation android:targetPackage=&quot;com.example.aatg.sample&quot;        android:name=&quot;android.test.InstrumentationTestRunner&quot;       android:label=&quot;Sample Tests&quot; /<span class="ni">&amp;gt;</span> <span class="ni">&amp;lt;</span>uses-permission android:name=&quot; android.permission.INJECT_EVENTS&quot; /<span class="ni">&amp;gt;&amp;lt;</span>/manifest<span class="ni">&amp;gt;</span>
-</span><span class='line'><span class="nt">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock 被测试project的AndroidManifest.xml lang:xml %}
+&lt;?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"  package="com.example.aatg.sample"   android:versionCode="1" android:versionName="1.0">  <application android:icon="@drawable/icon" android:label="@string/app_name">        <activity android:name=".SampleActivity" android:label="@string/app_name">          <intent-filter>             <action android:name="android.intent.action.MAIN" />                <category android:name="android.intent.category.LAUNCHER" />            </intent-filter>        </activity> </application>  <uses-sdk android:minSdkVersion="7" /></manifest>
+{% endcodeblock %}
+{% codeblock 测试project的AndroidManifest.xml lang:xml %}
+&lt;?xml version="1.0" encoding="utf-8"?>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"  package="com.example.aatg.sample.test"  android:versionCode="1"</p>
+
+<pre><code>android:versionName="1.0"&gt;  &lt;application android:icon="@drawable/icon" android:label="@string/app_name"&gt;        &lt;uses-library android:name="android.test.runner" /&gt; &lt;/application&gt;  &lt;uses-sdk android:minSdkVersion="7" /&gt;  &lt;instrumentation android:targetPackage="com.example.aatg.sample"        android:name="android.test.InstrumentationTestRunner"       android:label="Sample Tests" /&gt; &lt;uses-permission android:name=" android.permission.INJECT_EVENTS" /&gt;&lt;/manifest&gt;
+</code></pre>
+
+<p>{% endcodeblock %}</p>
 
 <p>注意：<br/>
 * Test项目的package是被测项目的package后面加上<em>.test</em><br/>

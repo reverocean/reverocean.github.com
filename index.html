@@ -7,8 +7,8 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="到年底了，Training Budget需要报销。在一年里陆陆续续买了些书，但是也有很多书会在最后一起买，因为怕Budget会花在别的地方。
-选了一些书之后，下一个任务就是要把书名拷贝到邮件里，一本书这样做当然无妨，但是要书多的话，这就不是一个程序员该做的事情了。因为我是在Amazon买的书， &hellip;">
+	<meta name="description" content="因为项目原因，最近又重新看了一下MyBatis，发现MyBatis只有Ant和Maven的Generator，没有Gradle的插件。而现在Gradle已经越来越流行，没有Gradle插件怎么行。
+编写Gradle插件，可以从头自己实现，也可以调用现有的Ant Task。 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -71,6 +71,227 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2013/12/09/gradle-plugin-for-mybatis-generator/">Gradle Plugin for MyBatis Generator</a></h1>
+	<div class="entry-content">
+		<p>因为项目原因，最近又重新看了一下MyBatis，发现MyBatis只有Ant和Maven的Generator，没有Gradle的插件。而现在Gradle已经越来越流行，没有Gradle插件怎么行。<br/>
+编写Gradle插件，可以从头自己实现，也可以调用现有的Ant Task。MyBatis已经有Ant的Generator了，所以我决定不重造轮子，调用Ant的Task就行了。</p>
+
+<h2>定义插件Task的类型</h2>
+
+<p>编写插件就是为了重用一些Task，比如Gradle的Java插件，就提供了编译、测试以及打包等Task，这样在构建脚本里使用：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply: 'java'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+就可以使用这些Task。所以我们自定义插件，就难免要为插件定义Task。Gradle中的Task也是有类型的，比如<a href="http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.Copy.html">Copy</a>的Task。自定义Task也可以继承已经有的Task，但是我们这里要使用的Task是Ant提供的，所以我们需要继承ConventionTask。</p>
+
+<figure class='code'><figcaption><span>Task的定义  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kd">class</span> <span class="nc">MyBatisGeneratorTask</span> <span class="kd">extends</span> <span class="n">ConventionTask</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">//Define some properties</span>
+</span><span class='line'>    <span class="nd">@TaskAction</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">executeCargoAction</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">//Implement the task action</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>申明了Task之后，就需要实现Task的Action了，就是该Task都做哪些事情。我们这里要调用MyBatis的Ant任务，所以需要使用IsolatedAntBuilder。代码如下：</p>
+
+<figure class='code'><figcaption><span>Task的Action实现  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">services</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">IsolatedAntBuilder</span><span class="o">).</span><span class="na">withClasspath</span><span class="o">(</span><span class="n">getMyBatisGeneratorClasspath</span><span class="o">()).</span><span class="na">execute</span> <span class="o">{</span>
+</span><span class='line'>       <span class="n">ant</span><span class="o">.</span><span class="na">taskdef</span><span class="o">(</span><span class="nl">name:</span> <span class="s1">&#39;mbgenerator&#39;</span><span class="o">,</span>
+</span><span class='line'>                       <span class="nl">classname:</span> <span class="s1">&#39;org.mybatis.generator.ant.GeneratorAntTask&#39;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="n">ant</span><span class="o">.</span><span class="na">properties</span><span class="o">[</span><span class="s1">&#39;generated.source.dir&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="n">getTargetDir</span><span class="o">()</span>
+</span><span class='line'>       <span class="n">ant</span><span class="o">.</span><span class="na">mbgenerator</span><span class="o">(</span><span class="nl">overwrite:</span> <span class="n">getOverwrite</span><span class="o">(),</span>
+</span><span class='line'>                          <span class="nl">configfile:</span> <span class="n">getConfigFile</span><span class="o">(),</span>
+</span><span class='line'>                          <span class="nl">verbose:</span> <span class="n">getVerbose</span><span class="o">())</span> <span class="o">{}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>跟Ant里一样，要使用自定义的Ant任务，就必须先通过Ant的Taskdef定义一个Task，之后才能在Ant脚本里使用。同样在Gradle里也通过<strong>ant.taskdef</strong>来定义新的Ant任务。要定义Task，我们就需要制定从哪个classpath下去加载指定的类名<em>org.mybatis.generator.ant.GeneratorAntTask</em>。这里我们通过getMyBatisGeneratorClasspath()获得，这就需要我们在使用该Gradle Task的时候讲classpath传到Task里去，所以我们就需要定义Task的属性了。同时，大家还应该注意到这里不止一个getMyBatisGeneratorClasspath()方法，还有其他的Get方法，这些Get方法都是从Task的属性取值。我们的Task属性定义如下：</p>
+
+<figure class='code'><figcaption><span>Task的属性  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kt">def</span> <span class="n">overwrite</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">configFile</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">verbose</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">targetDir</span>
+</span><span class='line'><span class="n">FileCollection</span> <span class="n">myBatisGeneratorClasspath</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>编写Plugin</h2>
+
+<p>有了Task类型之后，我们就可以编写Plugin了。自定义Plugin需要实现Plugin接口：</p>
+
+<figure class='code'><figcaption><span>Plugin  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kd">class</span> <span class="nc">MyBatisGeneratorPlugin</span> <span class="kd">implements</span> <span class="n">Plugin</span><span class="o">&lt;</span><span class="n">ProjectInternal</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">apply</span><span class="o">(</span><span class="n">ProjectInternal</span> <span class="n">project</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">project</span><span class="o">.</span><span class="na">logger</span><span class="o">.</span><span class="na">info</span> <span class="s2">&quot;Configuring MyBatis Generator for project: $project.name&quot;</span>
+</span><span class='line'>        <span class="n">MyBatisGeneratorTask</span> <span class="n">task</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">tasks</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s2">&quot;mbGenerator&quot;</span><span class="o">,</span> <span class="n">MyBatisGeneratorTask</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">project</span><span class="o">.</span><span class="na">configurations</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s1">&#39;mybatis&#39;</span><span class="o">).</span><span class="na">with</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;The MyBatis Generator to be used for this project.&#39;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">project</span><span class="o">.</span><span class="na">extensions</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s2">&quot;mybatis&quot;</span><span class="o">,</span> <span class="n">MyBatisGeneratorPluginExtension</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">task</span><span class="o">.</span><span class="na">conventionMapping</span><span class="o">.</span><span class="na">with</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">myBatisGeneratorClasspath</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'>                <span class="kt">def</span> <span class="n">config</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">configurations</span><span class="o">[</span><span class="s1">&#39;mybatis&#39;</span><span class="o">]</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">config</span><span class="o">.</span><span class="na">dependencies</span><span class="o">.</span><span class="na">empty</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">project</span><span class="o">.</span><span class="na">dependencies</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="n">mybatis</span><span class="o">(</span><span class="s1">&#39;org.mybatis.generator:mybatis-generator-core:1.3.2&#39;</span><span class="o">)</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>                <span class="n">config</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="n">overwrite</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">overwrite</span> <span class="o">}</span>
+</span><span class='line'>            <span class="n">configFile</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">configFile</span> <span class="o">}</span>
+</span><span class='line'>            <span class="n">verbose</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">verbose</span> <span class="o">}</span>
+</span><span class='line'>            <span class="n">targetDir</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">targetDir</span> <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在这里我们通过<em>MyBatisGeneratorTask task = project.tasks.create(&#8220;mbGenerator&#8221;, MyBatisGeneratorTask);</em>创建一个Task并给该Task指定相应的属性。</p>
+
+<h2>插件的配置</h2>
+
+<p>要编写插件，就难免需要在Gradle里配置该插件。在Gradle的插件里，通常都提供默认配置值，但是有时在Gradle构建脚本里也需要让用户自定义。在Gradle里使用<em>extension objects</em>方法，通过Project的<a href="http://www.gradle.org/docs/current/javadoc/org/gradle/api/plugins/ExtensionContainer.html">ExtensionContainer</a>对象，把构建脚本里的配置信息传到插件里。Extension很简单，就是简单的Groovy对象：</p>
+
+<figure class='code'><figcaption><span>Extension的定义  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@ToString</span><span class="o">(</span><span class="n">includeNames</span> <span class="o">=</span> <span class="kc">true</span><span class="o">)</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">MyBatisGeneratorPluginExtension</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">configFile</span> <span class="o">=</span> <span class="s2">&quot;generatorConfig.xml&quot;</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">targetDir</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下来就是在插件里使用这个Extension：</p>
+
+<figure class='code'><figcaption><span>Extension的使用  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">project</span><span class="o">.</span><span class="na">extensions</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s2">&quot;mybatis&quot;</span><span class="o">,</span> <span class="n">MyBatisGeneratorPluginExtension</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里就会把构建脚本里的mybatis的配置，合并到我们提供的Extension里去，比如在构建脚本里提供如下的配置：</p>
+
+<figure class='code'><figcaption><span>配置插件  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">mybatis</span><span class="o">{</span>
+</span><span class='line'>    <span class="n">configFile</span> <span class="o">=</span> <span class="s1">&#39;../generatorConfig.xml&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就会覆盖默认的configFile配置，默认会从当前目录里去找generatorConfig.xml的文件，但是经过我们配置之后，就会从上级目录去找该文件。</p>
+
+<h2>Summary</h2>
+
+<p>至此，Gradle的MyBatis插件编写完毕，下面一个问题就是如何在项目中使用。该插件已经上传到Github<a href="https://github.com/reverocean/MyBatisGenerator">https://github.com/reverocean/MyBatisGenerator</a>。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-09T14:31:00+08:00" pubdate data-updated="true">2013-12-09 Mon</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gradle/'>Gradle</a>, <a class='category' href='/blog/categories/mybatis/'>MyBatis</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/12/09/gradle-plugin-for-mybatis-generator//index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">
@@ -1207,247 +1428,6 @@ logging用于访问logger的日志级别，参见上面的例子。</p></li>
 </div>
 	
 		<span class="comments"><a href="/blog/2012/09/27/project-in-gradle//index.html#disqus_thread">Comments</a></span>
-	
-</div></article>
-
-
-    <article class="post">
-	<h1 class="title"><a href="/blog/2012/09/27/gradle-for-java/">Gradle for Java</a></h1>
-	<div class="entry-content">
-		<p>Gradle针对Java开发提供了‘java’插件，非常方便。如果安装约定的目录结构组织项目，几乎不用修改build.gradle。当然也很方便修改build.gradle去适应你的项目结构。</p>
-
-<h1>A basic Java project</h1>
-
-<figure class='code'><figcaption><span>使用Java plugin </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'java'</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>gradle的Java插件约定的项目结构跟Maven的项目结构一样</li>
-<li>所有的output文件放在build文件夹下</li>
-</ul>
-
-
-<h1>Tasks</h1>
-
-<ul>
-<li>build：编译，测试并创建一个包含main下面的类和资源文件的JAR</li>
-<li>clean：删除build文件夹，做清理</li>
-<li>assemble：编译并打一个JAR包，不测试代码。加了War插件之后会打一个war包</li>
-<li>check：编译，测试。也可以添加其他的插件（Code-quality）来检查你的代码格式</li>
-</ul>
-
-
-<h1>管理依赖</h1>
-
-<p>依赖管理分为两个部分，第一是本项目依赖外部的其他jar，第二是本项目会产生一个jar包，别的项目会依赖当前项目的jar包，所以需要把jar包放置到一个公共的位置。</p>
-
-<h2>管理外部依赖</h2>
-
-<ul>
-<li>添加Maven的Repository</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>添加respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
-</span><span class='line'>    mavenCentral()
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>添加respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
-</span><span class='line'>    maven {
-</span><span class='line'>        url "http://repo.mycompany.com/maven2"
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>添加lvy respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
-</span><span class='line'>    ivy {
-</span><span class='line'>        url "http://repo.mycompany.com/repo"
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>添加lvy local respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
-</span><span class='line'>    ivy {
-</span><span class='line'>        url "../local-repo"
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<pre><code>*  Gradle支持Maven和lvy的Respository
-*  Gradle可以通过local file system或者HTTP访问Respository
-*  Gradle默认不配置respository
-</code></pre>
-
-<ul>
-<li>添加dependencies</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>添加dependencies </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
-</span><span class='line'>    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
-</span><span class='line'>    testCompile group: 'junit', name: 'junit', version: '4.+'
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>添加dependencies </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
-</span><span class='line'>    compile 'org.hibernate:hibernate-core:3.6.7.Final'
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<pre><code>*  跟Maven一样，依赖分为几个声明周期：
-    *  compile
-    *  runtime
-    *  testCompile
-    *  testRuntime
-*  同样跟Maven一样，需要指定依赖包的group，name以及version。也可以通过简单的方法“group:name:version”来指定
-</code></pre>
-
-<h2>Publishing artifacts</h2>
-
-<figure class='code'><figcaption><span>设置publish到lvy </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {
-</span><span class='line'>    repositories {
-</span><span class='line'>        ivy {
-</span><span class='line'>            credentials {
-</span><span class='line'>                username "username"
-</span><span class='line'>                password "pw"
-</span><span class='line'>            }
-</span><span class='line'>            url "http://repo.mycompany.com"
-</span><span class='line'>        }
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>设置publish到Maven </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'maven'
-</span><span class='line'>
-</span><span class='line'>uploadArchives {
-</span><span class='line'>    repositories {
-</span><span class='line'>        mavenDeployer {
-</span><span class='line'>            repository(url: "file://localhost/tmp/myRepo/")
-</span><span class='line'>        }
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span>设置publish到文件夹 </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {
-</span><span class='line'>    repositories {
-</span><span class='line'>       flatDir {
-</span><span class='line'>           dirs 'repos'
-</span><span class='line'>       }
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>IDE插件</h1>
-
-<p>apply plugin: &#8216;eclipse&#8217;
-apply plugin: &#8216;idea&#8217;</p>
-
-<p>gradle idea</p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-27T10:15:00+08:00" pubdate data-updated="true">2012-09-27 Thu</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gradle/'>Gradle</a>, <a class='category' href='/blog/categories/java/'>Java</a>
-
-
-</div>
-	
-		<span class="comments"><a href="/blog/2012/09/27/gradle-for-java//index.html#disqus_thread">Comments</a></span>
 	
 </div></article>
 

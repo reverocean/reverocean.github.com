@@ -1,0 +1,340 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Gradle Plugin For MyBatis Generator - 海洋的Blog</title>
+	<meta name="author" content="海洋">
+
+	
+	<meta name="description" content="因为项目原因，最近又重新看了一下MyBatis，发现MyBatis只有Ant和Maven的Generator，没有Gradle的插件。而现在Gradle已经越来越流行，没有Gradle插件怎么行。
+编写Gradle插件，可以从头自己实现，也可以调用现有的Ant Task。 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="海洋的Blog" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.ico" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">海洋的Blog</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/about/index.html">About Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="http://google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:reverocean.github.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+        <a class="sina-weibo" href="http://weibo.com/2249767451" target="_blank">
+            <svg width="40" height="40" class="sina-weibo" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path fill="" d="M9.641,17.231c-3.799,0.374-7.079-1.343-7.326-3.838c-0.246-2.494,2.634-4.82,6.434-5.196  c3.798-0.377,7.079,1.34,7.326,3.835C16.32,14.529,13.44,16.855,9.641,17.231 M17.24,8.952c-0.322-0.098-0.544-0.163-0.375-0.587  c0.365-0.921,0.403-1.718,0.007-2.286c-0.745-1.063-2.783-1.005-5.12-0.027c0-0.002-0.734,0.321-0.546-0.261  c0.359-1.156,0.305-2.123-0.254-2.682c-1.267-1.271-4.639,0.047-7.53,2.936C1.257,8.209,0,10.504,0,12.488  c0,3.796,4.866,6.104,9.628,6.104c6.241,0,10.393-3.627,10.393-6.506C20.021,10.347,18.557,9.358,17.24,8.952" />
+                <path fill="" d="M21.384,2.005c-1.507-1.671-3.73-2.308-5.782-1.872l0,0c-0.475,0.102-0.778,0.569-0.676,1.043  c0.101,0.473,0.567,0.777,1.043,0.674c1.459-0.31,3.039,0.145,4.111,1.332c1.069,1.188,1.362,2.806,0.902,4.225v0.001  c-0.149,0.462,0.104,0.957,0.566,1.106c0.461,0.149,0.956-0.104,1.105-0.565c0,0,0-0.002,0-0.004  C23.299,5.95,22.894,3.674,21.384,2.005" />
+                <path fill="" d="M19.07,4.094c-0.734-0.814-1.817-1.123-2.817-0.912c-0.409,0.088-0.671,0.49-0.581,0.899  c0.088,0.407,0.489,0.67,0.896,0.58v0.001c0.488-0.104,1.019,0.047,1.379,0.445c0.359,0.398,0.455,0.941,0.301,1.416l0,0  c-0.127,0.398,0.09,0.825,0.488,0.954c0.396,0.127,0.824-0.091,0.952-0.488C20,6.017,19.805,4.908,19.07,4.094" />
+                <path fill="" d="M9.85,12.713c-0.132,0.229-0.426,0.338-0.656,0.242c-0.227-0.094-0.297-0.348-0.169-0.572  c0.132-0.221,0.416-0.328,0.64-0.239C9.895,12.227,9.978,12.483,9.85,12.713 M8.64,14.268c-0.367,0.586-1.154,0.843-1.747,0.57  c-0.584-0.265-0.756-0.945-0.389-1.518c0.362-0.568,1.124-0.824,1.712-0.574C8.811,12.998,9.001,13.675,8.64,14.268 M10.021,10.118  c-1.808-0.47-3.852,0.431-4.637,2.023c-0.8,1.624-0.026,3.428,1.801,4.017c1.892,0.612,4.122-0.324,4.898-2.078  C12.848,12.367,11.891,10.602,10.021,10.118" />
+            </svg>
+        </a>
+	</div>
+	<form class="search" action="http://google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:reverocean.github.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h1 class="title">Gradle Plugin for MyBatis Generator</h1>
+	<div class="entry-content"><p>因为项目原因，最近又重新看了一下MyBatis，发现MyBatis只有Ant和Maven的Generator，没有Gradle的插件。而现在Gradle已经越来越流行，没有Gradle插件怎么行。<br/>
+编写Gradle插件，可以从头自己实现，也可以调用现有的Ant Task。MyBatis已经有Ant的Generator了，所以我决定不重造轮子，调用Ant的Task就行了。</p>
+
+<h2>定义插件Task的类型</h2>
+
+<p>编写插件就是为了重用一些Task，比如Gradle的Java插件，就提供了编译、测试以及打包等Task，这样在构建脚本里使用：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply: 'java'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+就可以使用这些Task。所以我们自定义插件，就难免要为插件定义Task。Gradle中的Task也是有类型的，比如<a href="http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.Copy.html">Copy</a>的Task。自定义Task也可以继承已经有的Task，但是我们这里要使用的Task是Ant提供的，所以我们需要继承ConventionTask。</p>
+
+<figure class='code'><figcaption><span>Task的定义  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kd">class</span> <span class="nc">MyBatisGeneratorTask</span> <span class="kd">extends</span> <span class="n">ConventionTask</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">//Define some properties</span>
+</span><span class='line'>    <span class="nd">@TaskAction</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">executeCargoAction</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">//Implement the task action</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>申明了Task之后，就需要实现Task的Action了，就是该Task都做哪些事情。我们这里要调用MyBatis的Ant任务，所以需要使用IsolatedAntBuilder。代码如下：</p>
+
+<figure class='code'><figcaption><span>Task的Action实现  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">services</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">IsolatedAntBuilder</span><span class="o">).</span><span class="na">withClasspath</span><span class="o">(</span><span class="n">getMyBatisGeneratorClasspath</span><span class="o">()).</span><span class="na">execute</span> <span class="o">{</span>
+</span><span class='line'>       <span class="n">ant</span><span class="o">.</span><span class="na">taskdef</span><span class="o">(</span><span class="nl">name:</span> <span class="s1">&#39;mbgenerator&#39;</span><span class="o">,</span>
+</span><span class='line'>                       <span class="nl">classname:</span> <span class="s1">&#39;org.mybatis.generator.ant.GeneratorAntTask&#39;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>       <span class="n">ant</span><span class="o">.</span><span class="na">properties</span><span class="o">[</span><span class="s1">&#39;generated.source.dir&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="n">getTargetDir</span><span class="o">()</span>
+</span><span class='line'>       <span class="n">ant</span><span class="o">.</span><span class="na">mbgenerator</span><span class="o">(</span><span class="nl">overwrite:</span> <span class="n">getOverwrite</span><span class="o">(),</span>
+</span><span class='line'>                          <span class="nl">configfile:</span> <span class="n">getConfigFile</span><span class="o">(),</span>
+</span><span class='line'>                          <span class="nl">verbose:</span> <span class="n">getVerbose</span><span class="o">())</span> <span class="o">{}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>跟Ant里一样，要使用自定义的Ant任务，就必须先通过Ant的Taskdef定义一个Task，之后才能在Ant脚本里使用。同样在Gradle里也通过<strong>ant.taskdef</strong>来定义新的Ant任务。要定义Task，我们就需要制定从哪个classpath下去加载指定的类名<em>org.mybatis.generator.ant.GeneratorAntTask</em>。这里我们通过getMyBatisGeneratorClasspath()获得，这就需要我们在使用该Gradle Task的时候讲classpath传到Task里去，所以我们就需要定义Task的属性了。同时，大家还应该注意到这里不止一个getMyBatisGeneratorClasspath()方法，还有其他的Get方法，这些Get方法都是从Task的属性取值。我们的Task属性定义如下：</p>
+
+<figure class='code'><figcaption><span>Task的属性  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kt">def</span> <span class="n">overwrite</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">configFile</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">verbose</span>
+</span><span class='line'><span class="kt">def</span> <span class="n">targetDir</span>
+</span><span class='line'><span class="n">FileCollection</span> <span class="n">myBatisGeneratorClasspath</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>编写Plugin</h2>
+
+<p>有了Task类型之后，我们就可以编写Plugin了。自定义Plugin需要实现Plugin接口：</p>
+
+<figure class='code'><figcaption><span>Plugin  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="kd">class</span> <span class="nc">MyBatisGeneratorPlugin</span> <span class="kd">implements</span> <span class="n">Plugin</span><span class="o">&lt;</span><span class="n">ProjectInternal</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">apply</span><span class="o">(</span><span class="n">ProjectInternal</span> <span class="n">project</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">project</span><span class="o">.</span><span class="na">logger</span><span class="o">.</span><span class="na">info</span> <span class="s2">&quot;Configuring MyBatis Generator for project: $project.name&quot;</span>
+</span><span class='line'>        <span class="n">MyBatisGeneratorTask</span> <span class="n">task</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">tasks</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s2">&quot;mbGenerator&quot;</span><span class="o">,</span> <span class="n">MyBatisGeneratorTask</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">project</span><span class="o">.</span><span class="na">configurations</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s1">&#39;mybatis&#39;</span><span class="o">).</span><span class="na">with</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;The MyBatis Generator to be used for this project.&#39;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">project</span><span class="o">.</span><span class="na">extensions</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s2">&quot;mybatis&quot;</span><span class="o">,</span> <span class="n">MyBatisGeneratorPluginExtension</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">task</span><span class="o">.</span><span class="na">conventionMapping</span><span class="o">.</span><span class="na">with</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">myBatisGeneratorClasspath</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'>                <span class="kt">def</span> <span class="n">config</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">configurations</span><span class="o">[</span><span class="s1">&#39;mybatis&#39;</span><span class="o">]</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">config</span><span class="o">.</span><span class="na">dependencies</span><span class="o">.</span><span class="na">empty</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">project</span><span class="o">.</span><span class="na">dependencies</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="n">mybatis</span><span class="o">(</span><span class="s1">&#39;org.mybatis.generator:mybatis-generator-core:1.3.2&#39;</span><span class="o">)</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>                <span class="n">config</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="n">overwrite</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">overwrite</span> <span class="o">}</span>
+</span><span class='line'>            <span class="n">configFile</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">configFile</span> <span class="o">}</span>
+</span><span class='line'>            <span class="n">verbose</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">verbose</span> <span class="o">}</span>
+</span><span class='line'>            <span class="n">targetDir</span> <span class="o">=</span> <span class="o">{</span> <span class="n">project</span><span class="o">.</span><span class="na">mybatis</span><span class="o">.</span><span class="na">targetDir</span> <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在这里我们通过<em>MyBatisGeneratorTask task = project.tasks.create(&#8220;mbGenerator&#8221;, MyBatisGeneratorTask);</em>创建一个Task并给该Task指定相应的属性。</p>
+
+<h2>插件的配置</h2>
+
+<p>要编写插件，就难免需要在Gradle里配置该插件。在Gradle的插件里，通常都提供默认配置值，但是有时在Gradle构建脚本里也需要让用户自定义。在Gradle里使用<em>extension objects</em>方法，通过Project的<a href="http://www.gradle.org/docs/current/javadoc/org/gradle/api/plugins/ExtensionContainer.html">ExtensionContainer</a>对象，把构建脚本里的配置信息传到插件里。Extension很简单，就是简单的Groovy对象：</p>
+
+<figure class='code'><figcaption><span>Extension的定义  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="nd">@ToString</span><span class="o">(</span><span class="n">includeNames</span> <span class="o">=</span> <span class="kc">true</span><span class="o">)</span>
+</span><span class='line'><span class="kd">class</span> <span class="nc">MyBatisGeneratorPluginExtension</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">true</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">configFile</span> <span class="o">=</span> <span class="s2">&quot;generatorConfig.xml&quot;</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">verbose</span> <span class="o">=</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">targetDir</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下来就是在插件里使用这个Extension：</p>
+
+<figure class='code'><figcaption><span>Extension的使用  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">project</span><span class="o">.</span><span class="na">extensions</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="s2">&quot;mybatis&quot;</span><span class="o">,</span> <span class="n">MyBatisGeneratorPluginExtension</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里就会把构建脚本里的mybatis的配置，合并到我们提供的Extension里去，比如在构建脚本里提供如下的配置：</p>
+
+<figure class='code'><figcaption><span>配置插件  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">mybatis</span><span class="o">{</span>
+</span><span class='line'>    <span class="n">configFile</span> <span class="o">=</span> <span class="s1">&#39;../generatorConfig.xml&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就会覆盖默认的configFile配置，默认会从当前目录里去找generatorConfig.xml的文件，但是经过我们配置之后，就会从上级目录去找该文件。</p>
+
+<h2>Summary</h2>
+
+<p>至此，Gradle的MyBatis插件编写完毕，下面一个问题就是如何在项目中使用。该插件已经上传到Github<a href="https://github.com/reverocean/MyBatisGenerator">https://github.com/reverocean/MyBatisGenerator</a>。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-09T14:31:00+08:00" pubdate data-updated="true">2013-12-09 Mon</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gradle/'>Gradle</a>, <a class='category' href='/blog/categories/mybatis/'>MyBatis</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/12/09/gradle-plugin-for-mybatis-generator/#disqus_thread">Comments</a></span>
+	
+</div></article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2013
+
+    海洋
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'reverocean';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://reverocean.github.com/blog/2013/12/09/gradle-plugin-for-mybatis-generator/';
+        var disqus_url = 'http://reverocean.github.com/blog/2013/12/09/gradle-plugin-for-mybatis-generator/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+</body>
+</html>

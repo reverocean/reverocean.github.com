@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gradle | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/gradle/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-12-06T10:18:15+08:00</updated>
+  <updated>2013-12-10T14:41:28+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,133 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Gradle Plugin For MyBatis Generator]]></title>
+    <link href="http://reverocean.github.com/blog/2013/12/09/gradle-plugin-for-mybatis-generator/"/>
+    <updated>2013-12-09T14:31:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/12/09/gradle-plugin-for-mybatis-generator</id>
+    <content type="html"><![CDATA[<p>因为项目原因，最近又重新看了一下MyBatis，发现MyBatis只有Ant和Maven的Generator，没有Gradle的插件。而现在Gradle已经越来越流行，没有Gradle插件怎么行。<br/>
+编写Gradle插件，可以从头自己实现，也可以调用现有的Ant Task。MyBatis已经有Ant的Generator了，所以我决定不重造轮子，调用Ant的Task就行了。</p>
+
+<h2>定义插件Task的类型</h2>
+
+<p>编写插件就是为了重用一些Task，比如Gradle的Java插件，就提供了编译、测试以及打包等Task，这样在构建脚本里使用：<br/>
+<code>
+apply: 'java'
+</code><br/>
+就可以使用这些Task。所以我们自定义插件，就难免要为插件定义Task。Gradle中的Task也是有类型的，比如<a href="http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.Copy.html">Copy</a>的Task。自定义Task也可以继承已经有的Task，但是我们这里要使用的Task是Ant提供的，所以我们需要继承ConventionTask。<br/>
+{% codeblock Task的定义 lang:groovy %}
+class MyBatisGeneratorTask extends ConventionTask {</p>
+
+<pre><code>//Define some properties
+@TaskAction
+void executeCargoAction() {
+//Implement the task action
+}
+</code></pre>
+
+<p>}
+{% endcodeblock %}
+申明了Task之后，就需要实现Task的Action了，就是该Task都做哪些事情。我们这里要调用MyBatis的Ant任务，所以需要使用IsolatedAntBuilder。代码如下：<br/>
+{% codeblock Task的Action实现 lang:groovy %}
+services.get(IsolatedAntBuilder).withClasspath(getMyBatisGeneratorClasspath()).execute {</p>
+
+<pre><code>   ant.taskdef(name: 'mbgenerator', 
+                     classname: 'org.mybatis.generator.ant.GeneratorAntTask')
+
+   ant.properties['generated.source.dir'] = getTargetDir()
+   ant.mbgenerator(overwrite: getOverwrite(), 
+                        configfile: getConfigFile(), 
+                        verbose: getVerbose()) {}
+</code></pre>
+
+<p>}
+{% endcodeblock %}
+跟Ant里一样，要使用自定义的Ant任务，就必须先通过Ant的Taskdef定义一个Task，之后才能在Ant脚本里使用。同样在Gradle里也通过<strong>ant.taskdef</strong>来定义新的Ant任务。要定义Task，我们就需要制定从哪个classpath下去加载指定的类名<em>org.mybatis.generator.ant.GeneratorAntTask</em>。这里我们通过getMyBatisGeneratorClasspath()获得，这就需要我们在使用该Gradle Task的时候讲classpath传到Task里去，所以我们就需要定义Task的属性了。同时，大家还应该注意到这里不止一个getMyBatisGeneratorClasspath()方法，还有其他的Get方法，这些Get方法都是从Task的属性取值。我们的Task属性定义如下：<br/>
+{% codeblock Task的属性 lang:groovy %}
+def overwrite
+def configFile
+def verbose
+def targetDir
+FileCollection myBatisGeneratorClasspath
+{% endcodeblock %}</p>
+
+<h2>编写Plugin</h2>
+
+<p>有了Task类型之后，我们就可以编写Plugin了。自定义Plugin需要实现Plugin接口： <br/>
+{% codeblock Plugin lang:groovy %}</p>
+
+<p>class MyBatisGeneratorPlugin implements Plugin<ProjectInternal> {</p>
+
+<pre><code>@Override
+void apply(ProjectInternal project) {
+    project.logger.info "Configuring MyBatis Generator for project: $project.name"
+    MyBatisGeneratorTask task = project.tasks.create("mbGenerator", MyBatisGeneratorTask);
+    project.configurations.create('mybatis').with {
+        description = 'The MyBatis Generator to be used for this project.'
+    }
+    project.extensions.create("mybatis", MyBatisGeneratorPluginExtension)
+
+    task.conventionMapping.with {
+        myBatisGeneratorClasspath = {
+            def config = project.configurations['mybatis']
+            if (config.dependencies.empty) {
+                project.dependencies {
+                    mybatis('org.mybatis.generator:mybatis-generator-core:1.3.2')
+                }
+            }
+            config
+        }
+        overwrite = { project.mybatis.overwrite }
+        configFile = { project.mybatis.configFile }
+        verbose = { project.mybatis.verbose }
+        targetDir = { project.mybatis.targetDir }
+    }
+
+}
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
+
+<p>在这里我们通过<em>MyBatisGeneratorTask task = project.tasks.create("mbGenerator", MyBatisGeneratorTask);</em>创建一个Task并给该Task指定相应的属性。</p>
+
+<h2>插件的配置</h2>
+
+<p>要编写插件，就难免需要在Gradle里配置该插件。在Gradle的插件里，通常都提供默认配置值，但是有时在Gradle构建脚本里也需要让用户自定义。在Gradle里使用<em>extension objects</em>方法，通过Project的<a href="http://www.gradle.org/docs/current/javadoc/org/gradle/api/plugins/ExtensionContainer.html">ExtensionContainer</a>对象，把构建脚本里的配置信息传到插件里。Extension很简单，就是简单的Groovy对象：<br/>
+{% codeblock Extension的定义 lang:groovy %}
+@ToString(includeNames = true)
+class MyBatisGeneratorPluginExtension {</p>
+
+<pre><code>def overwrite = true
+def configFile = "generatorConfig.xml"
+def verbose = false
+def targetDir = "."
+</code></pre>
+
+<p>}
+{% endcodeblock %} <br/>
+接下来就是在插件里使用这个Extension：<br/>
+{% codeblock Extension的使用 lang:groovy %}
+project.extensions.create("mybatis", MyBatisGeneratorPluginExtension)
+{% endcodeblock %}
+这里就会把构建脚本里的mybatis的配置，合并到我们提供的Extension里去，比如在构建脚本里提供如下的配置：<br/>
+{% codeblock 配置插件 lang:groovy %}
+mybatis{</p>
+
+<pre><code>configFile = '../generatorConfig.xml'
+</code></pre>
+
+<p>}
+{% endcodeblock %}<br/>
+就会覆盖默认的configFile配置，默认会从当前目录里去找generatorConfig.xml的文件，但是经过我们配置之后，就会从上级目录去找该文件。</p>
+
+<h2>Summary</h2>
+
+<p>至此，Gradle的MyBatis插件编写完毕，下面一个问题就是如何在项目中使用。该插件已经上传到Github:<a href="https://github.com/reverocean/MyBatisGenerator">https://github.com/reverocean/MyBatisGenerator</a>。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Smart GCIS]]></title>
@@ -143,102 +270,54 @@ cucumberRuntime {
 <p> <!--more-->
  ##完整build.gradle</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>build.gradle  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span>
-</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;idea&#39;</span><span class="o">&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;repositories {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">mavenCentral</span><span class="o">()</span>
-</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;configurations {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">cucumberRuntime</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">extendsFrom</span> <span class="n">testRuntime</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;dependencies {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">testCompile</span><span class="o">(</span>
-</span><span class='line'>        <span class="s1">&#39;info.cukes:cucumber-java:1.1.1&#39;</span><span class="o">,</span>
-</span><span class='line'>        <span class="s1">&#39;info.cukes:cucumber-junit:1.1.1&#39;</span><span class="o">,</span>
-</span><span class='line'>        <span class="s1">&#39;junit:junit:4.10&#39;</span>
-</span><span class='line'><span class="o">)</span>
-</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;task cucumber() {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">dependsOn</span> <span class="n">classes</span>
-</span><span class='line'><span class="n">doLast</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">javaexec</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;cucumber.api.cli.Main&quot;</span>
-</span><span class='line'>        <span class="n">classpath</span> <span class="n">configurations</span><span class="o">.</span><span class="na">cucumberRuntime</span>
-</span><span class='line'>        <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">main</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
-</span><span class='line'>        <span class="n">classpath</span> <span class="n">sourceSets</span><span class="o">.</span><span class="na">test</span><span class="o">.</span><span class="na">output</span><span class="o">.</span><span class="na">classesDir</span>
-</span><span class='line'>        <span class="n">args</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;-f&#39;</span><span class="o">,</span> <span class="s1">&#39;pretty&#39;</span><span class="o">,</span> <span class="s1">&#39;--glue&#39;</span><span class="o">,</span> <span class="s1">&#39;cucumber.examples.java.helloworld&#39;</span><span class="o">,</span> <span class="s1">&#39;src/test/resources&#39;</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock build.gradle lang:groovy %}
+apply plugin: 'java'
+apply plugin: 'idea'</p>
+
+<p>repositories {</p>
+
+<pre><code>mavenCentral()
+</code></pre>
+
+<p>}</p>
+
+<p>configurations {</p>
+
+<pre><code>cucumberRuntime {
+    extendsFrom testRuntime
+}
+</code></pre>
+
+<p>}</p>
+
+<p>dependencies {</p>
+
+<pre><code>testCompile(
+        'info.cukes:cucumber-java:1.1.1',
+        'info.cukes:cucumber-junit:1.1.1',
+        'junit:junit:4.10'
+)
+</code></pre>
+
+<p>}</p>
+
+<p>task cucumber() {</p>
+
+<pre><code>dependsOn classes
+doLast {
+    javaexec {
+        main = "cucumber.api.cli.Main"
+        classpath configurations.cucumberRuntime
+        classpath sourceSets.main.output.classesDir
+        classpath sourceSets.test.output.classesDir
+        args = ['-f', 'pretty', '--glue', 'cucumber.examples.java.helloworld', 'src/test/resources']
+
+    }
+}
+</code></pre>
+
+<p>}
+ {% endcodeblock %}</p>
 ]]></content>
   </entry>
   
@@ -253,103 +332,56 @@ cucumberRuntime {
 
 <h2>局部变量</h2>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Local variables  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="o">&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;def dest = &quot;dest&quot;</span>
-</span><span class='line'><span class="s">task copy(type: Copy) {</span>
-</span><span class='line'><span class="s">    from &quot;source&quot;</span>
-</span><span class='line'><span class="s">    into dest</span>
-</span><span class='line'><span class="s">}</span>
-</span><span class='line'><span class="s">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock Local variables lang:groovy %}</p>
+
+<pre><code>def dest = "dest"
+task copy(type: Copy) {
+    from "source"
+    into dest
+}
+</code></pre>
+
+<p>{% endcodeblock %}</p>
 
 <h2>Extra properties</h2>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Extra properties  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s2">&quot;java&quot;</span><span class="o">&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;ext {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">springVersion</span> <span class="o">=</span> <span class="s2">&quot;3.1.0.RELEASE&quot;</span>
-</span><span class='line'><span class="n">emailNotification</span> <span class="o">=</span> <span class="s2">&quot;build@master.org&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;sourceSets.all { ext.purpose = null }&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">sourceSets</span> <span class="o">{&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;main {</span>
-</span><span class='line'><span class="s">    purpose = &quot;production&quot;</span>
-</span><span class='line'><span class="s">}</span>
-</span><span class='line'><span class="s">test {</span>
-</span><span class='line'><span class="s">    purpose = &quot;test&quot;</span>
-</span><span class='line'><span class="s">}</span>
-</span><span class='line'><span class="s">plugin {</span>
-</span><span class='line'><span class="s">    purpose = &quot;production&quot;</span>
-</span><span class='line'><span class="s">}</span>
-</span><span class='line'><span class="s">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="s">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">task</span> <span class="n">printProperties</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="o">{&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;println springVersion</span>
-</span><span class='line'><span class="s">println emailNotification</span>
-</span><span class='line'><span class="s">sourceSets.matching { it.purpose == &quot;production&quot; }.each { println it.name }</span>
-</span><span class='line'><span class="s">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock Extra properties lang:groovy %}
+apply plugin: "java"</p>
+
+<p>ext {</p>
+
+<pre><code>springVersion = "3.1.0.RELEASE"
+emailNotification = "build@master.org"
+</code></pre>
+
+<p>}</p>
+
+<p>sourceSets.all { ext.purpose = null }</p>
+
+<p>sourceSets {</p>
+
+<pre><code>main {
+    purpose = "production"
+}
+test {
+    purpose = "test"
+}
+plugin {
+    purpose = "production"
+}
+</code></pre>
+
+<p>}</p>
+
+<p>task printProperties &lt;&lt; {</p>
+
+<pre><code>println springVersion
+println emailNotification
+sourceSets.matching { it.purpose == "production" }.each { println it.name }
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
 
 <ul>
 <li>Gradle的每个对象都可以通过ext来定义属性</li>
@@ -364,86 +396,59 @@ cucumberRuntime {
 <h2>Property accessor</h2>
 
 <p>Groovy自动为属性添加getter和setter方法
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Property accessor  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Using a getter method</span>
-</span><span class='line'><span class="n">println</span> <span class="n">project</span><span class="o">.</span><span class="na">buildDir</span>
-</span><span class='line'><span class="n">println</span> <span class="nf">getProject</span><span class="o">().</span><span class="na">getBuildDir</span><span class="o">()&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;/</span><span class="o">/</span> <span class="n">Using</span> <span class="n">a</span> <span class="n">setter</span> <span class="n">method</span>
-</span><span class='line'><span class="n">project</span><span class="o">.</span><span class="na">buildDir</span> <span class="o">=</span> <span class="s1">&#39;target&#39;</span>
-</span><span class='line'><span class="n">getProject</span><span class="o">().</span><span class="na">setBuildDir</span><span class="o">(</span><span class="s1">&#39;target&#39;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock Property accessor lang:groovy %}
+// Using a getter method
+println project.buildDir
+println getProject().getBuildDir()</p>
+
+<p>// Using a setter method
+project.buildDir = 'target'
+getProject().setBuildDir('target')
+{% endcodeblock %}</p>
 
 <h2>Optional parentheses on method calls</h2>
 
 <p>方法调用的时候括号是可选的
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Optional parentheses  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">systemProperty</span> <span class="s1">&#39;some.prop&#39;</span><span class="o">,</span> <span class="s1">&#39;value&#39;</span>
-</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">systemProperty</span><span class="o">(</span><span class="s1">&#39;some.prop&#39;</span><span class="o">,</span> <span class="s1">&#39;value&#39;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock Optional parentheses lang:groovy %}
+test.systemProperty 'some.prop', 'value'
+test.systemProperty('some.prop', 'value')
+{% endcodeblock %}</p>
 
 <h2>List</h2>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>List  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// List literal</span>
-</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">includes</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;org/gradle/api/&lt;strong&gt;&#39;</span><span class="o">,</span> <span class="s1">&#39;org/gradle/internal/&lt;/strong&gt;&#39;</span><span class="o">]&lt;</span><span class="s">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s">&lt;p&gt;List&lt;String&gt; list = new ArrayList&lt;String&gt;()</span>
-</span><span class='line'><span class="s">list.add(&#39;org/</span><span class="n">gradle</span><span class="s">/api/</span><span class="o">&lt;</span><span class="n">strong</span><span class="o">&gt;</span><span class="s1">&#39;)</span>
-</span><span class='line'><span class="s1">list.add(&#39;</span><span class="n">org</span><span class="s">/gradle/</span><span class="n">internal</span><span class="s">/&lt;/</span><span class="n">strong</span><span class="o">&gt;</span><span class="err">&#39;</span><span class="o">)</span>
-</span><span class='line'><span class="n">test</span><span class="o">.</span><span class="na">includes</span> <span class="o">=</span> <span class="n">list</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock List lang:groovy %}
+// List literal
+test.includes = ['org/gradle/api/<strong>', 'org/gradle/internal/</strong>']</p>
+
+<p>List<String> list = new ArrayList<String>()
+list.add('org/gradle/api/<strong>')
+list.add('org/gradle/internal/</strong>')
+test.includes = list
+{% endcodeblock %}</p>
 
 <h2>Map</h2>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Map  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="c1">// Map literal</span>
-</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;java&#39;</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">Map</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;()</span>
-</span><span class='line'><span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s1">&#39;plugin&#39;</span><span class="o">,</span> <span class="s1">&#39;java&#39;</span><span class="o">)</span>
-</span><span class='line'><span class="n">apply</span><span class="o">(</span><span class="n">map</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock Map lang:groovy %}
+// Map literal
+apply plugin: 'java'</p>
+
+<p>Map&lt;String, String> map = new HashMap&lt;String, String>()
+map.put('plugin', 'java')
+apply(map)
+{% endcodeblock %}</p>
 
 <ul>
 <li>这里<strong>apply plugin: 'java'</strong>相当于Ruby里的<strong>apply plugin=>'java'</strong>
 
 <h2>Closures as the last parameter in a method</h2>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Closure  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">repositories</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="n">repositories</span><span class="o">()</span> <span class="o">{</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">}</span>
-</span><span class='line'><span class="n">repositories</span><span class="o">({</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">})</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p></li>
+<p>{% codeblock Closure lang:groovy %}
+repositories {
+  println "in a closure"
+}
+repositories() { println "in a closure" }
+repositories({ println "in a closure" })
+{% endcodeblock %}</p></li>
 </ul>
 
 ]]></content>
@@ -474,261 +479,6 @@ cucumberRuntime {
 <li>gradle -m clean compile列出要执行哪些task</li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Advance of task in gradle]]></title>
-    <link href="http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle/"/>
-    <updated>2012-09-29T09:19:00+08:00</updated>
-    <id>http://reverocean.github.com/blog/2012/09/29/advance-of-task-in-gradle</id>
-    <content type="html"><![CDATA[<p>Gradle在执行的时候有三个生命周期：</p>
-
-<ol>
-<li>initialization</li>
-<li>configuration</li>
-<li>execution</li>
-</ol>
-
-
-<h1>Configuration</h1>
-
-<p>configuration一般用于设置Task在运行时所需的变量和数据结构，每次运行Gradle build文件的时候，都会运行一次configuration代码。
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Configuration of task </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>task initializeDatabase
-</span><span class='line'>initializeDatabase { print 'configuring ' }
-</span><span class='line'>initializeDatabase { println 'database connection' }</span></code></pre></td></tr></table></div></figure></notextile></div>
-注意这里的configuration块和定义task的块是一样的，不一样的地方就是在task后面没有"&lt;&lt;"活着doLast等。</p>
-
-<h1>Task是对象</h1>
-
-<p>Gradle为每一个Task都会创建一个具有属性，方法的对象。我们可以控制每个Task对象的访问顺序，类型以及其功能。一般的每个新的Task都是DefaultTask类型（就像Java里的java.lang.Object一样）。DefaultTask没有实际的功能，只提供一些Gradle需要的接口。</p>
-
-<h2>DefaultTask的方法</h2>
-
-<ul>
-<li>dependsOn
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>不同的方式调用dependsOn </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">//</span> <span class="no">Declare</span> <span class="n">that</span> <span class="n">world</span> <span class="n">depends</span> <span class="n">on</span> <span class="n">hello</span>  <span class="sr">//</span> <span class="no">Preserves</span> <span class="n">any</span> <span class="n">previously</span> <span class="n">defined</span> <span class="n">dependencies</span> <span class="n">as</span> <span class="n">well</span>
-</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>     <span class="n">dependsOn</span> <span class="n">createSchema</span>
-</span><span class='line'><span class="p">}</span><span class="o">//</span> <span class="no">An</span> <span class="n">alternate</span> <span class="n">way</span> <span class="n">to</span> <span class="n">express</span> <span class="n">the</span> <span class="n">same</span> <span class="n">dependency</span>
-</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>     <span class="n">dependsOn</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">createSchema</span>
-</span><span class='line'><span class="p">}</span><span class="o">//</span> <span class="no">Do</span> <span class="n">the</span> <span class="n">same</span> <span class="n">using</span> <span class="n">single</span> <span class="n">quotes</span> <span class="p">(</span><span class="n">which</span> <span class="n">are</span> <span class="n">usually</span> <span class="n">optional</span><span class="p">)</span>
-</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span> <span class="p">{</span>     <span class="n">dependsOn</span> <span class="err">&#39;</span><span class="n">createSchem</span>
-</span><span class='line'><span class="p">}</span><span class="o">//</span> <span class="no">Explicitly</span> <span class="n">call</span> <span class="n">the</span> <span class="nb">method</span> <span class="n">on</span> <span class="n">the</span> <span class="n">task</span> <span class="n">object</span><span class="o">&lt;</span><span class="sr">/li&gt;</span>
-</span><span class='line'><span class="sr">&lt;/u</span><span class="n">l</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">task</span> <span class="n">loadTestDataloadTestData</span><span class="o">.</span><span class="n">dependsOn</span> <span class="n">createSema</span><span class="o">//</span> <span class="n">A</span> <span class="n">shortcut</span> <span class="k">for</span> <span class="n">declaring</span> <span class="n">dependencies</span>
-</span><span class='line'><span class="n">task</span> <span class="n">loadTestData</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">createSchema</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<ul>
-<li><p>doFirst<br/>
-可以添加一段在执行task的之前执行的代码，doFirst可以在已经存在的Task上添加代码。当多次定义doFirst的时候，每个代码块都会被累加到doFirst里去，运行的时候是安装先定义的后执行的顺序。</p></li>
-<li><p>doLast<br/>
-doLast除了在执行完Task之后执行和doFirst不一样之外，其他都一样。</p></li>
-<li><p>onlyIf<br/>
-onlyIf会判断你传入的闭包是否满足条件，如果满足条件就执行Task，否则就不执行。使用onlyIf方法，你可以使用System property来切换Task是否可以被调用。也可以读文件、调用web services、检查安全等来控制。
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>onlyIf的例子  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">createSchema</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">{</span>  <span class="n">println</span> <span class="s1">&#39;create database schema&#39;</span><span class="p">}</span><span class="n">task</span> <span class="n">loadTestData</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">createSchema</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">println</span> <span class="s1">&#39;load test data&#39;</span><span class="p">}</span><span class="n">loadTestData</span><span class="o">.</span><span class="n">onlyIf</span> <span class="p">{</span>
-</span><span class='line'>  <span class="no">System</span><span class="o">.</span><span class="n">properties</span><span class="o">[</span><span class="s1">&#39;load.data&#39;</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p></li>
-</ul>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>不传人property执行结果 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gradle</span> <span class="n">loadTestDatacreate</span> <span class="n">database</span> <span class="n">schema</span>
-</span><span class='line'><span class="ss">:loadTestData</span> <span class="no">SKIPPED</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>传人property执行结果  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gradle</span> <span class="o">-</span><span class="no">Dload</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="kp">true</span> <span class="n">loadTestData</span><span class="ss">:createSchemacreate</span> <span class="n">database</span> <span class="n">schema</span><span class="ss">:loadTestDataload</span> <span class="nb">test</span> <span class="n">data</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<h2>DefaultTask的属性</h2>
-
-<ul>
-<li>didWork<br/>
-表示Task是否执行完毕的布尔值。不时所有的Task都有didWork这个属性，但是一些内置的Task都有，比如Compile，Copy以及Delete都有didWork这个Property，用于表示是否成功执行完成。</li>
-</ul>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>利用compileJava的didWork </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">apply</span> <span class="n">plugin</span><span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="n">task</span> <span class="n">emailMe</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">compileJava</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;if(tasks.compileJava.didWork) {     println &#39;SEND EMAIL ANNOUNCING SUCCESS&#39; </span>
-</span><span class='line'><span class="sr">}}</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<ul>
-<li>enabled<br/>
-用于表示Task是否会被执行的布尔值。当被设置为false的时候，task就不会被执行。</li>
-</ul>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>设置task的enabled </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">templates</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">{</span> <span class="n">println</span> <span class="s1">&#39;process email templates&#39;</span><span class="p">}</span><span class="n">task</span> <span class="n">sendEmails</span><span class="p">(</span><span class="n">dependsOn</span><span class="p">:</span> <span class="n">templates</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;println &#39;send emails&#39;}sendEmails.enabled = false</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-这个build在执行gradle sendEmails的时候，因为sendEmails的enabled设置成了false，所以他不会被执行，但是他依赖的templates会被执行。</p>
-
-<ul>
-<li><p>path
-表示Task全路径的字符串。一般的该值就是task的name属性，但是当被其他的build文件调用时，就不一样了。</p></li>
-<li><p>logger
-Gradle内部logger的引用，它实现了org.slf4j.Logger接口，但是添加了更多额外的logging level（DEBUG, INFO
-, LIFECYCLE, WARN, QUIET, ERROR）。</p></li>
-</ul>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>logger的level </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">logLevel</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">{</span>  <span class="k">def</span> <span class="nf">levels</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;                &#39;DEBUG&#39;,                    &#39;INFO&#39;, </span>
-</span><span class='line'><span class="sr">                &#39;LIFECYCLE&#39;, </span>
-</span><span class='line'><span class="sr">                &#39;QUIET&#39;, </span>
-</span><span class='line'><span class="sr">                &#39;WARN&#39;, </span>
-</span><span class='line'><span class="sr">                &#39;ERROR&#39;]    levels.each { level -&amp;gt;      logging.level = level       def logMessage = &quot;SETTING LogLevel=${level}&quot; </span>
-</span><span class='line'><span class="sr">    logger.error logMessage     logger.error &#39;-&#39; * logMessage.size() logger.debug &#39;DEBUG ENABLED&#39;       logger.info &#39;INFO ENABLED&#39;      logger.lifecycle &#39;LIFECYCLE ENABLED&#39; logger.warn &#39;WARN ENABLED&#39;     logger.quiet &#39;QUIET ENABLED&#39;        logger.error &#39;ERROR ENABLED&#39;        println &#39;THIS IS println OUTPUT&#39; logger.error &#39; &#39;   }</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt; }</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<ul>
-<li><p>logging<br/>
-logging用于访问logger的日志级别，参见上面的例子。</p></li>
-<li><p>description</p></li>
-</ul>
-
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>description的不同设置方式 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">helloWorld</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="s1">&#39;Says hello to the world&#39;</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;println &#39;hello, world&#39;}</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;task helloWorld &amp;lt;&amp;lt; {&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">println</span> <span class="s1">&#39;hello, world&#39;</span><span class="p">}</span><span class="n">helloWorld</span> <span class="p">{</span> <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Says hello to the world&#39;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="p">}</span><span class="o">//</span> <span class="no">Another</span> <span class="n">way</span> <span class="n">to</span> <span class="k">do</span> <span class="n">ithelloWorld</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Says hello to the world&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<ul>
-<li><p>temporaryDir<br/>
-返回零时目录File的引用</p></li>
-<li><p>动态Property</p></li>
-</ul>
-
-
-<h1>Task类型</h1>
-
-<p>除了默认的DefaultTask，Gradle也定义了一些通用的task类型。</p>
-
-<h2>自定义Task类型</h2>
-
-<p>当Gradle提供的Task类型不够用的时候，我们可以自己定义一些我们的Task类型。</p>
-
-<h3>Custom Tasks Types in the Build file</h3>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>description的不同设置方式 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">task</span> <span class="n">createDatabase</span><span class="p">(</span><span class="n">type</span><span class="p">:</span> <span class="no">MySqlTask</span><span class="p">)</span> <span class="p">{</span>  <span class="n">sql</span> <span class="o">=</span> <span class="s1">&#39;CREATE DATABASE IF NOT EXISTS example&#39;</span><span class="p">}</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">MySqlTask</span> <span class="n">extends</span> <span class="no">DefaultTask</span> <span class="p">{</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;def hostname = &#39;localhost&#39;  def port = 3306 def sql def database    def username = &#39;root&#39;   def password = &#39;password&#39;   @TaskAction def runQuery() {        def cmd </span>
-</span><span class='line'><span class="sr">    if(database) {          cmd = &quot;mysql -u ${username} -p${password} -h ${hostname} -P ${port} ${database} -e &quot; </span>
-</span><span class='line'><span class="sr">    } else {            cmd = &quot;mysql -u ${username} -p${password} -h ${hostname} -P ${port} -e &quot;        }       project.exec {          commandLine = cmd.split().toList() + sql </span>
-</span><span class='line'><span class="sr">    }   }</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<pre><code>* 自定义Task需要继承自DefaultTask 
-* hostname，port等都是Task自定义的属性
-* 使用@TaskAction标示一个方法为Task的Action
-</code></pre>
-
-<h3>Custom Tasks in the Source Tree</h3>
-
-<p>在project的根目录下建一个buildSrc的文件夹，然后在文件夹里创建groove的源文件，在Gradle运行task的时候，会找该目录下的文件。</p>
 ]]></content>
   </entry>
   

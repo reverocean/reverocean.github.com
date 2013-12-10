@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-12-06T10:18:15+08:00</updated>
+  <updated>2013-12-10T14:41:28+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -88,9 +88,9 @@ Dropwizard的文档很详细，我就不赘述了，但是在这个项目中，�
 
 <h1>A basic Java project</h1>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>使用Java plugin </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'java'</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock 使用Java plugin %}
+apply plugin: 'java'
+{% endcodeblock %}</p>
 
 <ul>
 <li>gradle的Java插件约定的项目结构跟Maven的项目结构一样</li>
@@ -116,68 +116,45 @@ Dropwizard的文档很详细，我就不赘述了，但是在这个项目中，�
 
 <ul>
 <li>添加Maven的Repository
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
-</span><span class='line'>  mavenCentral()
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div>
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {
-</span><span class='line'>  maven {
-</span><span class='line'>
-</span><span class='line'>&lt;pre>&lt;code>  url "http://repo.mycompany.com/maven2"
-</span><span class='line'>&lt;/code>&lt;/pre>
-</span><span class='line'>
-</span><span class='line'>&lt;p>  }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p></li>
+{% codeblock 添加respositories %}
+repositories {
+  mavenCentral()
+}
+{% endcodeblock %}
+{% codeblock 添加respositories %}
+repositories {
+  maven {
+
+<pre><code>  url "http://repo.mycompany.com/maven2"
+</code></pre>
+
+<p>  }
+}
+{% endcodeblock %}</p></li>
 </ul>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加lvy respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;pre>&lt;code>ivy {
-</span><span class='line'>    url "http://repo.mycompany.com/repo"
-</span><span class='line'>}
-</span><span class='line'>&lt;/code>&lt;/pre>
-</span><span class='line'>
-</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock 添加lvy respositories %}
+repositories {</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加lvy local respositories </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>repositories {&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;pre>&lt;code>ivy {
-</span><span class='line'>    url "../local-repo"
-</span><span class='line'>}
-</span><span class='line'>&lt;/code>&lt;/pre>
-</span><span class='line'>
-</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>ivy {
+    url "http://repo.mycompany.com/repo"
+}
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
+
+<p>{% codeblock 添加lvy local respositories %}
+repositories {</p>
+
+<pre><code>ivy {
+    url "../local-repo"
+}
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
 
 <pre><code>*  Gradle支持Maven和lvy的Respository
 *  Gradle可以通过local file system或者HTTP访问Respository
@@ -186,22 +163,17 @@ Dropwizard的文档很详细，我就不赘述了，但是在这个项目中，�
 
 <ul>
 <li><p>添加dependencies
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加dependencies </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
-</span><span class='line'>  compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
-</span><span class='line'>  testCompile group: 'junit', name: 'junit', version: '4.+'
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div>
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>添加dependencies </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>dependencies {
-</span><span class='line'>  compile 'org.hibernate:hibernate-core:3.6.7.Final'
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock 添加dependencies %}
+dependencies {
+  compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+  testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+{% endcodeblock %}
+{% codeblock 添加dependencies %}
+dependencies {
+  compile 'org.hibernate:hibernate-core:3.6.7.Final'
+}
+{% endcodeblock %}</p>
 
 <ul>
 <li> 跟Maven一样，依赖分为几个声明周期：
@@ -221,83 +193,50 @@ Dropwizard的文档很详细，我就不赘述了，但是在这个项目中，�
 
 <h2>Publishing artifacts</h2>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>设置publish到lvy </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;pre>&lt;code>repositories {
-</span><span class='line'>    ivy {
-</span><span class='line'>        credentials {
-</span><span class='line'>            username "username"
-</span><span class='line'>            password "pw"
-</span><span class='line'>        }
-</span><span class='line'>        url "http://repo.mycompany.com"
-</span><span class='line'>    }
-</span><span class='line'>}
-</span><span class='line'>&lt;/code>&lt;/pre>
-</span><span class='line'>
-</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock 设置publish到lvy %}
+uploadArchives {</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>设置publish到Maven </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'maven'&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;p>uploadArchives {&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;pre>&lt;code>repositories {
-</span><span class='line'>    mavenDeployer {
-</span><span class='line'>        repository(url: "file://localhost/tmp/myRepo/")
-</span><span class='line'>    }
-</span><span class='line'>}
-</span><span class='line'>&lt;/code>&lt;/pre>
-</span><span class='line'>
-</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<pre><code>repositories {
+    ivy {
+        credentials {
+            username "username"
+            password "pw"
+        }
+        url "http://repo.mycompany.com"
+    }
+}
+</code></pre>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>设置publish到文件夹 </span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>uploadArchives {&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;pre>&lt;code>repositories {
-</span><span class='line'>   flatDir {
-</span><span class='line'>       dirs 'repos'
-</span><span class='line'>   }
-</span><span class='line'>}
-</span><span class='line'>&lt;/code>&lt;/pre>
-</span><span class='line'>
-</span><span class='line'>&lt;p>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>}
+{% endcodeblock %}</p>
+
+<p>{% codeblock 设置publish到Maven %}
+apply plugin: 'maven'</p>
+
+<p>uploadArchives {</p>
+
+<pre><code>repositories {
+    mavenDeployer {
+        repository(url: "file://localhost/tmp/myRepo/")
+    }
+}
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
+
+<p>{% codeblock 设置publish到文件夹 %}
+uploadArchives {</p>
+
+<pre><code>repositories {
+   flatDir {
+       dirs 'repos'
+   }
+}
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
 
 <h1>IDE插件</h1>
 
@@ -321,38 +260,23 @@ apply plugin: 'idea'</p>
 
 <ul>
 <li>实现RequestCondition接口
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>RequestCondition接口  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">.</span><span class="na">mvc</span><span class="o">.</span><span class="na">condition</span><span class="o">;&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">ul</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RequestCondition</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">T</span> <span class="n">combine</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">);</span>
-</span><span class='line'><span class="n">T</span> <span class="nf">getMatchingCondition</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
-</span><span class='line'><span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">T</span> <span class="n">other</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">);</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock RequestCondition接口 lang:java %}
+package org.springframework.web.servlet.mvc.condition;</li>
+</ul>
+
+
+<p>import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestMapping;</p>
+
+<p>public interface RequestCondition<T> {</p>
+
+<pre><code>T combine(T other);
+T getMatchingCondition(HttpServletRequest request);
+int compareTo(T other, HttpServletRequest request);
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
 
 <ul>
 <li>继承RequestMappingHandlerMapping
@@ -380,10 +304,9 @@ apply plugin: 'idea'</p>
     <id>http://reverocean.github.com/blog/2012/09/24/exception-handling-in-spring-at-mvc</id>
     <content type="html"><![CDATA[<h1>Exception Handler</h1>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Exception Handler接口  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">springframeowork</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">servlet</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletRequest</span><span class="o">;</span><span class="kn">import</span> <span class="nn">javax.servlet.http.HttpServletResponse</span><span class="o">;</span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">HandlerExceptionResolver</span> <span class="o">{</span>  <span class="n">ModelAndView</span> <span class="n">resolveException</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span>                                <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span>                                <span class="n">Object</span> <span class="n">handler</span><span class="o">,</span>                                <span class="n">Exception</span> <span class="n">ex</span><span class="o">);}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock Exception Handler接口 lang:java %}
+package org.springframeowork.web.servlet;import javax.servlet.http.HttpServletRequest;import javax.servlet.http.HttpServletResponse;public interface HandlerExceptionResolver {  ModelAndView resolveException(HttpServletRequest request,                                HttpServletResponse response,                                Object handler,                                Exception ex);}
+{% endcodeblock %}</p>
 
 <ul>
 <li>Dispatcher servlet会查找application context里的所有实现了HandlerExceptionResolver接口的Bean。</li>
@@ -445,20 +368,17 @@ apply plugin: 'idea'</p>
 2. 使用org.springframework.web.servlet .config.annotation.InterceptorRegistry添加（推荐这种方式）
 </code></pre>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>显示关联HandlerMapping和Interceptor  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.context.annotation.ComponentScan</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.EnableWebMvc</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport</span><span class="o">;</span><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping</span><span class="o">;</span><span class="nd">@Configuration@EnableWebMvc@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurationSupport</span> <span class="o">{</span>    <span class="nd">@Override</span>    <span class="kd">public</span> <span class="n">RequestMappingHandlerMapping</span> <span class="n">requestMappingHandlerMapping</span><span class="o">()</span> <span class="o">{</span>        <span class="n">RequestMappingHandlerMapping</span> <span class="n">handlerMapping</span><span class="o">;</span>        <span class="n">handlerMapping</span> <span class="o">=</span> <span class="kd">super</span><span class="o">.</span><span class="na">requestMappingHandlerMapping</span><span class="o">();</span>        <span class="n">handlerMapping</span><span class="o">.</span><span class="na">setInterceptors</span><span class="o">(</span><span class="n">getAllInterceptors</span><span class="o">());</span>        <span class="k">return</span> <span class="n">handlerMapping</span> <span class="o">}</span> <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock 显示关联HandlerMapping和Interceptor lang:java %}
+package com.apress.prospringmvc.bookstore.web.config;import org.springframework.context.annotation.ComponentScan;import org.springframework.context.annotation.Configuration;import org.springframework.web.servlet.config.annotation.EnableWebMvc;import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;@Configuration@EnableWebMvc@ComponentScan(basePackages = { "com.apress.prospringmvc.bookstore.web" })public class WebMvcContextConfiguration extends WebMvcConfigurationSupport {    @Override    public RequestMappingHandlerMapping requestMappingHandlerMapping() {        RequestMappingHandlerMapping handlerMapping;        handlerMapping = super.requestMappingHandlerMapping();        handlerMapping.setInterceptors(getAllInterceptors());        return handlerMapping } }
+{% endcodeblock %}</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>使用InterceptorRegistry关联HandlerMapping和Interceptor  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="c1">//Other imports omittedimport org.springframework.web.servlet.HandlerInterceptor;import org.springframework.web.servlet.config.annotation.InterceptorRegistry;@Configuration@EnableWebMvc@ComponentScan(basePackages = { &quot;com.apress.prospringmvc.bookstore.web&quot; })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Override    public void addInterceptors(InterceptorRegistry registry) {        registry.addInterceptor(localeChangeInterceptor());    }    @Bean    public HandlerInterceptor localeChangeInterceptor() {        LocaleChangeInterceptor localeChangeInterceptor;        localeChangeInterceptor = new LocaleChangeInterceptor();        localeChangeInterceptor.setParamName(&quot;lang&quot;);        return localeChangeInterceptor;    }    //... Other methods omitted}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock 使用InterceptorRegistry关联HandlerMapping和Interceptor lang:java %}
+package com.apress.prospringmvc.bookstore.web.config;//Other imports omittedimport org.springframework.web.servlet.HandlerInterceptor;import org.springframework.web.servlet.config.annotation.InterceptorRegistry;@Configuration@EnableWebMvc@ComponentScan(basePackages = { "com.apress.prospringmvc.bookstore.web" })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Override    public void addInterceptors(InterceptorRegistry registry) {        registry.addInterceptor(localeChangeInterceptor());    }    @Bean    public HandlerInterceptor localeChangeInterceptor() {        LocaleChangeInterceptor localeChangeInterceptor;        localeChangeInterceptor = new LocaleChangeInterceptor();        localeChangeInterceptor.setParamName("lang");        return localeChangeInterceptor;    }    //... Other methods omitted}
+{% endcodeblock %}</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Limiting an Interceptor to Certain URLs  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span><span class="c1">//Imports omitted@Configuration@EnableWebMvc@ComponentScan(basePackages = { &quot;com.apress.prospringmvc.bookstore.web&quot; })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Override    public void addInterceptors(InterceptorRegistry registry) {        InterceptorRegistration registration;       registration = registry.addInterceptor(localeChangeInterceptor());      registation.addPathPatterns(&quot;/customers/**&quot;);}    //Other methods omitted}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock Limiting an Interceptor to Certain URLs lang:java %}
+package com.apress.prospringmvc.bookstore.web.config;//Imports omitted@Configuration@EnableWebMvc@ComponentScan(basePackages = { "com.apress.prospringmvc.bookstore.web" })public class WebMvcContextConfiguration extends WebMvcConfigurerAdapter {    @Override    public void addInterceptors(InterceptorRegistry registry) {        InterceptorRegistration registration;       registration = registry.addInterceptor(localeChangeInterceptor());      registation.addPathPatterns("/customers/**");}    //Other methods omitted}
+{% endcodeblock %}</p>
 ]]></content>
   </entry>
   

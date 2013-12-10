@@ -7,13 +7,8 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="Spring的Validator接口 Spring的Validation主要接口是：org.springframework.validation.Validator Validator接口 1
-2
-3
-4
-5
-6
-package org.springframework.validation; &hellip;">
+	<meta name="description" content="Spring中i18n的组件 org.springframework.context.MessageSource基于message code和Locale转换成相应的message
+org.springframework.web.servlet. &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -76,6 +71,198 @@ package org.springframework.validation; &hellip;">
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2012/09/09/internationalization-in-spring-at-mvc/">Internationalization in Spring @MVC</a></h1>
+	<div class="entry-content">
+		<h2>Spring中i18n的组件</h2>
+
+<ol>
+<li><em>org.springframework.context.MessageSource</em>基于message code和Locale转换成相应的message</li>
+<li><em>org.springframework.web.servlet.LocaleResolver</em>从session或者cookie里取的locale</li>
+<li><em>org.springframework.web.servlet.i18n.LocaleChangeInterceptor</em>改变locale</li>
+</ol>
+
+
+<h1>MessageSource</h1>
+
+<h3>MessageSource的实现</h3>
+
+<p>Spring在<em>org.springframework.context.support</em>包下提供了两个MessageSource的实现：<br/>
+1. <em>ResourceBundleMessageSource</em>：使用JVM提供的ResourceBundle实现，只能在classpath里加载资源<br/>
+2. <em>ReloadableResourceBundleMessageSource</em>：和<em>ResourceBundleMessageSource</em>非常类似，但是提供了<strong>自动重新加载</strong>和<strong>缓存</strong>能力，以及可以从文件系统读取资源文件</p>
+
+<h3>配置MessageSource</h3>
+
+<figure class='code'><figcaption><span>配置MessageSource  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.support.ReloadableResourceBundleMessageSource</span><span class="o">;</span> <span class="c1">// Other imports omitted</span>
+</span><span class='line'><span class="nd">@Configuration</span>
+</span><span class='line'><span class="nd">@EnableWebMvc</span>
+</span><span class='line'><span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">MessageSource</span> <span class="nf">messageSource</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">ReloadableResourceBundleMessageSource</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">messageSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReloadableResourceBundleMessageSource</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setBasename</span><span class="o">(</span><span class="s">&quot;classpath:/messages&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setUseCodeAsDefaultMessage</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>配置一个name是<strong>messageSource</strong>的Bean</li>
+<li>该配置会从classpath加载所有的messages.properties和messages_[locale].properties文件</li>
+</ul>
+
+
+<h1>LocaleResolver</h1>
+
+<p>LocaleResolver用来判断使用什么Locale，Spring在<em>org.springframework.web.servlet.i18n</em>包里具有如下实现：
+*  FixedLocaleResolver：固定Locale，不支持改变locale
+*  SessionLocaleResolver
+*  AcceptHeaderLocaleResolver：从Http头的accept里取的locale，一般和用户的操作系统一样，因此也不支持改变locale。是默认<strong>LocaleResolver</strong>
+*  CookieLocaleResolver</p>
+
+<h1>LocaleChangeInterceptor</h1>
+
+<p><strong>LocaleChangeInterceptor</strong>检查当前的request中是否有locale的参数，如果有，interceptor会使用配置的LocaleResolver去改变当前用户的locale。参数的名子（locale）是可配置的。</p>
+
+<h1>配置Spring的i18n</h1>
+
+<figure class='code'><figcaption><span>Spring的i18n配置  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.MessageSource</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.context.support.ReloadableResourceBundleMessageSource</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.HandlerInterceptor</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.LocaleResolver</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.InterceptorRegistry</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.i18n.CookieLocaleResolver</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.springframework.web.servlet.i18n.LocaleChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'><span class="c1">// Other imports omitted</span>
+</span><span class='line'><span class="nd">@Configuration</span>
+</span><span class='line'><span class="nd">@EnableWebMvc</span>
+</span><span class='line'><span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addInterceptors</span><span class="o">(</span><span class="n">InterceptorRegistry</span> <span class="n">registry</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="n">localeChangeInterceptor</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">HandlerInterceptor</span> <span class="nf">localeChangeInterceptor</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">LocaleChangeInterceptor</span> <span class="n">localeChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">localeChangeInterceptor</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LocaleChangeInterceptor</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">localeChangeInterceptor</span><span class="o">.</span><span class="na">setParamName</span><span class="o">(</span><span class="s">&quot;lang&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">localeChangeInterceptor</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">LocaleResolver</span> <span class="nf">localeResolver</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">CookieLocaleResolver</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Bean</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">MessageSource</span> <span class="nf">messageSource</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">ReloadableResourceBundleMessageSource</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">messageSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReloadableResourceBundleMessageSource</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setBasename</span><span class="o">(</span><span class="s">&quot;classpath:/messages&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">messageSource</span><span class="o">.</span><span class="na">setUseCodeAsDefaultMessage</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">messageSource</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>注意：<br/>
+*  23行的代码<strong>localeChangeInterceptor.setParamName(&#8220;lang&#8221;)</strong>用来设置request中的参数名<br/>
+*  一般把LocaleChangeInterceptor配置为第一个interceptor，这样即使出现什么错误，任然能够改变用户的language</p>
+
+<hr />
+
+<blockquote><p>本文是基于Pro Spring MVC - With Web Flow的笔记，非原创</p></blockquote>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-09T20:05:00+08:00" pubdate data-updated="true">2012-09-09 Sun</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/java/'>Java</a>, <a class='category' href='/blog/categories/spring-mvc/'>Spring @MVC</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2012/09/09/internationalization-in-spring-at-mvc//blog/page/3/index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">
