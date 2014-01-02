@@ -99,15 +99,21 @@
         <lastmod>2013-12-10T14:45:13+08:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://reverocean.github.com/blog/2013/12/10/how-to-use-your-custom-gradle-plugin/
+        </loc>
+        <lastmod>2014-01-02T21:40:01+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://reverocean.github.com/about/</loc>
         <lastmod>2013-03-29T01:03:53+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/blog/archives/</loc>
-        <lastmod>2013-12-10T14:45:13+08:00</lastmod>
+        <lastmod>2014-01-02T21:40:01+08:00</lastmod>
     </url>
     <url>
         <loc>http://reverocean.github.com/</loc>
-        <lastmod>2013-12-10T14:45:13+08:00</lastmod>
+        <lastmod>2014-01-02T21:40:01+08:00</lastmod>
     </url>
 </urlset>

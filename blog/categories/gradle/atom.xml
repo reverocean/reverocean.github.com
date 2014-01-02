@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gradle | 海洋的Blog]]></title>
   <link href="http://reverocean.github.com/blog/categories/gradle/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-12-10T14:47:27+08:00</updated>
+  <updated>2014-01-02T21:40:02+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,223 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How to Use Your Custom Gradle Plugin]]></title>
+    <link href="http://reverocean.github.com/blog/2013/12/10/how-to-use-your-custom-gradle-plugin/"/>
+    <updated>2013-12-10T14:50:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/12/10/how-to-use-your-custom-gradle-plugin</id>
+    <content type="html"><![CDATA[<p>在<a href="http://reverocean.github.io/blog/2013/12/09/gradle-plugin-for-mybatis-generator/">Gradle Plugin for MyBatis Generator</a>一文中描述了如何自定义一个插件，下面我们就应该考虑该如何使用我们的插件了。相信大家都知道通过<strong>apply plugin:插件名</strong>来使用插件，但是要使用自定义插件的话，有一个问题就是Gradle脚本去哪里找我们自定义的插件。我们可以通过下面三种方式来使用自定义插件：<br/>
+1. 将插件和Gradle脚本放在同一个文件里<br/>
+2. 上传到Maven Repository里去<br/>
+3. 上传到Github上<br/>
+讲插件的定义代码放在build.gradle文件里，这个没有什么好讲的，在插件里直接通过apply就可以。但是我们自定义插件的目的就是为了让插件能够被其他项目使用到，要是放在build.gradle文件里就不能被其他项目使用了，也就失去了我们自定义插件的意义了，所以我们着重讲下后面两种情况。</p>
+
+<h1>上传到Maven Repository</h1>
+
+<p>Gradle天然和Maven融合的很好，除了可以使用Maven Repository里的依赖，还可以在Gradle里使用在Maven Repository的插件。说到Maven Repository，想必大家都知道有本地和远程两种Maven Repository之分。在上传时上没有什么不一样的配置，只是使用的时候，本地的Maven Repository只能在本机上使用，而远程的可以给整个公司乃至全球的人使用。<br/>
+要上传到Maven Repository，我们首先要在自定义插件项目的build.gradl文件里使用<em>maven</em>插件：<br/>
+<code>
+apply plugin: 'maven'
+</code><br/>
+这样我们执行<em>gradle install</em>就能把插件安装到Local Maven Repository的默认目录（一般在home下的.m2文件下），在使用插件的Gradle脚本里，通过如下的方式引用：<br/>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Local Maven Repository插件的使用  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;repositories {</span>
+</span><span class='line'><span class="s">    mavenLocal()</span>
+</span><span class='line'><span class="s">}</span>
+</span><span class='line'><span class="s">dependencies {</span>
+</span><span class='line'><span class="s">    classpath(&#39;com.rever:mybatis:1.0-SNAPSHOT&#39;)</span>
+</span><span class='line'><span class="s">}</span>
+</span><span class='line'><span class="s">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;mybatis&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+ <!--more-->
+这里是放到默认目录，如果我们想放到特定目录的话，我们就要使用Maven插件提供的uploadArchives任务了，我们通过为uploadArchives指定要上传的路径即可：<br/>
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>指定uploadArchives路径  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;maven&#39;</span><span class="o">&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;p&gt;uploadArchives {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenDeployer</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">repository</span><span class="o">(</span><span class="nl">url:</span> <span class="s2">&quot;file://${projectDir}/repo&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div><br/>
+这样就上传到当前plugin项目的根目录下的repo目录下，同样这里的url如果指定为远程Maven Repository的话，就会上传到远程。那么在使用的时候也就需要调整了：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>上传到指定的文件夹  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;repositories {</span>
+</span><span class='line'><span class="s">    maven {</span>
+</span><span class='line'><span class="s">        url uri(&#39;../</span><span class="n">repo</span><span class="s1">&#39;)</span>
+</span><span class='line'><span class="s1">    }</span>
+</span><span class='line'><span class="s1">}</span>
+</span><span class='line'><span class="s1">dependencies {</span>
+</span><span class='line'><span class="s1">    classpath(&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">rever</span><span class="o">:</span><span class="nl">mybatis:</span><span class="mf">1.0</span><span class="o">-</span><span class="n">SNAPSHOT</span><span class="s1">&#39;)</span>
+</span><span class='line'><span class="s1">}</span>
+</span><span class='line'><span class="s1">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s1">&lt;p&gt;}</span>
+</span><span class='line'><span class="s1">apply plugin: &#39;</span><span class="n">mybatis</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+按照这两种方式就可以将插件传到Maven Repository，之后在项目的Gradle脚本里使用了。</p>
+
+<h1>上传到Github</h1>
+
+<p>上传到Maven Repository一般来说就能解决问题了，但是如果公司没有Maven Repository私服的话要去sonatype注册用户还是很麻烦，作为我们用来管理代码的Github要是也能提供插件就完美了。<br/>
+其实，将插件上传到Github，然后再使用也很简单。首先还是要像上面上传到Local Maven Repository上传到当前项目的repo文件夹下：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>上传到指定的文件夹  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;maven&#39;</span><span class="o">&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;p&gt;uploadArchives {&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenDeployer</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">repository</span><span class="o">(</span><span class="nl">url:</span> <span class="s2">&quot;file://${projectDir}/repo&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+然后将repo添加到Github上去，但是这样还不能使用。为了能够使用上传到Github上的插件，需要提供一个gradle文件：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>mybatis.gradle  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;def pathParts = sourceURI.path.split(&#39;/</span><span class="s1">&#39;)</span>
+</span><span class='line'><span class="s1">def version = pathParts[-2]</span>
+</span><span class='line'><span class="s1">def basePath = pathParts[0..(pathParts.size()-6)].join(&#39;</span><span class="s">/&#39;)</span>
+</span><span class='line'><span class="s">if (sourceURI.scheme != &#39;file&#39;) {</span>
+</span><span class='line'><span class="s">    def uri = new java.net.URI(sourceURI.scheme, sourceURI.userInfo, sourceURI.host, sourceURI.port, basePath, null, null)</span>
+</span><span class='line'><span class="s">    basePath = &quot;${uri.toString()}&quot;</span>
+</span><span class='line'><span class="s">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">repositories {</span>
+</span><span class='line'><span class="s">    mavenCentral()</span>
+</span><span class='line'><span class="s">    mavenRepo url: basePath</span>
+</span><span class='line'><span class="s">}</span>
+</span><span class='line'><span class="s">dependencies {</span>
+</span><span class='line'><span class="s">    classpath(&quot;com.rever:mybatisPlugin:${version}&quot;)</span>
+</span><span class='line'><span class="s">}</span>
+</span><span class='line'><span class="s">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="s">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;p&gt;}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">repositories</span> <span class="o">{&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;mavenCentral()</span>
+</span><span class='line'><span class="s">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="n">com</span><span class="o">.</span><span class="na">rever</span><span class="o">.</span><span class="na">MyBatisGeneratorPlugin</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+该文件也就是根据当前路径解析出版本号，然后再使用该插件。将该文件放到对应的版本文件夹下，我这里存放的路径是：<strong>repo/com/rever/mybatisPlugin/1.0-SNAPSHOT/</strong>。有了这个文件之后，我们通过如下简单的引用就能使用插件了：
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>使用Github上的插件  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{&lt;</span><span class="s">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s">&lt;pre&gt;&lt;code&gt;apply from: &#39;https://raw.github.com/</span><span class="n">reverocean</span><span class="s">/MyBatisGenerator/</span><span class="n">master</span><span class="s">/repo/</span><span class="n">com</span><span class="s">/rever/</span><span class="n">mybatisPlugin</span><span class="s">/1.0-SNAPSHOT/</span><span class="n">mybatis</span><span class="o">.</span><span class="na">gradle</span><span class="err">&#39;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="s">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<hr />
+
+<p>本文讲解了两种方式上传Gradle自定义插件，大体上来说如果插件就开发者自己使用，那么可以上传到Local Maven Repository，如果要整个公司使用，那么我推荐放到公司的私有Maven Repository或者其他Maven Repository上去。如果你的代码在Github上管理，那么我推荐上传到Github上去。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gradle Plugin For MyBatis Generator]]></title>
@@ -650,34 +867,6 @@ cucumberRuntime {
 </span><span class='line'><span class="n">repositories</span><span class="o">()</span> <span class="o">{</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">}</span>
 </span><span class='line'><span class="n">repositories</span><span class="o">({</span> <span class="n">println</span> <span class="s2">&quot;in a closure&quot;</span> <span class="o">})</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Using the Gradle Command-Line]]></title>
-    <link href="http://reverocean.github.com/blog/2012/10/12/using-the-gradle-command-line/"/>
-    <updated>2012-10-12T14:21:00+08:00</updated>
-    <id>http://reverocean.github.com/blog/2012/10/12/using-the-gradle-command-line</id>
-    <content type="html"><![CDATA[<p>执行Gradle命令一些用法</p>
-
-<ul>
-<li>一次运行多个task<br/>
-  <strong><em>gradle dist test</em></strong></li>
-<li>使用-x参数可以指定哪些task不执行 <br/>
-  <strong><em>gradle dist -x test</em></strong></li>
-<li>使用--continue当有错误时继续执行未执行的task<br/>
-  <strong><em>gradle dist test --continue</em></strong></li>
-<li>使用task的缩写执行task <br/>
-  <strong><em>gradle cT</em></strong> <br/>
-  执行compileTest task</li>
-<li>使用-b指定build脚本文件</li>
-<li>gradle projects</li>
-<li>gradle tasks</li>
-<li>gradle dependencies</li>
-<li>gradle properties</li>
-<li>gradle -m clean compile列出要执行哪些task</li>
 </ul>
 
 ]]></content>

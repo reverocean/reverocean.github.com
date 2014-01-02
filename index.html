@@ -7,8 +7,7 @@
 	<meta name="author" content="海洋">
 
 	
-	<meta name="description" content="因为项目原因，最近又重新看了一下MyBatis，发现MyBatis只有Ant和Maven的Generator，没有Gradle的插件。而现在Gradle已经越来越流行，没有Gradle插件怎么行。
-编写Gradle插件，可以从头自己实现，也可以调用现有的Ant Task。 &hellip;">
+	<meta name="description" content="在Gradle Plugin for MyBatis Generator一文中描述了如何自定义一个插件，下面我们就应该考虑该如何使用我们的插件了。相信大家都知道通过apply plugin:插件名来使用插件，但是要使用自定义插件的话，有一个问题就是Gradle脚本去哪里找我们自定义的插件。 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -71,6 +70,82 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h1 class="title"><a href="/blog/2013/12/10/how-to-use-your-custom-gradle-plugin/">How to Use Your Custom Gradle Plugin</a></h1>
+	<div class="entry-content">
+		<p>在<a href="http://reverocean.github.io/blog/2013/12/09/gradle-plugin-for-mybatis-generator/">Gradle Plugin for MyBatis Generator</a>一文中描述了如何自定义一个插件，下面我们就应该考虑该如何使用我们的插件了。相信大家都知道通过<strong>apply plugin:插件名</strong>来使用插件，但是要使用自定义插件的话，有一个问题就是Gradle脚本去哪里找我们自定义的插件。我们可以通过下面三种方式来使用自定义插件：<br/>
+1. 将插件和Gradle脚本放在同一个文件里<br/>
+2. 上传到Maven Repository里去<br/>
+3. 上传到Github上<br/>
+讲插件的定义代码放在build.gradle文件里，这个没有什么好讲的，在插件里直接通过apply就可以。但是我们自定义插件的目的就是为了让插件能够被其他项目使用到，要是放在build.gradle文件里就不能被其他项目使用了，也就失去了我们自定义插件的意义了，所以我们着重讲下后面两种情况。</p>
+
+<h1>上传到Maven Repository</h1>
+
+<p>Gradle天然和Maven融合的很好，除了可以使用Maven Repository里的依赖，还可以在Gradle里使用在Maven Repository的插件。说到Maven Repository，想必大家都知道有本地和远程两种Maven Repository之分。在上传时上没有什么不一样的配置，只是使用的时候，本地的Maven Repository只能在本机上使用，而远程的可以给整个公司乃至全球的人使用。<br/>
+要上传到Maven Repository，我们首先要在自定义插件项目的build.gradl文件里使用<em>maven</em>插件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'maven'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+这样我们执行<em>gradle install</em>就能把插件安装到Local Maven Repository的默认目录（一般在home下的.m2文件下），在使用插件的Gradle脚本里，通过如下的方式引用：</p>
+
+<figure class='code'><figcaption><span>Local Maven Repository插件的使用  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mavenLocal</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">classpath</span><span class="o">(</span><span class="s1">&#39;com.rever:mybatis:1.0-SNAPSHOT&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;mybatis&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 
+		
+		<a href="/blog/2013/12/10/how-to-use-your-custom-gradle-plugin/" class="more-link">继续阅读 &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-10T14:50:00+08:00" pubdate data-updated="true">2013-12-10 Tue</time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gradle/'>Gradle</a>
+
+
+</div>
+	
+		<span class="comments"><a href="/blog/2013/12/10/how-to-use-your-custom-gradle-plugin//index.html#disqus_thread">Comments</a></span>
+	
+</div></article>
 
 
     <article class="post">
@@ -1193,115 +1268,6 @@ logging用于访问logger的日志级别，参见上面的例子。</p></li>
 	
 </div></article>
 
-
-    <article class="post">
-	<h1 class="title"><a href="/blog/2012/09/27/project-in-gradle/">Project in Gradle</a></h1>
-	<div class="entry-content">
-		<p>针对每一个项目的build.gradle，在运行的时候Gradle都会创建一个<strong>Project</strong>对象：</p>
-
-<ul>
-<li>在build脚本里调用没有定义的方法都会被代理到project对象</li>
-<li>在build脚本里没有定义的属性也会被代理到project对象</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>println name
-</span><span class='line'>println project.name</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Project的属性</h1>
-
-<table>
-<thead>
-<tr>
-<th align="left">Name        </th>
-<th align="center"> Type          </th>
-<th align="left"> Default Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">project     </td>
-<td align="center"> Project       </td>
-<td align="left"> The Project instance</td>
-</tr>
-<tr>
-<td align="left">name        </td>
-<td align="center"> String        </td>
-<td align="left"> The name of the project directory.</td>
-</tr>
-<tr>
-<td align="left">path        </td>
-<td align="center"> String        </td>
-<td align="left"> The absolute path of the project.</td>
-</tr>
-<tr>
-<td align="left">description </td>
-<td align="center"> String        </td>
-<td align="left"> A description for the project.</td>
-</tr>
-<tr>
-<td align="left">projectDir  </td>
-<td align="center"> File          </td>
-<td align="left"> The directory containing the build script.</td>
-</tr>
-<tr>
-<td align="left">buildDir    </td>
-<td align="center"> File          </td>
-<td align="left"> projectDir/build</td>
-</tr>
-<tr>
-<td align="left">group       </td>
-<td align="center"> Object        </td>
-<td align="left"> unspecified</td>
-</tr>
-<tr>
-<td align="left">version     </td>
-<td align="center"> Object        </td>
-<td align="left"> unspecified</td>
-</tr>
-<tr>
-<td align="left">ant         </td>
-<td align="center"> AntBuilder    </td>
-<td align="left"> An AntBuilder instance</td>
-</tr>
-</tbody>
-</table>
-
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-27T14:07:00+08:00" pubdate data-updated="true">2012-09-27 Thu</time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gradle/'>Gradle</a>
-
-
-</div>
-	
-		<span class="comments"><a href="/blog/2012/09/27/project-in-gradle//index.html#disqus_thread">Comments</a></span>
-	
-</div></article>
-
 <nav id="pagenavi">
     
     
@@ -1309,7 +1275,7 @@ logging用于访问logger的日志级别，参见上面的例子。</p></li>
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
-	<footer id="footer" class="inner">Copyright &copy; 2013
+	<footer id="footer" class="inner">Copyright &copy; 2014
 
     海洋
 

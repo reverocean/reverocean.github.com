@@ -4,7 +4,7 @@
   <title><![CDATA[海洋的Blog]]></title>
   <link href="http://reverocean.github.com/atom.xml" rel="self"/>
   <link href="http://reverocean.github.com/"/>
-  <updated>2013-12-10T14:47:27+08:00</updated>
+  <updated>2014-01-02T21:40:02+08:00</updated>
   <id>http://reverocean.github.com/</id>
   <author>
     <name><![CDATA[海洋]]></name>
@@ -12,6 +12,201 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How to Use Your Custom Gradle Plugin]]></title>
+    <link href="http://reverocean.github.com/blog/2013/12/10/how-to-use-your-custom-gradle-plugin/"/>
+    <updated>2013-12-10T14:50:00+08:00</updated>
+    <id>http://reverocean.github.com/blog/2013/12/10/how-to-use-your-custom-gradle-plugin</id>
+    <content type="html"><![CDATA[<p>在<a href="http://reverocean.github.io/blog/2013/12/09/gradle-plugin-for-mybatis-generator/">Gradle Plugin for MyBatis Generator</a>一文中描述了如何自定义一个插件，下面我们就应该考虑该如何使用我们的插件了。相信大家都知道通过<strong>apply plugin:插件名</strong>来使用插件，但是要使用自定义插件的话，有一个问题就是Gradle脚本去哪里找我们自定义的插件。我们可以通过下面三种方式来使用自定义插件：<br/>
+1. 将插件和Gradle脚本放在同一个文件里<br/>
+2. 上传到Maven Repository里去<br/>
+3. 上传到Github上<br/>
+讲插件的定义代码放在build.gradle文件里，这个没有什么好讲的，在插件里直接通过apply就可以。但是我们自定义插件的目的就是为了让插件能够被其他项目使用到，要是放在build.gradle文件里就不能被其他项目使用了，也就失去了我们自定义插件的意义了，所以我们着重讲下后面两种情况。</p>
+
+<h1>上传到Maven Repository</h1>
+
+<p>Gradle天然和Maven融合的很好，除了可以使用Maven Repository里的依赖，还可以在Gradle里使用在Maven Repository的插件。说到Maven Repository，想必大家都知道有本地和远程两种Maven Repository之分。在上传时上没有什么不一样的配置，只是使用的时候，本地的Maven Repository只能在本机上使用，而远程的可以给整个公司乃至全球的人使用。<br/>
+要上传到Maven Repository，我们首先要在自定义插件项目的build.gradl文件里使用<em>maven</em>插件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apply plugin: 'maven'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+这样我们执行<em>gradle install</em>就能把插件安装到Local Maven Repository的默认目录（一般在home下的.m2文件下），在使用插件的Gradle脚本里，通过如下的方式引用：</p>
+
+<figure class='code'><figcaption><span>Local Maven Repository插件的使用  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mavenLocal</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">classpath</span><span class="o">(</span><span class="s1">&#39;com.rever:mybatis:1.0-SNAPSHOT&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;mybatis&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> <!--more-->
+这里是放到默认目录，如果我们想放到特定目录的话，我们就要使用Maven插件提供的uploadArchives任务了，我们通过为uploadArchives指定要上传的路径即可：</p>
+
+<figure class='code'><figcaption><span>指定uploadArchives路径  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;maven&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">uploadArchives</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mavenDeployer</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">repository</span><span class="o">(</span><span class="nl">url:</span> <span class="s2">&quot;file://${projectDir}/repo&quot;</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就上传到当前plugin项目的根目录下的repo目录下，同样这里的url如果指定为远程Maven Repository的话，就会上传到远程。那么在使用的时候也就需要调整了：</p>
+
+<figure class='code'><figcaption><span>上传到指定的文件夹  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">maven</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">url</span> <span class="nf">uri</span><span class="o">(</span><span class="s1">&#39;../repo&#39;</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">classpath</span><span class="o">(</span><span class="s1">&#39;com.rever:mybatis:1.0-SNAPSHOT&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;mybatis&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>按照这两种方式就可以将插件传到Maven Repository，之后在项目的Gradle脚本里使用了。</p>
+
+<h1>上传到Github</h1>
+
+<p>上传到Maven Repository一般来说就能解决问题了，但是如果公司没有Maven Repository私服的话要去sonatype注册用户还是很麻烦，作为我们用来管理代码的Github要是也能提供插件就完美了。<br/>
+其实，将插件上传到Github，然后再使用也很简单。首先还是要像上面上传到Local Maven Repository上传到当前项目的repo文件夹下：</p>
+
+<figure class='code'><figcaption><span>上传到指定的文件夹  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;maven&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">uploadArchives</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mavenDeployer</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">repository</span><span class="o">(</span><span class="nl">url:</span> <span class="s2">&quot;file://${projectDir}/repo&quot;</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后将repo添加到Github上去，但是这样还不能使用。为了能够使用上传到Github上的插件，需要提供一个gradle文件：</p>
+
+<figure class='code'><figcaption><span>mybatis.gradle  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">pathParts</span> <span class="o">=</span> <span class="n">sourceURI</span><span class="o">.</span><span class="na">path</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s1">&#39;/&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">version</span> <span class="o">=</span> <span class="n">pathParts</span><span class="o">[-</span><span class="mi">2</span><span class="o">]</span>
+</span><span class='line'>    <span class="kt">def</span> <span class="n">basePath</span> <span class="o">=</span> <span class="n">pathParts</span><span class="o">[</span><span class="mi">0</span><span class="o">..(</span><span class="n">pathParts</span><span class="o">.</span><span class="na">size</span><span class="o">()-</span><span class="mi">6</span><span class="o">)].</span><span class="na">join</span><span class="o">(</span><span class="s1">&#39;/&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">sourceURI</span><span class="o">.</span><span class="na">scheme</span> <span class="o">!=</span> <span class="s1">&#39;file&#39;</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">def</span> <span class="n">uri</span> <span class="o">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">net</span><span class="o">.</span><span class="na">URI</span><span class="o">(</span><span class="n">sourceURI</span><span class="o">.</span><span class="na">scheme</span><span class="o">,</span> <span class="n">sourceURI</span><span class="o">.</span><span class="na">userInfo</span><span class="o">,</span> <span class="n">sourceURI</span><span class="o">.</span><span class="na">host</span><span class="o">,</span> <span class="n">sourceURI</span><span class="o">.</span><span class="na">port</span><span class="o">,</span> <span class="n">basePath</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">basePath</span> <span class="o">=</span> <span class="s2">&quot;${uri.toString()}&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'>        <span class="n">mavenRepo</span> <span class="nl">url:</span> <span class="n">basePath</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">classpath</span><span class="o">(</span><span class="s2">&quot;com.rever:mybatisPlugin:${version}&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">repositories</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mavenCentral</span><span class="o">()</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="n">com</span><span class="o">.</span><span class="na">rever</span><span class="o">.</span><span class="na">MyBatisGeneratorPlugin</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>该文件也就是根据当前路径解析出版本号，然后再使用该插件。将该文件放到对应的版本文件夹下，我这里存放的路径是：<strong>repo/com/rever/mybatisPlugin/1.0-SNAPSHOT/</strong>。有了这个文件之后，我们通过如下简单的引用就能使用插件了：</p>
+
+<figure class='code'><figcaption><span>使用Github上的插件  </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">buildscript</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">apply</span> <span class="nl">from:</span> <span class="s1">&#39;https://raw.github.com/reverocean/MyBatisGenerator/master/repo/com/rever/mybatisPlugin/1.0-SNAPSHOT/mybatis.gradle&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p>本文讲解了两种方式上传Gradle自定义插件，大体上来说如果插件就开发者自己使用，那么可以上传到Local Maven Repository，如果要整个公司使用，那么我推荐放到公司的私有Maven Repository或者其他Maven Repository上去。如果你的代码在Github上管理，那么我推荐上传到Github上去。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Gradle Plugin For MyBatis Generator]]></title>
@@ -2327,102 +2522,6 @@ Android在android.test.mock包下提供了一些mock对象，用于隔离测试�
 </span></code></pre></td></tr></table></div></figure>
 
 
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Using Scoped Beans]]></title>
-    <link href="http://reverocean.github.com/blog/2012/09/11/using-scoped-beans/"/>
-    <updated>2012-09-11T09:22:00+08:00</updated>
-    <id>http://reverocean.github.com/blog/2012/09/11/using-scoped-beans</id>
-    <content type="html"><![CDATA[<h1>Bean的Scope</h1>
-
-<p>Spring支持的Scope有：
-*  singleton: 默认scope<br/>
-*  prototype<br/>
-*  thread<br/>
-*  request<br/>
-*  session<br/>
-*  globalSession<br/>
-*  application</p>
-
-<p>在定义Bean的地方添加<em>org.springframework.context.annotation.Scope</em>annotation，为定义的Bean指定不同的Scope。该annotation可以用在type-level和method-level上。<br/>
-*  type-level: 该类型的所有的Bean都是指定的Scope<br/>
-*  method-level： 当前方法所定义的Bean是指定的Scope</p>
-
-<p>Scope Annotation的属性：<br/>
-*  value： 指定Bean的scope类型<br/>
-*  proxyModel： 指定是否需要proxy以及proxy的机制。<strong>ScopedProxyModel.TARGET_CLASS</strong>用于指定该Bean所对应的类型没有接口，需要默认值是NO</p>
-
-<h1>Example of session scope</h1>
-
-<figure class='code'><figcaption><span>配置session scope的Bean  </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">apress</span><span class="o">.</span><span class="na">prospringmvc</span><span class="o">.</span><span class="na">bookstore</span><span class="o">.</span><span class="na">web</span><span class="o">.</span><span class="na">config</span><span class="o">;</span>
-</span><span class='line'>  <span class="c1">//Other imports omitted</span>
-</span><span class='line'>  <span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Scope</span><span class="o">;</span>
-</span><span class='line'>  <span class="kn">import</span> <span class="nn">org.springframework.context.annotation.ScopedProxyMode</span><span class="o">;</span>
-</span><span class='line'>  <span class="kn">import</span> <span class="nn">com.apress.prospringmvc.bookstore.domain.Cart</span><span class="o">;</span>
-</span><span class='line'>  <span class="nd">@Configuration</span>
-</span><span class='line'>  <span class="nd">@EnableWebMvc</span>
-</span><span class='line'>  <span class="nd">@ComponentScan</span><span class="o">(</span><span class="n">basePackages</span> <span class="o">=</span>      <span class="o">{</span> <span class="s">&quot;com.apress.prospringmvc.bookstore.web&quot;</span> <span class="o">})</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcContextConfiguration</span> <span class="kd">extends</span> <span class="n">WebMvcConfigurerAdapter</span> <span class="o">{</span>
-</span><span class='line'><span class="c1">//Other methods omitted</span>
-</span><span class='line'><span class="nd">@Bean</span>
-</span><span class='line'><span class="nd">@Scope</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">&quot;session&quot;</span><span class="o">,</span> <span class="n">proxyMode</span> <span class="o">=</span> <span class="n">ScopedProxyMode</span><span class="o">.</span><span class="na">TARGET_CLASS</span><span class="o">)</span>
-</span><span class='line'>  
-</span><span class='line'><span class="kd">public</span> <span class="n">Cart</span> <span class="nf">cart</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">Cart</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>使用SessionStatus管理session scope bean的状态</h1>
-
-<figure class='code'><figcaption><span>SessionStatus实例 </span></figcaption>
- <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">method</span> <span class="o">=</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">,</span> <span class="n">params</span> <span class="o">=</span> <span class="s">&quot;order&quot;</span><span class="o">)</span>      
-</span><span class='line'> <span class="kd">public</span> <span class="n">String</span> <span class="nf">checkout</span><span class="o">(</span><span class="n">SessionStatus</span> <span class="n">status</span><span class="o">,</span><span class="nd">@Validated</span> <span class="nd">@ModelAttribute</span> <span class="n">Order</span> <span class="n">order</span><span class="o">,</span>
-</span><span class='line'>                           <span class="n">BindingResult</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">errors</span><span class="o">.</span><span class="na">hasErrors</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;cart/checkout&quot;</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">bookstoreService</span><span class="o">.</span><span class="na">store</span><span class="o">(</span><span class="n">order</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">status</span><span class="o">.</span><span class="na">setComplete</span><span class="o">();</span> <span class="c1">//remove order from session</span>
-</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">cart</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span> <span class="c1">// clear the cart</span>
-</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;redirect:/index.htm&quot;</span><span class="o">;</span>
-</span><span class='line'>      <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
 
 ]]></content>
   </entry>
